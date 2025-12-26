@@ -41,21 +41,53 @@
                                         <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="type of tea place " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ssp-QR-lHg">
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="56x-RM-gfx">
                                         <rect key="frame" x="0.0" y="44.666666666666657" width="237" height="32.333333333333343"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                        <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="type of tea place " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ssp-QR-lHg">
+                                                <rect key="frame" x="0.0" y="0.0" width="157" height="32.333333333333336"/>
+                                                <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
+                                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Visited" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="glL-Pk-od6">
+                                                <rect key="frame" x="157" y="0.0" width="80" height="32.333333333333336"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="80" id="Lyg-qh-aDb"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <integer key="value" value="16"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="color" keyPath="backgroundColor">
+                                                        <color key="value" systemColor="systemMintColor"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
                                 </subviews>
                             </stackView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xJb-bQ-dYj">
+                                <rect key="frame" x="33.666666666666664" y="65" width="30" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="ZtP-xr-BHj"/>
+                                    <constraint firstAttribute="width" secondItem="xJb-bQ-dYj" secondAttribute="height" multiplier="1:1" id="klV-jF-hTh"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="32n-8N-POC" firstAttribute="leading" secondItem="Ibt-Lb-3Wy" secondAttribute="leading" constant="10" id="CPF-uC-mjJ"/>
+                            <constraint firstItem="xJb-bQ-dYj" firstAttribute="bottom" secondItem="32n-8N-POC" secondAttribute="bottom" constant="10" id="Eqm-YT-kEA"/>
                             <constraint firstItem="eoG-at-L0k" firstAttribute="top" secondItem="32n-8N-POC" secondAttribute="top" id="RON-2j-FDQ"/>
                             <constraint firstItem="eoG-at-L0k" firstAttribute="leading" secondItem="32n-8N-POC" secondAttribute="trailing" constant="10" id="UJm-0S-fwm"/>
                             <constraint firstAttribute="bottom" secondItem="32n-8N-POC" secondAttribute="bottom" constant="8" id="XN8-OB-hDg"/>
+                            <constraint firstItem="xJb-bQ-dYj" firstAttribute="centerX" secondItem="32n-8N-POC" secondAttribute="centerX" id="okh-iZ-MQE"/>
                             <constraint firstItem="eoG-at-L0k" firstAttribute="bottom" secondItem="32n-8N-POC" secondAttribute="bottom" id="t7U-bt-LNM"/>
                             <constraint firstAttribute="trailing" secondItem="eoG-at-L0k" secondAttribute="trailing" constant="10" id="vzs-Dh-W5Y"/>
                             <constraint firstItem="32n-8N-POC" firstAttribute="top" secondItem="Ibt-Lb-3Wy" secondAttribute="top" constant="8" id="ykE-zA-bz0"/>
@@ -78,16 +110,21 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
                 <outlet property="imgTeaPlace" destination="32n-8N-POC" id="5Q0-sB-jzH"/>
+                <outlet property="isFavImage" destination="xJb-bQ-dYj" id="zKQ-t3-ZpU"/>
                 <outlet property="lblLocationTeaPlace" destination="Ww0-4B-Esc" id="251-1m-P1g"/>
                 <outlet property="lblNameTeaPlace" destination="6TC-hW-X2G" id="FdG-Iz-gF9"/>
                 <outlet property="lblTypeTeaPlace" destination="Ssp-QR-lHg" id="JxA-zY-Rq4"/>
+                <outlet property="lblVisited" destination="glL-Pk-od6" id="87q-oV-zYc"/>
             </connections>
             <point key="canvasLocation" x="126.71755725190839" y="154.57746478873241"/>
         </tableViewCell>
     </objects>
     <resources>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
