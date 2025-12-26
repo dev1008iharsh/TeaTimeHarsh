@@ -147,7 +147,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TeaTimeHarsh/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "TeaTime Harsh";
+				INFOPLIST_KEY_CFBundleDisplayName = TeaTimeHarsh;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -182,7 +182,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TeaTimeHarsh/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "TeaTime Harsh";
+				INFOPLIST_KEY_CFBundleDisplayName = TeaTimeHarsh;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
