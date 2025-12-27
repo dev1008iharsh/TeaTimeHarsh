@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="PlaceDetailHeader" customModule="TeaTimeHarsh" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="708" height="587"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="scE-MD-fre">
+                    <rect key="frame" x="0.0" y="118" width="708" height="401"/>
+                </imageView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.34999999999999998" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qkm-tK-d9N">
+                    <rect key="frame" x="0.0" y="118" width="708" height="401"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="alpha">
+                            <real key="value" value="0.69999999999999996"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                </imageView>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" translatesAutoresizingMaskIntoConstraints="NO" id="zvW-ya-eb9">
+                    <rect key="frame" x="25" y="437" width="89" height="66"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gwI-mO-rFY">
+                            <rect key="frame" x="0.0" y="0.0" width="89" height="42"/>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="35"/>
+                            <color key="textColor" systemColor="systemBackgroundColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g7Z-OK-vRV">
+                            <rect key="frame" x="0.0" y="42" width="89" height="24"/>
+                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
+                            <color key="textColor" systemColor="systemBackgroundColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                </stackView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HdV-lH-RTv">
+                    <rect key="frame" x="575" y="138" width="113" height="40"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="SUH-Qf-OVz"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="FAVOURITE"/>
+                    <connections>
+                        <action selector="favouriteButtonTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="Zui-cF-kmW"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="68W-9t-vlh">
+                    <rect key="frame" x="602.33333333333337" y="188" width="85.666666666666629" height="34.333333333333343"/>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="VISITED"/>
+                    <connections>
+                        <action selector="visitButtonTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="XG2-da-qOF"/>
+                    </connections>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="WXD-Kx-aEU"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="qkm-tK-d9N" firstAttribute="bottom" secondItem="scE-MD-fre" secondAttribute="bottom" id="0We-4E-c1d"/>
+                <constraint firstItem="68W-9t-vlh" firstAttribute="trailing" secondItem="HdV-lH-RTv" secondAttribute="trailing" id="6gs-U3-VOv"/>
+                <constraint firstItem="qkm-tK-d9N" firstAttribute="trailing" secondItem="scE-MD-fre" secondAttribute="trailing" id="AQS-XV-JKq"/>
+                <constraint firstItem="HdV-lH-RTv" firstAttribute="top" secondItem="WXD-Kx-aEU" secondAttribute="top" constant="20" id="Jbx-9D-aEZ"/>
+                <constraint firstItem="WXD-Kx-aEU" firstAttribute="trailing" secondItem="HdV-lH-RTv" secondAttribute="trailing" constant="20" id="QQH-Qs-a0N"/>
+                <constraint firstItem="zvW-ya-eb9" firstAttribute="leading" secondItem="WXD-Kx-aEU" secondAttribute="leading" constant="25" id="TbA-NE-3Mn"/>
+                <constraint firstItem="qkm-tK-d9N" firstAttribute="leading" secondItem="scE-MD-fre" secondAttribute="leading" id="cHZ-DA-nnI"/>
+                <constraint firstItem="scE-MD-fre" firstAttribute="leading" secondItem="WXD-Kx-aEU" secondAttribute="leading" id="cda-Gd-8QO"/>
+                <constraint firstItem="scE-MD-fre" firstAttribute="bottom" secondItem="WXD-Kx-aEU" secondAttribute="bottom" id="dHO-x8-2FN"/>
+                <constraint firstItem="WXD-Kx-aEU" firstAttribute="bottom" secondItem="zvW-ya-eb9" secondAttribute="bottom" constant="16" id="fTo-g8-qV2"/>
+                <constraint firstItem="WXD-Kx-aEU" firstAttribute="trailing" secondItem="scE-MD-fre" secondAttribute="trailing" id="mx9-RE-lo6"/>
+                <constraint firstItem="scE-MD-fre" firstAttribute="top" secondItem="WXD-Kx-aEU" secondAttribute="top" id="oRm-sy-mLO"/>
+                <constraint firstItem="68W-9t-vlh" firstAttribute="top" secondItem="HdV-lH-RTv" secondAttribute="bottom" constant="10" id="prW-Ur-5kI"/>
+                <constraint firstItem="qkm-tK-d9N" firstAttribute="top" secondItem="scE-MD-fre" secondAttribute="top" id="xaQ-QX-wmW"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="btnFav" destination="HdV-lH-RTv" id="0JO-HO-ezP"/>
+                <outlet property="btnVisited" destination="68W-9t-vlh" id="BcF-8K-wgU"/>
+                <outlet property="imgPlace" destination="scE-MD-fre" id="v50-rH-75E"/>
+                <outlet property="lblLocaton" destination="g7Z-OK-vRV" id="5Wj-Bh-Xf2"/>
+                <outlet property="lblName" destination="gwI-mO-rFY" id="T6q-9y-NTf"/>
+            </connections>
+            <point key="canvasLocation" x="378.62595419847327" y="60.211267605633807"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

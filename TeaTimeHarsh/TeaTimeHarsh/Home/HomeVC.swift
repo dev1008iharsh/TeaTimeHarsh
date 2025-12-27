@@ -11,14 +11,68 @@ class HomeVC: UIViewController {
     @IBOutlet var tblTeaPlaces: UITableView!
 
     var arrTeaPlaces = [TeaPlace]()
-    var setFavPlaces = Set<String>() // For managing favourite places ❤️
+
+    /*
+      var setFavPlaces: Set<String> {
+          get { FavouritePlacesSet.favourites }
+          set { FavouritePlacesSet.favourites = newValue }
+      }
+     var setFavPlaces = Set<String>() // For managing favourite places ❤️
+      */
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tblTeaPlaces.register(UINib(nibName: "TeaListCell", bundle: nil), forCellReuseIdentifier: "TeaListCell")
         createDummyModel()
+        presentTipIfNeeded()
+        configureNavBar()
+
+        // detectLongPressOnCell()
     }
+
+    private func configureNavBar() {
+        hideBackButton(hidden: true, swipeEnabled: true)
+        setLargeTitleSpacing(20)
+        setNavigationTitleStyle(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+        // setCustomBackButton(image: UIImage(named: "backButtonIcon") ?? UIImage(), text: "Back", color: .systemIndigo)
+    }
+
+    private func presentTipIfNeeded() {
+        guard HomeListingTipManager.shouldShowTip() else { return }
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let tipVC = storyboard.instantiateViewController(
+            withIdentifier: "HomeListingTipVC"
+        ) as! HomeListingTipVC
+
+        tipVC.modalPresentationStyle = .overFullScreen
+        tipVC.modalTransitionStyle = .crossDissolve
+
+        present(tipVC, animated: true)
+    }
+
+    /*
+      func detectLongPressOnCell() {
+          let longPressGesture = UILongPressGestureRecognizer(
+              target: self,
+              action: #selector(handleLongPress(_:))
+          )
+          tblTeaPlaces.addGestureRecognizer(longPressGesture)
+      }
+
+     @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+         // fire only once (not continuously)
+         guard gesture.state == .began else { return }
+
+         let point = gesture.location(in: tblTeaPlaces)
+         guard let indexPath = tblTeaPlaces.indexPathForRow(at: point) else { return }
+
+         // reuse your existing logic
+         performDidSelectOpenActionSheetOperations(table: tblTeaPlaces, indexPath: indexPath)
+     }*/
 }
+
+// MARK: - UITableViewDelegate UITableViewDelegate
 
 extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -29,7 +83,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         let teaCell = tableView.dequeueReusableCell(withIdentifier: "TeaListCell", for: indexPath) as! TeaListCell
         teaCell.configure(teaPlace: arrTeaPlaces[indexPath.row])
 
-        let isFav = setFavPlaces.contains(arrTeaPlaces[indexPath.row].id)
+        let isFav = FavouritePlacesStore.favourites.contains(arrTeaPlaces[indexPath.row].id)
         teaCell.isFavImage.image = UIImage(systemName: isFav ? "heart.fill" : "heart")
 
         return teaCell
@@ -40,7 +94,30 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performDidSelectOperations(table: tableView, indexPath: indexPath)
+        let placeDetailVC = UIStoryboard(name: "Main", bundle: nil)
+            .instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
+
+        placeDetailVC.place = arrTeaPlaces[indexPath.row]
+        placeDetailVC.onBackToHome = { [weak self] in
+            guard let self else { return }
+            print("⬅️ User came back from Detail to Home")
+            // ✅ Refresh UI / reload table / sync favourites
+            self.tblTeaPlaces.reloadRows(at: [indexPath], with: .automatic)
+        }
+
+        placeDetailVC.onVisitToggle = { [weak self] _ in
+            guard let self else { return }
+
+            self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
+            /*
+             if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == placeID }) {
+                 self.arrTeaPlaces[index].toggleIsVisisted()
+             }*/
+        }
+
+        navigationController?.pushViewController(placeDetailVC, animated: true)
+
+        // performDidSelectOpenActionSheetOperations(table: tableView, indexPath: indexPath)
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -52,6 +129,70 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
         return makeLeadingSwipeActions(table: tableView, indexPath: indexPath)
+    }
+
+    // MARK: - UIContextMenu on cell tap
+
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        let place = arrTeaPlaces[indexPath.row]
+        let placeID = place.id
+
+        return UIContextMenuConfiguration(
+            identifier: indexPath as NSIndexPath,
+            previewProvider: nil
+        ) { _ in
+
+            // 📞 Call
+            let callAction = UIAction(
+                title: "Call",
+                image: UIImage(systemName: "phone")
+            ) { _ in
+                guard let phone = place.phone,
+                      let url = URL(string: "tel://\(phone)"),
+                      UIApplication.shared.canOpenURL(url) else { return }
+                UIApplication.shared.open(url)
+            }
+
+            // ❤️ Favourite
+            let isFavourite = FavouritePlacesStore.favourites.contains(placeID)
+            let favAction = UIAction(
+                title: isFavourite ? "Remove Favourite" : "Add Favourite",
+                image: UIImage(systemName: isFavourite ? "heart.slash" : "heart"),
+                attributes: []
+            ) { _ in
+                if FavouritePlacesStore.favourites.remove(placeID) == nil {
+                    FavouritePlacesStore.favourites.insert(placeID)
+                }
+                tableView.reloadRows(at: [indexPath], with: .none)
+
+                /* Same code as above == nil
+                 if FavouritePlacesStore.favourites.contains(placeID) {
+                     FavouritePlacesStore.favourites.remove(placeID)
+                 } else {
+                     FavouritePlacesStore.favourites.insert(placeID)
+                 }
+                 */
+            }
+
+            // ✅ Visited
+            let visitedAction = UIAction(
+                title: place.isVisited ? "Remove Visited" : "Mark Visited",
+                image: UIImage(systemName: place.isVisited ? "checkmark.app" : "checkmark.app.fill")
+            ) { _ in
+                self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
+                tableView.reloadRows(at: [indexPath], with: .none)
+            }
+
+            return UIMenu(title: "", children: [
+                callAction,
+                favAction,
+                visitedAction,
+            ])
+        }
     }
 
     // MARK: - Trailing swipe on cell
@@ -106,7 +247,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         🏷️ Place Name: \(place.name ?? "N/A \(appName)")
         📌 Location: \(place.location ?? "N/A \(appName)")
         📞 Phone: \(place.phone.map(String.init) ?? "N/A \(appName)")
-        ☕ Type: \(place.type ?? "N/A \(appName)")
+        ☕ Description: \(place.desc ?? "N/A \(appName)")
         ⭐ Rating: \(place.rating.map { String(format: "%.1f", $0) } ?? "N/A \(appName)")
 
         ——————————————
@@ -122,16 +263,16 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         let place = arrTeaPlaces[indexPath.row]
         let placeID = place.id
 
-        let isFavourite = setFavPlaces.contains(placeID)
+        let isFavourite = FavouritePlacesStore.favourites.contains(placeID)
         let isVisited = place.isVisited
 
         let favouriteAction = UIContextualAction(style: .normal, title: isFavourite ? "Unfavourite" : "Favourite") { [weak self] _, _, completion in
             guard let self else { return }
 
-            if self.setFavPlaces.contains(placeID) {
-                self.setFavPlaces.remove(placeID)
+            if FavouritePlacesStore.favourites.contains(placeID) {
+                FavouritePlacesStore.favourites.remove(placeID)
             } else {
-                self.setFavPlaces.insert(placeID)
+                FavouritePlacesStore.favourites.insert(placeID)
             }
 
             table.reloadRows(at: [indexPath], with: .none)
@@ -147,7 +288,9 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             table.reloadRows(at: [indexPath], with: .none)
             completion(true)
         }
-        visitedAction.image = UIImage(systemName: isVisited ? "eye.slash" : "eye.fill")
+
+        visitedAction.image = UIImage(systemName: isVisited ? "checkmark.circle" : "checkmark.circle.fill")
+
         visitedAction.backgroundColor = .systemGreen
 
         let configuration = UISwipeActionsConfiguration(actions: [visitedAction, favouriteAction])
@@ -156,55 +299,56 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         return configuration
     }
 
-    // MARK: - ActionSheet on cell tap
+    /*
+     // MARK: - ActionSheet on cell tap
 
-    func performDidSelectOperations(table: UITableView, indexPath: IndexPath) {
-        let place = arrTeaPlaces[indexPath.row]
-        let placeID = place.id
+     func performDidSelectOpenActionSheetOperations(table: UITableView, indexPath: IndexPath) {
+         let place = arrTeaPlaces[indexPath.row]
+         let placeID = place.id
 
-        let actionSheet = UIAlertController(
-            title: "What action do you want to perform with \(place.name ?? "Selected Place") ?",
-            message: nil,
-            preferredStyle: .actionSheet
-        )
+         let actionSheet = UIAlertController(
+             title: "What action do you want to perform with \(place.name ?? "Selected Place") ?",
+             message: nil,
+             preferredStyle: .actionSheet
+         )
 
-        // 📞 Call
-        actionSheet.addAction(UIAlertAction(title: "Call", style: .default) { _ in
-            guard let phone = place.phone,
-                  let url = URL(string: "tel://\(phone)"),
-                  UIApplication.shared.canOpenURL(url) else { return }
-            UIApplication.shared.open(url)
-        })
+         // 📞 Call
+         actionSheet.addAction(UIAlertAction(title: "Call", style: .default) { _ in
+             guard let phone = place.phone,
+                   let url = URL(string: "tel://\(phone)"),
+                   UIApplication.shared.canOpenURL(url) else { return }
+             UIApplication.shared.open(url)
+         })
 
-        // ❤️ Favourite
-        let favTitle = setFavPlaces.contains(placeID) ? "Remove from Favourites" : "Add to Favourites"
-        actionSheet.addAction(UIAlertAction(title: favTitle, style: .default) { [weak self] _ in
-            guard let self else { return }
-            if setFavPlaces.remove(placeID) == nil {
-                setFavPlaces.insert(placeID)
-            }
-            table.reloadRows(at: [indexPath], with: .none)
-        })
+         // ❤️ Favourite
+         let favTitle = FavouritePlacesStore.favourites.contains(placeID) ? "Remove from Favourites" : "Add to Favourites"
+         actionSheet.addAction(UIAlertAction(title: favTitle, style: .default) { [weak self] _ in
+             guard let self else { return }
+             if FavouritePlacesStore.favourites.remove(placeID) == nil {
+                 FavouritePlacesStore.favourites.insert(placeID)
+             }
+             table.reloadRows(at: [indexPath], with: .none)
+         })
 
-        // ✅ Visited
-        let visitedTitle = place.isVisited ? "Remove from Visited" : "Add to Visited"
-        actionSheet.addAction(UIAlertAction(title: visitedTitle, style: .default) { [weak self] _ in
-            guard let self else { return }
-            arrTeaPlaces[indexPath.row].toggleIsVisisted()
-            table.reloadRows(at: [indexPath], with: .none)
-        })
+         // ✅ Visited
+         let visitedTitle = place.isVisited ? "Remove from Visited" : "Add to Visited"
+         actionSheet.addAction(UIAlertAction(title: visitedTitle, style: .default) { [weak self] _ in
+             guard let self else { return }
+             arrTeaPlaces[indexPath.row].toggleIsVisisted()
+             table.reloadRows(at: [indexPath], with: .none)
+         })
 
-        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-        // 📱 iPad support
-        if let popover = actionSheet.popoverPresentationController {
-            popover.sourceView = table
-            popover.sourceRect = table.rectForRow(at: indexPath)
-            popover.permittedArrowDirections = [.up, .down]
-        }
+         // 📱 iPad support
+         if let popover = actionSheet.popoverPresentationController {
+             popover.sourceView = table
+             popover.sourceRect = table.rectForRow(at: indexPath)
+             popover.permittedArrowDirections = [.up, .down]
+         }
 
-        present(actionSheet, animated: true)
-    }
+         present(actionSheet, animated: true)
+     }*/
 }
 
 extension HomeVC {
@@ -212,119 +356,119 @@ extension HomeVC {
         arrTeaPlaces.append(contentsOf: [TeaPlace(name: "Assam Chai Point",
                                                   phone: 9876543210,
                                                   location: "Ahmedabad",
-                                                  type: "Street Tea",
+                                                  desc: "Street Tea",
                                                   rating: 4.3,
                                                   image: UIImage(named: "tea1")),
 
                                          TeaPlace(name: "Darjeeling Tea House",
                                                   phone: 9876543211,
                                                   location: "Mumbai",
-                                                  type: "Premium Tea",
+                                                  desc: "Premium Tea",
                                                   rating: 4.6,
                                                   image: UIImage(named: "tea2")),
 
                                          TeaPlace(name: "Masala Chai Adda",
                                                   phone: 9876543212,
                                                   location: "Delhi",
-                                                  type: "Masala Tea",
+                                                  desc: "Masala Tea",
                                                   rating: 4.1,
                                                   image: UIImage(named: "tea3")),
 
                                          TeaPlace(name: "Green Leaf Café",
                                                   phone: 9876543213,
                                                   location: "Pune",
-                                                  type: "Organic Tea",
+                                                  desc: "Organic Tea",
                                                   rating: 4.5,
                                                   image: UIImage(named: "tea4")),
 
                                          TeaPlace(name: "Royal Kulhad Chai",
                                                   phone: 9876543214,
                                                   location: "Jaipur",
-                                                  type: "Kulhad Tea",
+                                                  desc: "Kulhad Tea",
                                                   rating: 4.4,
                                                   image: UIImage(named: "tea5")),
 
                                          TeaPlace(name: "Evening Chaiwala",
                                                   phone: 9876543215,
                                                   location: "Indore",
-                                                  type: "Street Tea",
+                                                  desc: "Street Tea",
                                                   rating: 4.0,
                                                   image: UIImage(named: "tea6")),
 
                                          TeaPlace(name: "Himalayan Tea Lounge",
                                                   phone: 9876543216,
                                                   location: "Shimla",
-                                                  type: "Herbal Tea",
+                                                  desc: "Herbal Tea",
                                                   rating: 4.7,
                                                   image: UIImage(named: "tea7")),
 
                                          TeaPlace(name: "South Sip Chai",
                                                   phone: 9876543217,
                                                   location: "Bangalore",
-                                                  type: "Filter Tea",
+                                                  desc: "Filter Tea",
                                                   rating: 4.2,
                                                   image: UIImage(named: "tea8")),
 
                                          TeaPlace(name: "Midnight Chai Hub",
                                                   phone: 9876543218,
                                                   location: "Hyderabad",
-                                                  type: "Late Night Tea",
+                                                  desc: "Late Night Tea",
                                                   rating: 4.1,
                                                   image: UIImage(named: "tea9")),
 
                                          TeaPlace(name: "Urban Tea Café",
                                                   phone: 9876543219,
                                                   location: "Gurgaon",
-                                                  type: "Modern Café",
+                                                  desc: "Modern Café",
                                                   rating: 4.3,
                                                   image: UIImage(named: "tea10")),
 
                                          TeaPlace(name: "Classic Cutting Chai",
                                                   phone: 9876543220,
                                                   location: "Surat",
-                                                  type: "Cutting Chai",
+                                                  desc: "Cutting Chai",
                                                   rating: 4.4,
                                                   image: UIImage(named: "tea11")),
 
                                          TeaPlace(name: "Morning Brew Chai",
                                                   phone: 9876543221,
                                                   location: "Vadodara",
-                                                  type: "Morning Tea",
+                                                  desc: "Morning Tea",
                                                   rating: 3.9,
                                                   image: UIImage(named: "tea12")),
 
                                          TeaPlace(name: "Soulful Sips",
                                                   phone: 9876543222,
                                                   location: "Udaipur",
-                                                  type: "Lake View Café",
+                                                  desc: "Lake View Café",
                                                   rating: 4.6,
                                                   image: UIImage(named: "tea13")),
 
                                          TeaPlace(name: "Campus Chai Stop",
                                                   phone: 9876543223,
                                                   location: "Gandhinagar",
-                                                  type: "Student Favorite",
+                                                  desc: "Student Favorite",
                                                   rating: 4.0,
                                                   image: UIImage(named: "tea14")),
 
                                          TeaPlace(name: "Vintage Tea Corner",
                                                   phone: 9876543224,
                                                   location: "Kolkata",
-                                                  type: "Traditional Tea",
+                                                  desc: "Traditional Tea",
                                                   rating: 4.5,
                                                   image: UIImage(named: "tea15")),
 
                                          TeaPlace(name: "Highway Chai Dhaba",
                                                   phone: 9876543225,
                                                   location: "NH-8",
-                                                  type: "Highway Tea",
+                                                  desc: "Highway Tea",
                                                   rating: 4.2,
                                                   image: UIImage(named: "tea16")),
 
                                          TeaPlace(name: "Sunset Tea Garden",
                                                   phone: 9876543226,
                                                   location: "Mount Abu",
-                                                  type: "Scenic Tea",
+                                                  desc: "Scenic Tea",
                                                   rating: 4.7,
                                                   image: UIImage(named: "tea17")),
 
