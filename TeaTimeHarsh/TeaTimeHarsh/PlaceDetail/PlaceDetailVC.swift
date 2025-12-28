@@ -15,7 +15,6 @@ class PlaceDetailVC: UIViewController {
     // MARK: - Properties
 
     var place: TeaPlace?
-    // var setFavPlaces = Set<String>()
     var onBackToHome: (() -> Void)?
     var onVisitToggle: ((String) -> Void)? // pass placeID
 
@@ -36,7 +35,7 @@ class PlaceDetailVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        removeBackButtonText()
+        removeBackButtonTextNavBar()
         navigationController?.navigationBar.prefersLargeTitles = false
     }
 
@@ -77,7 +76,9 @@ private extension PlaceDetailVC {
         // Button callback
         header.onButtonTap = { [weak self] buttonType in
             guard let self else { return }
+            
             let placeID = place.id
+            
             switch buttonType {
             case .favourite:
                 if FavouritePlacesStore.favourites.contains(placeID) {
@@ -86,8 +87,8 @@ private extension PlaceDetailVC {
                     FavouritePlacesStore.favourites.insert(placeID)
                 }
 
-                let isFavourite = FavouritePlacesStore.favourites.contains(placeID)
-                header.updateFavouriteButton(isFavourite: isFavourite)
+                let isFav = FavouritePlacesStore.favourites.contains(placeID)
+                header.updateFavouriteButton(isFavourite: isFav)
 
             case .visit:
                 // 🔥 Tell HOME to update the real model
@@ -104,13 +105,7 @@ private extension PlaceDetailVC {
 
         // Container view (required for stretch)
         let container = UIView(
-            frame: CGRect(
-                x: 0,
-                y: 0,
-                width: tblPlaceDetail.bounds.width,
-                height: headerHeight
-            )
-        )
+            frame: CGRect(x: 0,y: 0,width: tblPlaceDetail.bounds.width, height: headerHeight))
 
         header.frame = container.bounds
         container.addSubview(header)
@@ -135,12 +130,7 @@ private extension PlaceDetailVC {
         let offsetY = scrollView.contentOffset.y
 
         if offsetY < 0 {
-            container.frame = CGRect(
-                x: 0,
-                y: offsetY,
-                width: tblPlaceDetail.bounds.width,
-                height: headerHeight - offsetY
-            )
+            container.frame = CGRect(x: 0,y: offsetY, width: tblPlaceDetail.bounds.width,height: headerHeight - offsetY)
 
             header.frame = container.bounds
         }
@@ -158,18 +148,12 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
         25
     }
 
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
+    func tableView(_ tableView: UITableView,cellForRowAt indexPath:IndexPath) -> UITableViewCell {
         // Replace with real cell later
         return UITableViewCell()
     }
 
-    func tableView(
-        _ tableView: UITableView,
-        heightForRowAt indexPath: IndexPath
-    ) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath:IndexPath) -> CGFloat {
         120
     }
 }

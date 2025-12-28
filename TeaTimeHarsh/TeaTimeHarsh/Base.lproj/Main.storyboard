@@ -55,10 +55,6 @@
                                 <rect key="frame" x="0.0" y="118" width="393" height="734"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <sections/>
-                                <connections>
-                                    <outlet property="dataSource" destination="Iug-aV-bSG" id="edC-Ma-X2Z"/>
-                                    <outlet property="delegate" destination="Iug-aV-bSG" id="AfB-sg-INT"/>
-                                </connections>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="3bY-hh-jGJ"/>

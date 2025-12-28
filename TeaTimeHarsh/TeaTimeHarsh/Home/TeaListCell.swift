@@ -45,7 +45,8 @@ class TeaListCell: UITableViewCell {
         lblLocationTeaPlace.text = teaPlace.location
         lblPhoneTeaPlace.text = teaPlace.phone?.description ?? "N/A"
         lblNameTeaPlace.text = teaPlace.name
-        // lblVisited.isHidden = !teaPlace.isVisited
+        
+        // lblVisited.isHidden = !teaPlace.isVisited //same as under 
         lblVisited.isHidden = teaPlace.isVisited ? false : true
     }
 }

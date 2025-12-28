@@ -9,6 +9,7 @@ import UIKit
 
 enum AppLaunchTracker {
     static let homeListingTipLaunchCount = "homeListingTipLaunchCount"
+    //tool tip screen show only 3 times
 }
 
 struct HomeListingTipManager {

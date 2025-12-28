@@ -31,9 +31,9 @@ class HomeVC: UIViewController {
     }
 
     private func configureNavBar() {
-        hideBackButton(hidden: true, swipeEnabled: true)
-        setLargeTitleSpacing(20)
-        setNavigationTitleStyle(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+        hideBackButtonNavBar(hidden: true, swipeEnabled: true)
+        setLargeTitleSpacingNavBar(20)
+        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
         // setCustomBackButton(image: UIImage(named: "backButtonIcon") ?? UIImage(), text: "Back", color: .systemIndigo)
     }
 
@@ -94,28 +94,29 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let placeDetailVC = UIStoryboard(name: "Main", bundle: nil)
+        let detailVC = UIStoryboard(name: "Main", bundle: nil)
             .instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
 
-        placeDetailVC.place = arrTeaPlaces[indexPath.row]
-        placeDetailVC.onBackToHome = { [weak self] in
+        detailVC.place = arrTeaPlaces[indexPath.row]
+        detailVC.onBackToHome = { [weak self] in
             guard let self else { return }
             print("⬅️ User came back from Detail to Home")
             // ✅ Refresh UI / reload table / sync favourites
             self.tblTeaPlaces.reloadRows(at: [indexPath], with: .automatic)
         }
 
-        placeDetailVC.onVisitToggle = { [weak self] _ in
+        detailVC.onVisitToggle = { [weak self] _ in
             guard let self else { return }
 
             self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
             /*
+             //this is after finding index getting back from detail
              if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == placeID }) {
                  self.arrTeaPlaces[index].toggleIsVisisted()
              }*/
         }
 
-        navigationController?.pushViewController(placeDetailVC, animated: true)
+        navigationController?.pushViewController(detailVC, animated: true)
 
         // performDidSelectOpenActionSheetOperations(table: tableView, indexPath: indexPath)
     }
@@ -128,7 +129,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         _ tableView: UITableView,
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        return makeLeadingSwipeActions(table: tableView, indexPath: indexPath)
+        makeLeadingSwipeActions(table: tableView, indexPath: indexPath)
     }
 
     // MARK: - UIContextMenu on cell tap
@@ -139,8 +140,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         let place = arrTeaPlaces[indexPath.row]
-        let placeID = place.id
-
+        
         return UIContextMenuConfiguration(
             identifier: indexPath as NSIndexPath,
             previewProvider: nil
@@ -158,14 +158,14 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             }
 
             // ❤️ Favourite
-            let isFavourite = FavouritePlacesStore.favourites.contains(placeID)
+            let isFav = FavouritePlacesStore.favourites.contains(place.id)
             let favAction = UIAction(
-                title: isFavourite ? "Remove Favourite" : "Add Favourite",
-                image: UIImage(systemName: isFavourite ? "heart.slash" : "heart"),
+                title: isFav ? "Remove Favourite" : "Add Favourite",
+                image: UIImage(systemName: isFav ? "heart.slash" : "heart"),
                 attributes: []
             ) { _ in
-                if FavouritePlacesStore.favourites.remove(placeID) == nil {
-                    FavouritePlacesStore.favourites.insert(placeID)
+                if FavouritePlacesStore.favourites.remove(place.id) == nil {
+                    FavouritePlacesStore.favourites.insert(place.id)
                 }
                 tableView.reloadRows(at: [indexPath], with: .none)
 
@@ -261,27 +261,25 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 
     private func makeLeadingSwipeActions(table: UITableView, indexPath: IndexPath) -> UISwipeActionsConfiguration {
         let place = arrTeaPlaces[indexPath.row]
-        let placeID = place.id
+        
+        let isFav = FavouritePlacesStore.favourites.contains(place.id)
+        
+        let favAction = UIContextualAction(style: .normal, title: isFav ? "Unfavourite" : "Favourite") { [weak self] _, _, completion in
+            //guard let self else { return }
 
-        let isFavourite = FavouritePlacesStore.favourites.contains(placeID)
-        let isVisited = place.isVisited
-
-        let favouriteAction = UIContextualAction(style: .normal, title: isFavourite ? "Unfavourite" : "Favourite") { [weak self] _, _, completion in
-            guard let self else { return }
-
-            if FavouritePlacesStore.favourites.contains(placeID) {
-                FavouritePlacesStore.favourites.remove(placeID)
+            if FavouritePlacesStore.favourites.contains(place.id) {
+                FavouritePlacesStore.favourites.remove(place.id)
             } else {
-                FavouritePlacesStore.favourites.insert(placeID)
+                FavouritePlacesStore.favourites.insert(place.id)
             }
 
             table.reloadRows(at: [indexPath], with: .none)
             completion(true)
         }
-        favouriteAction.image = UIImage(systemName: isFavourite ? "heart.slash" : "heart.fill")
-        favouriteAction.backgroundColor = .systemPink
+        favAction.image = UIImage(systemName: isFav ? "heart.slash" : "heart.fill")
+        favAction.backgroundColor = .systemPink
 
-        let visitedAction = UIContextualAction(style: .normal, title: isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
+        let visitedAction = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
             guard let self else { return }
 
             self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
@@ -289,11 +287,11 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             completion(true)
         }
 
-        visitedAction.image = UIImage(systemName: isVisited ? "checkmark.circle" : "checkmark.circle.fill")
+        visitedAction.image = UIImage(systemName: place.isVisited ? "checkmark.circle" : "checkmark.circle.fill")
 
         visitedAction.backgroundColor = .systemGreen
 
-        let configuration = UISwipeActionsConfiguration(actions: [visitedAction, favouriteAction])
+        let configuration = UISwipeActionsConfiguration(actions: [visitedAction, favAction])
         configuration.performsFirstActionWithFullSwipe = true
 
         return configuration

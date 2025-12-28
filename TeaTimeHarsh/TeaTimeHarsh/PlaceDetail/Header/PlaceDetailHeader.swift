@@ -15,6 +15,8 @@ class PlaceDetailHeader: UIView {
         didSet {
             lblLocaton.textColor = .systemBackground
             lblLocaton.backgroundColor = .systemYellow
+            lblLocaton.clipsToBounds = true
+            lblLocaton.layer.cornerRadius = 10
         }
     }
 
@@ -46,9 +48,9 @@ class PlaceDetailHeader: UIView {
 
     func configure(place: TeaPlace) {
         lblName.text = place.name
-        lblLocaton.text = place.location
+        lblLocaton.text = "  \(place.location ?? "")  "
         imgPlace.image = place.image
-
+       
         updateVisitedButton(isVisited: place.isVisited)
 
         if FavouritePlacesStore.favourites.contains(place.id) {
@@ -68,84 +70,21 @@ class PlaceDetailHeader: UIView {
         onButtonTap?(.favourite)
     }
 
-    // MARK: - Helpers
-
-    func configureButtonwithImage(
-        _ button: UIButton,
-        backgroundColor: UIColor,
-        title: String,
-        systemImageName: String
-    ) {
-        // Step 1: Zoom up
-        UIView.animate(
-            withDuration: 0.12,
-            delay: 0,
-            options: [.curveEaseOut, .allowUserInteraction]
-        ) {
-            button.transform = CGAffineTransform(scaleX: 1.4, y: 1.4)
-        } completion: { _ in
-
-            // Step 2: Change state (icon, text, color)
-            UIView.transition(
-                with: button,
-                duration: 0.18,
-                options: [.transitionCrossDissolve, .allowUserInteraction]
-            ) {
-                var config = UIButton.Configuration.plain()
-                config.title = title
-                config.image = UIImage(systemName: systemImageName)
-                config.imagePlacement = .leading
-                config.imagePadding = 5
-                config.baseForegroundColor = .white
-
-                button.configuration = config
-                button.backgroundColor = backgroundColor
-            }
-
-            // Step 3: Zoom back to normal
-            UIView.animate(
-                withDuration: 0.15,
-                delay: 0,
-                options: [.curveEaseIn, .allowUserInteraction]
-            ) {
-                button.transform = .identity
-            }
-        }
-    }
+    
 
     func updateVisitedButton(isVisited: Bool) {
         if isVisited {
-            configureButtonwithImage(
-                btnVisited,
-                backgroundColor: .systemGreen,
-                title: "Remove from Visited",
-                systemImageName: "checkmark.circle.fill"
-            )
+            btnVisited.animateAndConfigure(title: "Remove from Visited", systemImageName: "checkmark.circle.fill", backgroundColor: .systemGreen)
         } else {
-            configureButtonwithImage(
-                btnVisited,
-                backgroundColor: .systemGray,
-                title: "Mark Visited",
-                systemImageName: "checkmark.circle"
-            )
+            btnVisited.animateAndConfigure(title: "Mark Visited", systemImageName: "checkmark.circle", backgroundColor: .systemGray)
         }
     }
 
     func updateFavouriteButton(isFavourite: Bool) {
         if isFavourite {
-            configureButtonwithImage(
-                btnFav,
-                backgroundColor: .systemPink,
-                title: "Remove Favourite",
-                systemImageName: "heart.fill"
-            )
+            btnFav.animateAndConfigure(title: "Remove Favourite", systemImageName: "heart.fill", backgroundColor: .systemPink)
         } else {
-            configureButtonwithImage(
-                btnFav,
-                backgroundColor: .systemGray,
-                title: "Mark Favourite",
-                systemImageName: "heart"
-            )
+            btnFav.animateAndConfigure(title: "Mark Favourite", systemImageName: "heart", backgroundColor: .systemGray)
         }
     }
 

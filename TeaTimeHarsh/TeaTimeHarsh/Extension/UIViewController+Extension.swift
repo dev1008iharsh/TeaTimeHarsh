@@ -10,7 +10,7 @@ import UIKit
 import UIKit
 
 extension UIViewController {
-    func hideBackButton(hidden: Bool, swipeEnabled: Bool) {
+    func hideBackButtonNavBar(hidden: Bool, swipeEnabled: Bool) {
         // 1. Control the Visual Button (The Arrow)
         // animated: false is best for viewDidLoad to prevent "flickering"
         navigationItem.setHidesBackButton(hidden, animated: false)
@@ -21,7 +21,7 @@ extension UIViewController {
 
     /// Replaces the default iOS Back Button with your Custom Image and Text
     /// Replaces the default iOS Back Button with your Custom Image and Text (Fixed Aspect Ratio)
-    func setCustomBackButton(image: UIImage, text: String, color: UIColor) {
+    func setCustomBackButtonNavBar(image: UIImage, text: String, color: UIColor) {
         // 1. Create the Button
         let backButton = UIButton(type: .system)
 
@@ -66,7 +66,7 @@ extension UIViewController {
         navigationController?.popViewController(animated: true)
     }
 
-    func removeBackButtonText() {
+    func removeBackButtonTextNavBar() {
         // 1. Safety check: Do we have a navigation controller?
         guard let navigationController = navigationController else { return }
 
@@ -85,7 +85,7 @@ extension UIViewController {
     }
 
     /// Adds padding to the Left side of the Large Title
-    func setLargeTitleSpacing(_ spacing: CGFloat = 16) {
+    func setLargeTitleSpacingNavBar(_ spacing: CGFloat = 16) {
         // 1. Get the current navigation controller (guard check to be safe)
         guard let navController = navigationController else {
             print("⚠️ Warning: No Navigation Controller found!")
@@ -113,7 +113,7 @@ extension UIViewController {
 
     /// Sets the Font and Color for Navigation Titles.
     /// Sizes are automatically set to iOS Standards (Large: 34, Small: 17).
-    func setNavigationTitleStyle(font: UIFont, color: UIColor) {
+    func setNavigationTitleStyleNavBar(font: UIFont, color: UIColor) {
         // 1. Safety Check
         guard let navController = navigationController else { return }
 
