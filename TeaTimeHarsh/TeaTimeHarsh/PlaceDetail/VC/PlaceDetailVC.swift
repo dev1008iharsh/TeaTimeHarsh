@@ -21,7 +21,7 @@ class PlaceDetailVC: UIViewController {
     // MARK: - Header Properties
 
     private var headerContainerView: UIView?
-    private var headerView: PlaceDetailHeader?
+    private var headerView: DetailHeader?
 
     private let headerHeight: CGFloat = 300
 
@@ -52,6 +52,11 @@ class PlaceDetailVC: UIViewController {
     func setupTableView() {
         tblPlaceDetail.delegate = self
         tblPlaceDetail.dataSource = self
+        tblPlaceDetail.tableFooterView = UIView()
+        tblPlaceDetail.register(
+            UINib(nibName: "DetailStaticCell", bundle: nil),
+            forCellReuseIdentifier: "DetailStaticCell"
+        )
     }
 }
 
@@ -62,10 +67,10 @@ private extension PlaceDetailVC {
         guard
             let place,
             let header = Bundle.main.loadNibNamed(
-                "PlaceDetailHeader",
+                "DetailHeader",
                 owner: nil,
                 options: nil
-            )?.first as? PlaceDetailHeader
+            )?.first as? DetailHeader
         else { return }
 
         // Configure header data
@@ -76,9 +81,9 @@ private extension PlaceDetailVC {
         // Button callback
         header.onButtonTap = { [weak self] buttonType in
             guard let self else { return }
-            
+
             let placeID = place.id
-            
+
             switch buttonType {
             case .favourite:
                 if FavouritePlacesStore.favourites.contains(placeID) {
@@ -105,7 +110,7 @@ private extension PlaceDetailVC {
 
         // Container view (required for stretch)
         let container = UIView(
-            frame: CGRect(x: 0,y: 0,width: tblPlaceDetail.bounds.width, height: headerHeight))
+            frame: CGRect(x: 0, y: 0, width: tblPlaceDetail.bounds.width, height: headerHeight))
 
         header.frame = container.bounds
         container.addSubview(header)
@@ -130,7 +135,7 @@ private extension PlaceDetailVC {
         let offsetY = scrollView.contentOffset.y
 
         if offsetY < 0 {
-            container.frame = CGRect(x: 0,y: offsetY, width: tblPlaceDetail.bounds.width,height: headerHeight - offsetY)
+            container.frame = CGRect(x: 0, y: offsetY, width: tblPlaceDetail.bounds.width, height: headerHeight - offsetY)
 
             header.frame = container.bounds
         }
@@ -145,16 +150,21 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        25
+        1
     }
 
-    func tableView(_ tableView: UITableView,cellForRowAt indexPath:IndexPath) -> UITableViewCell {
-        // Replace with real cell later
-        return UITableViewCell()
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "DetailStaticCell", for: indexPath) as! DetailStaticCell
+        guard let place = place else { return UITableViewCell()}
+        cell.teaPlace = place
+        return cell
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath:IndexPath) -> CGFloat {
-        120
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        150
     }
 }
 

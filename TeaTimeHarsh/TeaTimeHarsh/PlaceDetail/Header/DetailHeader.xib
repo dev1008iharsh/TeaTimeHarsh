@@ -10,7 +10,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="PlaceDetailHeader" customModule="TeaTimeHarsh" customModuleProvider="target">
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="DetailHeader" customModule="TeaTimeHarsh" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="708" height="500"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
@@ -26,8 +26,8 @@
                     </userDefinedRuntimeAttributes>
                 </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g7Z-OK-vRV">
-                    <rect key="frame" x="20" y="388" width="49" height="24"/>
-                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
+                    <rect key="frame" x="20" y="390.33333333333331" width="45" height="21.666666666666686"/>
+                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                     <color key="textColor" systemColor="systemBackgroundColor"/>
                     <nil key="highlightedColor"/>
                 </label>
@@ -51,7 +51,7 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gwI-mO-rFY">
-                    <rect key="frame" x="20" y="336" width="89" height="42"/>
+                    <rect key="frame" x="20" y="338.33333333333331" width="89" height="42"/>
                     <fontDescription key="fontDescription" type="boldSystem" pointSize="35"/>
                     <color key="textColor" systemColor="systemBackgroundColor"/>
                     <nil key="highlightedColor"/>

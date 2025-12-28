@@ -7,7 +7,7 @@
 
 import UIKit
 
-class PlaceDetailHeader: UIView {
+class DetailHeader: UIView {
     // MARK: - IBOutlet
 
     @IBOutlet var lblName: UILabel!
