@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>This app saves tea place images to your photo library.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>This app uses the camera to take photos of tea places.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app needs access to your photo library to select images for tea places.</string>
+    
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>comgooglemaps</string>

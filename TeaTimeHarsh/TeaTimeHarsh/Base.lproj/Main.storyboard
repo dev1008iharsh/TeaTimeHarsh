@@ -3,6 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -139,6 +140,126 @@
             </objects>
             <point key="canvasLocation" x="920" y="823"/>
         </scene>
+        <!--Add PlaceVC-->
+        <scene sceneID="9qN-rz-ETr">
+            <objects>
+                <viewController storyboardIdentifier="AddPlaceVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="ZTw-uq-Uni" customClass="AddPlaceVC" customModule="TeaTimeHarsh" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="zp8-uH-efT">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9oz-FE-eSh">
+                                <rect key="frame" x="0.0" y="118" width="393" height="666"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="517-bF-GIo">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="1" id="ONA-9T-C0u"/>
+                                        </constraints>
+                                    </imageView>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mQW-nh-a8p">
+                                        <rect key="frame" x="20" y="21" width="353" height="200"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="200" id="m15-AD-m7A"/>
+                                        </constraints>
+                                    </imageView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="EtF-O8-v8E">
+                                        <rect key="frame" x="20" y="231" width="353" height="210"/>
+                                        <subviews>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place name" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="oDG-Q1-Ttz">
+                                                <rect key="frame" x="0.0" y="0.0" width="353" height="34"/>
+                                                <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                            </textField>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place location (city)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="x7l-49-3Vl">
+                                                <rect key="frame" x="0.0" y="44" width="353" height="34"/>
+                                                <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                            </textField>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place contact numeber" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="r5R-6E-sDD">
+                                                <rect key="frame" x="0.0" y="88" width="353" height="34"/>
+                                                <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                            </textField>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place description" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Urq-lJ-CQY">
+                                                <rect key="frame" x="0.0" y="132" width="353" height="34"/>
+                                                <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                            </textField>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place rating(1-5 star)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="WQ1-dr-jae">
+                                                <rect key="frame" x="0.0" y="176" width="353" height="34"/>
+                                                <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" enablesReturnKeyAutomatically="YES"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="517-bF-GIo" firstAttribute="width" secondItem="9oz-FE-eSh" secondAttribute="width" id="5tH-Ja-yCy"/>
+                                    <constraint firstAttribute="trailing" secondItem="517-bF-GIo" secondAttribute="trailing" id="7mV-ty-lmO"/>
+                                    <constraint firstItem="EtF-O8-v8E" firstAttribute="trailing" secondItem="mQW-nh-a8p" secondAttribute="trailing" id="Bnh-2F-J7A"/>
+                                    <constraint firstItem="mQW-nh-a8p" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="GGx-O7-Cax"/>
+                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="mQW-nh-a8p" secondAttribute="trailing" constant="20" id="PPf-8E-Lqr"/>
+                                    <constraint firstItem="517-bF-GIo" firstAttribute="leading" secondItem="9oz-FE-eSh" secondAttribute="leading" id="Y8y-L6-fY1"/>
+                                    <constraint firstItem="517-bF-GIo" firstAttribute="top" secondItem="9oz-FE-eSh" secondAttribute="top" id="fa0-0G-GvR"/>
+                                    <constraint firstItem="EtF-O8-v8E" firstAttribute="leading" secondItem="mQW-nh-a8p" secondAttribute="leading" id="kMI-b5-0Oy"/>
+                                    <constraint firstAttribute="bottom" secondItem="EtF-O8-v8E" secondAttribute="bottom" constant="20" id="miR-w9-Br3"/>
+                                    <constraint firstItem="EtF-O8-v8E" firstAttribute="top" secondItem="mQW-nh-a8p" secondAttribute="bottom" constant="10" id="v38-70-Cnl"/>
+                                    <constraint firstItem="mQW-nh-a8p" firstAttribute="top" secondItem="517-bF-GIo" secondAttribute="bottom" constant="20" id="wlT-tc-eYh"/>
+                                </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="viB-NR-3N3"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="KaD-hb-neo"/>
+                            </scrollView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BHA-FY-lQM">
+                                <rect key="frame" x="20" y="719" width="353" height="45"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="45" id="qsv-8L-gWB"/>
+                                </constraints>
+                                <buttonConfiguration key="configuration" style="filled" title="Submit" imagePadding="20" cornerStyle="capsule">
+                                    <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="large"/>
+                                    <backgroundConfiguration key="background">
+                                        <color key="backgroundColor" systemColor="systemTealColor"/>
+                                    </backgroundConfiguration>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                    </preferredSymbolConfiguration>
+                                    <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="20"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="btnSubmitTapped:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="Z0b-Bw-DxG"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="WU9-Xf-Tdn"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="WU9-Xf-Tdn" firstAttribute="trailing" secondItem="9oz-FE-eSh" secondAttribute="trailing" id="GGf-KQ-ai6"/>
+                            <constraint firstItem="BHA-FY-lQM" firstAttribute="leading" secondItem="zp8-uH-efT" secondAttribute="leading" constant="20" id="NWT-bc-bQz"/>
+                            <constraint firstItem="9oz-FE-eSh" firstAttribute="leading" secondItem="WU9-Xf-Tdn" secondAttribute="leading" id="cc0-0p-mSA"/>
+                            <constraint firstItem="WU9-Xf-Tdn" firstAttribute="bottom" secondItem="9oz-FE-eSh" secondAttribute="bottom" id="jd9-AS-xsV"/>
+                            <constraint firstItem="WU9-Xf-Tdn" firstAttribute="bottom" secondItem="BHA-FY-lQM" secondAttribute="bottom" constant="20" id="lMR-4s-H7Q"/>
+                            <constraint firstAttribute="trailing" secondItem="BHA-FY-lQM" secondAttribute="trailing" constant="20" id="vuj-rB-p2q"/>
+                            <constraint firstItem="9oz-FE-eSh" firstAttribute="top" secondItem="WU9-Xf-Tdn" secondAttribute="top" id="zG5-HY-9sR"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="imgPlace" destination="mQW-nh-a8p" id="iw4-Qz-rKH"/>
+                        <outlet property="txtDesc" destination="Urq-lJ-CQY" id="psX-gr-bxZ"/>
+                        <outlet property="txtLocation" destination="x7l-49-3Vl" id="9g0-Pf-mNb"/>
+                        <outlet property="txtName" destination="oDG-Q1-Ttz" id="uTf-Yq-V6e"/>
+                        <outlet property="txtPhone" destination="r5R-6E-sDD" id="VuS-gM-Uhf"/>
+                        <outlet property="txtRating" destination="WQ1-dr-jae" id="n2l-Lh-qSc"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Jhx-Ib-nno" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1649.6183206106869" y="822.53521126760563"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="OWM-sn-Fyn">
             <objects>
@@ -189,10 +310,14 @@
     </scenes>
     <resources>
         <image name="iconAppRound" width="1024" height="1024"/>
+        <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <image name="tip_1" width="672" height="322"/>
         <image name="tip_2" width="672" height="348"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemTealColor">
+            <color red="0.18823529410000001" green="0.69019607839999997" blue="0.78039215689999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

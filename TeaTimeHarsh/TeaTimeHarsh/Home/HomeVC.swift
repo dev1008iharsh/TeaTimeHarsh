@@ -31,10 +31,38 @@ class HomeVC: UIViewController {
     }
 
     private func configureNavBar() {
+        addPlaceNavBar()
+
         hideBackButtonNavBar(hidden: true, swipeEnabled: true)
         setLargeTitleSpacingNavBar(20)
         setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
         // setCustomBackButton(image: UIImage(named: "backButtonIcon") ?? UIImage(), text: "Back", color: .systemIndigo)
+    }
+
+    private func addPlaceNavBar() {
+        let addButton = UIBarButtonItem(
+            image: UIImage(systemName: "plus"),
+            style: .plain,
+            target: self,
+            action: #selector(didTapAddNavBar)
+        )
+        navigationItem.rightBarButtonItem = addButton
+    }
+
+    @objc private func didTapAddNavBar() {
+        print("Plus button tapped")
+        let vc = navigationController?.storyboard?
+            .instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
+
+        vc.onPlaceAdded = { [weak self] newPlace in
+            self?.arrTeaPlaces.insert(newPlace, at: 0)
+            self?.tblTeaPlaces.reloadData()
+        }
+
+        // 🔴 Embed in Navigation Controller
+        let navVC = UINavigationController(rootViewController: vc)
+
+        present(navVC, animated: true)
     }
 
     private func presentTipIfNeeded() {
@@ -140,7 +168,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         let place = arrTeaPlaces[indexPath.row]
-        
+
         return UIContextMenuConfiguration(
             identifier: indexPath as NSIndexPath,
             previewProvider: nil
@@ -261,11 +289,11 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 
     private func makeLeadingSwipeActions(table: UITableView, indexPath: IndexPath) -> UISwipeActionsConfiguration {
         let place = arrTeaPlaces[indexPath.row]
-        
+
         let isFav = FavouritePlacesStore.favourites.contains(place.id)
-        
+
         let favAction = UIContextualAction(style: .normal, title: isFav ? "Unfavourite" : "Favourite") { [weak self] _, _, completion in
-            //guard let self else { return }
+            // guard let self else { return }
 
             if FavouritePlacesStore.favourites.contains(place.id) {
                 FavouritePlacesStore.favourites.remove(place.id)
@@ -277,7 +305,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             completion(true)
         }
         favAction.image = UIImage(systemName: isFav ? "heart.slash" : "heart.fill")
-        favAction.backgroundColor = .systemPink
+        favAction.backgroundColor = isFav ? .systemGray : .systemPink
 
         let visitedAction = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
             guard let self else { return }
@@ -289,7 +317,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 
         visitedAction.image = UIImage(systemName: place.isVisited ? "checkmark.circle" : "checkmark.circle.fill")
 
-        visitedAction.backgroundColor = .systemGreen
+        visitedAction.backgroundColor = place.isVisited ? .systemGray4 : .systemGreen
 
         let configuration = UISwipeActionsConfiguration(actions: [visitedAction, favAction])
         configuration.performsFirstActionWithFullSwipe = true
@@ -350,13 +378,13 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension HomeVC {
-    func createDummyModel(){ arrTeaPlaces.append(contentsOf: [
+    func createDummyModel() { arrTeaPlaces.append(contentsOf: [
         TeaPlace(
             name: "Assam Chai Point",
             phone: 9876543210,
             location: "Ahmedabad",
             address: "123 Tea Lane, Satellite, Ahmedabad, Gujarat, India",
-            latitude: 23.030357,  // Satellite, Ahmedabad lat-long  [oai_citation:0‡LatLong.net](https://www.latlong.net/place/satellite-ahmedabad-india-8065.html?utm_source=chatgpt.com)
+            latitude: 23.030357, // Satellite, Ahmedabad lat-long  [oai_citation:0‡LatLong.net](https://www.latlong.net/place/satellite-ahmedabad-india-8065.html?utm_source=chatgpt.com)
             longitude: 72.517845,
             desc: "Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.Lush plantation cafe with mist-covered hills all around.Fresh Nilgiri brews with panoramic garden views.",
             rating: 4.3,
@@ -460,6 +488,6 @@ extension HomeVC {
             desc: "Tea lounge with scenic blue mountains in the backdrop.",
             rating: 4.6,
             image: UIImage(named: "tea10")
-        )
-    ])}
+        ),
+    ]) }
 }

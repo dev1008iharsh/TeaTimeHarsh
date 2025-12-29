@@ -9,6 +9,25 @@ import UIKit
 
 extension UIButton {
 
+    func applySingleSelectionMenu(
+        title: String,
+        items: [String],
+        selectedItem: String?,
+        onSelect: @escaping (String) -> Void
+    ) {
+
+        self.menu = SingleSelectionMenuBuilder.makeMenu(
+            title: title,
+            items: items,
+            selectedItem: selectedItem
+        ) { selected in
+            self.setTitle(selected, for: .normal)
+            onSelect(selected)
+        }
+
+        self.showsMenuAsPrimaryAction = true
+    }
+    
     func animateAndConfigure(
         title: String,
         systemImageName: String,
