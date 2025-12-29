@@ -5,11 +5,14 @@
 import UIKit
 import PhotosUI
 
-
+ 
+// This protects your class and makes it thread-safe for UI work.
+@MainActor
 class ImagePickerManager: NSObject {
-   
+    
     typealias ImageCompletion = ((UIImage?) -> Void)
     
+    // We don't need 'weak' here if we are careful, but weak is safer for ViewControllers
     private weak var presentationController: UIViewController?
     private var imageCompletion: ImageCompletion?
     
@@ -20,64 +23,36 @@ class ImagePickerManager: NSObject {
         super.init()
     }
     
+    // 2. This function is now explicitly on the Main Actor
     func selectImage(completion: @escaping ImageCompletion) {
         self.imageCompletion = completion
-        
-        if checkPhotoLibraryPermission() {
-            presentImagePicker()
-        } else {
-            requestPhotoLibraryPermission()
-        }
+        presentImagePicker()
     }
     
     private func presentImagePicker() {
-        guard !isPickerPresented else {
-                   return // Avoid presenting picker if already presented
-               }
-               
-               isPickerPresented = true // Set flag to true before presenting
+        guard let validVC = presentationController, !isPickerPresented else { return }
         
-        let configuration = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
+        isPickerPresented = true
+        
+        var configuration = PHPickerConfiguration()
+        configuration.selectionLimit = 1
+        configuration.filter = .images
+        
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = self
-        presentationController?.present(picker, animated: true, completion: nil)
-    }
-    
-    private func checkPhotoLibraryPermission() -> Bool {
-        let status = PHPhotoLibrary.authorizationStatus()
-        return status == .authorized
-    }
-    
-    private func requestPhotoLibraryPermission() {
-        PHPhotoLibrary.requestAuthorization { [weak self] status in
-            DispatchQueue.main.async {
-                if status == .authorized {
-                    self?.presentImagePicker()
-                } else {
-                    self?.showPermissionDeniedMessage()
-                }
-            }
-        }
-    }
-    
-    private func showPermissionDeniedMessage() {
-        print("Permission denied")
         
-        guard let vcName = presentationController else { return }
-        Utility.shared.showCustomConfirmAlert(title: "Media Access Permission Denied", message: "Please grant permission to access photos in settings.", rightSideActionName: "Open Settings", leftSideActionName: "Cancel", viewController: vcName) { settingAction in
-            
-            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(settingsURL)
-            }
-        } leftAction: { cancelAction in
-            print("cancle")
-        }
+        validVC.present(picker, animated: true)
     }
 }
 
+// MARK: - PHPickerViewControllerDelegate
 extension ImagePickerManager: PHPickerViewControllerDelegate {
+    
+    // This delegate method is automatically called on the Main Actor by UIKit
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true, completion: nil)
+        
+        self.isPickerPresented = false
+        picker.dismiss(animated: true)
         
         guard let provider = results.first?.itemProvider else {
             imageCompletion?(nil)
@@ -85,8 +60,15 @@ extension ImagePickerManager: PHPickerViewControllerDelegate {
         }
         
         if provider.canLoadObject(ofClass: UIImage.self) {
+            
+            // ⚠️ CRITICAL NOTE:
+            // loadObject performs work on a BACKGROUND thread.
+            // Even though our class is @MainActor, this closure leaves the VIP section.
             provider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
-                DispatchQueue.main.async {
+                
+                // 3. We MUST jump back to the Main Actor to touch 'self'
+                // because 'self' is isolated to the Main Actor.
+                Task { @MainActor [weak self] in
                     if let image = image as? UIImage {
                         self?.imageCompletion?(image)
                     } else {

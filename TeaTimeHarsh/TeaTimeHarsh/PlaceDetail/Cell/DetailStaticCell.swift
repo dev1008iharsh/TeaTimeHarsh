@@ -14,30 +14,56 @@ class DetailStaticCell: UITableViewCell {
     @IBOutlet var btnPhone: UIButton!
 
     @IBOutlet var lblDesc: UILabel!
+    
     @IBOutlet var lblAddress: UILabel!
-    @IBOutlet var mapContainerView: UIView!{
-        didSet{
+    
+    @IBOutlet var mapContainerView: UIView! {
+        didSet {
             mapContainerView.layer.cornerRadius = 20
             mapContainerView.clipsToBounds = true
         }
     }
 
-    let targetLat = 23.0225
-    let targetLong = 72.5714
+    // MARK: - Properties
+    var targetLat = 0.0
+    var targetLong = 0.0
 
-    var teaPlace: TeaPlace? {
+    
+    // We must keep a reference to the map to update it later
+    var googleMapView: GMSMapView?
+    
+     var teaPlace: TeaPlace? {
         didSet {
             configure()
         }
     }
 
-    // MARK: - Properties
+    
 
     // MARK: - Lifecycle
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        setupGoogleMap()
+        configureGoogleMap()
+        addTapGestureToMap()
+    }
+
+    func addTapGestureToMap() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(mapTapped))
+        googleMapView?.addGestureRecognizer(tapGesture)
+    }
+
+    func configureGoogleMap() {
+        // Initialize the map once and store the reference in 'googleMapView'
+        googleMapView = GoogleMapHelper.initializeMap(
+            in: mapContainerView,
+            enableGestures: false,
+            showLocationButton: false,
+            showCompass: false,
+            showIndoorPicker: false,
+            enableTraffic: false,
+            showUserLocation: false
+        )
     }
 
     // MARK: - Configure Data
@@ -46,6 +72,9 @@ class DetailStaticCell: UITableViewCell {
         btnPhone.setTitle("Connect via \(teaPlace?.phone, default: "")", for: .normal)
         lblDesc.text = teaPlace?.desc ?? ""
         lblAddress.text = teaPlace?.address ?? ""
+        targetLat = teaPlace?.latitude ?? 0.0
+        targetLong = teaPlace?.longitude ?? 0.0
+        GoogleMapHelper.updateLocation(mapView: googleMapView, lat: targetLat, long: targetLong, showMarker: true)
     }
 
     @IBAction func btnCallTapped(_ sender: UIButton) {
@@ -53,27 +82,6 @@ class DetailStaticCell: UITableViewCell {
               let url = URL(string: "tel://\(phone)"),
               UIApplication.shared.canOpenURL(url) else { return }
         UIApplication.shared.open(url)
-    }
-
-    func setupGoogleMap() {
-        let options = GMSMapViewOptions()
-        options.camera = GMSCameraPosition.camera(withLatitude: targetLat, longitude: targetLong, zoom: 15.0)
-        options.frame = mapContainerView.bounds
-
-        let mapView = GMSMapView(options: options)
-        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-
-        mapView.settings.setAllGesturesEnabled(false)
-
-        let marker = GMSMarker()
-        marker.position = CLLocationCoordinate2D(latitude: targetLat, longitude: targetLong)
- 
-        marker.map = mapView
-
-        mapContainerView.addSubview(mapView)
-
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(mapTapped))
-        mapView.addGestureRecognizer(tapGesture)
     }
 
     @objc func mapTapped() {

@@ -51,18 +51,20 @@ class HomeVC: UIViewController {
 
     @objc private func didTapAddNavBar() {
         print("Plus button tapped")
-        let vc = navigationController?.storyboard?
+        let addPlaceVC = navigationController?.storyboard?
             .instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
 
-        vc.onPlaceAdded = { [weak self] newPlace in
+        addPlaceVC.onPlaceAdded = { [weak self] newPlace in
             self?.arrTeaPlaces.insert(newPlace, at: 0)
             self?.tblTeaPlaces.reloadData()
         }
-
+        navigationController?.pushViewController(addPlaceVC, animated: true)
+        
+        /*
         // 🔴 Embed in Navigation Controller
         let navVC = UINavigationController(rootViewController: vc)
 
-        present(navVC, animated: true)
+        present(navVC, animated: true)*/
     }
 
     private func presentTipIfNeeded() {

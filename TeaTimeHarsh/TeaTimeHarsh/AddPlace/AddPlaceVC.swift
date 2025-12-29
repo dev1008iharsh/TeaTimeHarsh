@@ -6,43 +6,69 @@
 //
 
 import UIKit
+import GoogleMaps
 
-final class AddPlaceVC: UIViewController {
+class AddPlaceVC: UIViewController {
+    
 
     // MARK: - IBOutlets
-    @IBOutlet var imgPlace: UIImageView!
+    @IBOutlet weak var imgPlace: UIImageView!
     @IBOutlet var txtDesc: UITextField!
     @IBOutlet var txtRating: UITextField! {
         didSet { txtRating.inputView = UIView() }
     }
     @IBOutlet var txtPhone: UITextField!
+    @IBOutlet var txtAdress: UITextField!
     @IBOutlet var txtLocation: UITextField! {
         didSet { txtLocation.inputView = UIView() }
     }
     @IBOutlet var txtName: UITextField!
+    
+    @IBOutlet var mapContainerView: UIView!{
+        didSet{
+            mapContainerView.layer.cornerRadius = 20
+            mapContainerView.clipsToBounds = true
+        }
+    }
+    
+    var googleMapView: GMSMapView?
 
     // MARK: - Properties
     private var imagePickerManager: ImagePickerManager?
+    
+    
     var onPlaceAdded: ((TeaPlace) -> Void)?
 
     private var selectedRating: String?
     private var selectedLocation: String?
     private var hasSelectedImage = false
-
+    
+    private var selectedLatitude = 0.0
+    private var selectedLongitude = 0.0
+ 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Add New Place"
+        mapContainerView.isHidden = true // show map after selection
+        
+        imagePickerManager = ImagePickerManager(presentationController: self)
+        
         setupNavBar()
         setupMenuSelection()
         setupImageSelection()
+        setupGoogleMap()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
-
+   
+    func setupGoogleMap(){
+        self.googleMapView = GoogleMapHelper.initializeMap(in: mapContainerView, enableGestures: false, showLocationButton: false, showCompass: false, showIndoorPicker: false, enableTraffic: false, showUserLocation: false)
+    }
+     
     // MARK: - Navigation Bar
     private func setupNavBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -54,7 +80,7 @@ final class AddPlaceVC: UIViewController {
     }
 
     @objc private func didTapCancelBarButton() {
-        showDiscardAlert()
+        showDiscardAlert() // discard lost form details
     }
 
     // MARK: - Image Selection
@@ -73,9 +99,8 @@ final class AddPlaceVC: UIViewController {
     @objc private func didTapPlaceImage() {
         openImagePicker()
     }
-
+    
     private func openImagePicker() {
-        imagePickerManager = ImagePickerManager(presentationController: self)
         imagePickerManager?.selectImage { [weak self] selectedImage in
             guard let self, let image = selectedImage else {
                 print("No image selected or permission denied")
@@ -84,8 +109,23 @@ final class AddPlaceVC: UIViewController {
             self.hasSelectedImage = true
             self.imgPlace.image = image
         }
+        
+        // Call the function to open the gallery
+        imagePickerManager?.selectImage { [weak self] selectedImage in
+            guard let self else { return }
+            // Check if we actually got an image
+            guard let selectedImage = selectedImage else {
+                print("User cancelled or no image found")
+                return
+            }
+            
+            // Update the UI
+            hasSelectedImage = true
+            imgPlace.image = selectedImage
+            print("Successfully updated profile photo! 📸")
+        }
     }
-
+    
     // MARK: - Menu Selection
     private func setupMenuSelection() {
 
@@ -114,8 +154,14 @@ final class AddPlaceVC: UIViewController {
     }
 
     // MARK: - Actions
-    @IBAction func didTapCancel(_ sender: UIButton) {
-        showDiscardAlert()
+    @IBAction func btnSelectLocationMap(_ sender: UIButton) {
+        let mapVC = UIStoryboard(name: "Main", bundle: nil)
+            .instantiateViewController(withIdentifier: "SelectPlaceOnMapVC") as! SelectPlaceOnMapVC 
+       
+        mapVC.delegateMap = self
+
+        navigationController?.pushViewController(mapVC, animated: true)
+ 
     }
 
     @IBAction func btnSubmitTapped(_ sender: UIButton) {
@@ -130,7 +176,7 @@ final class AddPlaceVC: UIViewController {
 
         let teaPlace = createTeaPlace()
         onPlaceAdded?(teaPlace)
-        dismiss(animated: true)
+        navigationController?.popViewController(animated: true)
     }
 
     // MARK: - Validation
@@ -173,14 +219,14 @@ final class AddPlaceVC: UIViewController {
             phone: Int(txtPhone.text ?? "") ?? 0,
             location: txtLocation.text ?? "Unknown Location",
             address: "Ahmedabad Ring Road address available",
-            latitude: 23.0225,
-            longitude: 72.5714,
+            latitude: selectedLatitude,
+            longitude: selectedLongitude,
             desc: txtDesc.text ?? "No description available",
             rating: ratingValue,
             image: imgPlace.image
         )
     }
-
+    
     // MARK: - Alerts
     private func showDiscardAlert() {
         let alert = UIAlertController(
@@ -191,9 +237,28 @@ final class AddPlaceVC: UIViewController {
 
         alert.addAction(UIAlertAction(title: "Keep Editing", style: .cancel))
         alert.addAction(UIAlertAction(title: "Discard", style: .destructive) { _ in
-            self.dismiss(animated: true)
+            self.navigationController?.popViewController(animated: true)
         })
 
         present(alert, animated: true)
+    }
+}
+
+
+extension AddPlaceVC: SelectPlaceOnMapVCDelegate {
+
+    func didSelectLocation(
+        latitude: Double,
+        longitude: Double,
+        address: String
+    ) {
+        print("Location received:", latitude, longitude, address)
+        
+        txtAdress.text = address
+        selectedLatitude = latitude
+        selectedLongitude = longitude
+        mapContainerView.isHidden = false
+        
+        GoogleMapHelper.updateLocation(mapView: googleMapView, lat: latitude, long: longitude, showMarker: true)
     }
 }
