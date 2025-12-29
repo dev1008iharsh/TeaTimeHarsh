@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 04E5B6FA2F026542005AAB46 /* GoogleMaps */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		042105152EFE74D30078B30A /* TeaTimeHarsh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TeaTimeHarsh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = TeaTimeHarsh;
 			packageProductDependencies = (
+				04E5B6FA2F026542005AAB46 /* GoogleMaps */,
 			);
 			productName = TeaTimeHarsh;
 			productReference = 042105152EFE74D30078B30A /* TeaTimeHarsh.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 0421050C2EFE74D30078B30A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 042105162EFE74D30078B30A /* Products */;
 			projectDirPath = "";
@@ -349,6 +358,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		04E5B6FA2F026542005AAB46 /* GoogleMaps */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */;
+			productName = GoogleMaps;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0421050D2EFE74D30078B30A /* Project object */;
 }

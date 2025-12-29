@@ -100,7 +100,7 @@ private extension PlaceDetailVC {
                 self.onVisitToggle?(placeID)
 
                 // 🔄 Update local copy only for UI
-                self.place?.toggleIsVisisted()
+                self.place?.toggleIsVisited()
 
                 header.updateVisitedButton(
                     isVisited: self.place?.isVisited ?? false

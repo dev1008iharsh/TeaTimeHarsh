@@ -108,11 +108,11 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         detailVC.onVisitToggle = { [weak self] _ in
             guard let self else { return }
 
-            self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
+            self.arrTeaPlaces[indexPath.row].toggleIsVisited()
             /*
              //this is after finding index getting back from detail
              if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == placeID }) {
-                 self.arrTeaPlaces[index].toggleIsVisisted()
+                 self.arrTeaPlaces[index].toggleIsVisited()
              }*/
         }
 
@@ -183,7 +183,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
                 title: place.isVisited ? "Remove Visited" : "Mark Visited",
                 image: UIImage(systemName: place.isVisited ? "checkmark.app" : "checkmark.app.fill")
             ) { _ in
-                self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
+                self.arrTeaPlaces[indexPath.row].toggleIsVisited()
                 tableView.reloadRows(at: [indexPath], with: .none)
             }
 
@@ -282,7 +282,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         let visitedAction = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
             guard let self else { return }
 
-            self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
+            self.arrTeaPlaces[indexPath.row].toggleIsVisited()
             table.reloadRows(at: [indexPath], with: .none)
             completion(true)
         }
@@ -332,7 +332,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
          let visitedTitle = place.isVisited ? "Remove from Visited" : "Add to Visited"
          actionSheet.addAction(UIAlertAction(title: visitedTitle, style: .default) { [weak self] _ in
              guard let self else { return }
-             arrTeaPlaces[indexPath.row].toggleIsVisisted()
+             arrTeaPlaces[indexPath.row].toggleIsVisited()
              table.reloadRows(at: [indexPath], with: .none)
          })
 
@@ -350,126 +350,116 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension HomeVC {
-    func createDummyModel() {
-        arrTeaPlaces.append(contentsOf: [TeaPlace(name: "Assam Chai Point",
-                                                  phone: 9876543210,
-                                                  location: "Ahmedabad",
-                                                  desc: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.",
-                                                  rating: 4.3,
-                                                  image: UIImage(named: "tea1")),
-
-                                         TeaPlace(name: "Darjeeling Tea House",
-                                                  phone: 9876543211,
-                                                  location: "Mumbai",
-                                                  desc: "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words consectetur, from a Lorem Ipsum passage and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of de Finibus Bonorum et Malorum (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum",
-                                                  rating: 4.6,
-                                                  image: UIImage(named: "tea2")),
-
-                                         TeaPlace(name: "Masala Chai Adda",
-                                                  phone: 9876543212,
-                                                  location: "Delhi",
-                                                  desc: "simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-                                                  rating: 4.1,
-                                                  image: UIImage(named: "tea3")),
-
-                                         TeaPlace(name: "Green Leaf Café",
-                                                  phone: 9876543213,
-                                                  location: "Pune",
-                                                  desc: "Organic Tea",
-                                                  rating: 4.5,
-                                                  image: UIImage(named: "tea4")),
-
-                                         TeaPlace(name: "Royal Kulhad Chai",
-                                                  phone: 9876543214,
-                                                  location: "Jaipur",
-                                                  desc: "Kulhad Tea",
-                                                  rating: 4.4,
-                                                  image: UIImage(named: "tea5")),
-
-                                         TeaPlace(name: "Evening Chaiwala",
-                                                  phone: 9876543215,
-                                                  location: "Indore",
-                                                  desc: "Street Tea",
-                                                  rating: 4.0,
-                                                  image: UIImage(named: "tea6")),
-
-                                         TeaPlace(name: "Himalayan Tea Lounge",
-                                                  phone: 9876543216,
-                                                  location: "Shimla",
-                                                  desc: "Herbal Tea",
-                                                  rating: 4.7,
-                                                  image: UIImage(named: "tea7")),
-
-                                         TeaPlace(name: "South Sip Chai",
-                                                  phone: 9876543217,
-                                                  location: "Bangalore",
-                                                  desc: "Filter Tea",
-                                                  rating: 4.2,
-                                                  image: UIImage(named: "tea8")),
-
-                                         TeaPlace(name: "Midnight Chai Hub",
-                                                  phone: 9876543218,
-                                                  location: "Hyderabad",
-                                                  desc: "Late Night Tea",
-                                                  rating: 4.1,
-                                                  image: UIImage(named: "tea9")),
-
-                                         TeaPlace(name: "Urban Tea Café",
-                                                  phone: 9876543219,
-                                                  location: "Gurgaon",
-                                                  desc: "Modern Café",
-                                                  rating: 4.3,
-                                                  image: UIImage(named: "tea10")),
-
-                                         TeaPlace(name: "Classic Cutting Chai",
-                                                  phone: 9876543220,
-                                                  location: "Surat",
-                                                  desc: "Cutting Chai",
-                                                  rating: 4.4,
-                                                  image: UIImage(named: "tea11")),
-
-                                         TeaPlace(name: "Morning Brew Chai",
-                                                  phone: 9876543221,
-                                                  location: "Vadodara",
-                                                  desc: "Morning Tea",
-                                                  rating: 3.9,
-                                                  image: UIImage(named: "tea12")),
-
-                                         TeaPlace(name: "Soulful Sips",
-                                                  phone: 9876543222,
-                                                  location: "Udaipur",
-                                                  desc: "Lake View Café",
-                                                  rating: 4.6,
-                                                  image: UIImage(named: "tea13")),
-
-                                         TeaPlace(name: "Campus Chai Stop",
-                                                  phone: 9876543223,
-                                                  location: "Gandhinagar",
-                                                  desc: "Student Favorite",
-                                                  rating: 4.0,
-                                                  image: UIImage(named: "tea14")),
-
-                                         TeaPlace(name: "Vintage Tea Corner",
-                                                  phone: 9876543224,
-                                                  location: "Kolkata",
-                                                  desc: "Traditional Tea",
-                                                  rating: 4.5,
-                                                  image: UIImage(named: "tea15")),
-
-                                         TeaPlace(name: "Highway Chai Dhaba",
-                                                  phone: 9876543225,
-                                                  location: "NH-8",
-                                                  desc: "Highway Tea",
-                                                  rating: 4.2,
-                                                  image: UIImage(named: "tea16")),
-
-                                         TeaPlace(name: "Sunset Tea Garden",
-                                                  phone: 9876543226,
-                                                  location: "Mount Abu",
-                                                  desc: "Scenic Tea",
-                                                  rating: 4.7,
-                                                  image: UIImage(named: "tea17")),
-
-            ])
-    }
+    func createDummyModel(){ arrTeaPlaces.append(contentsOf: [
+        TeaPlace(
+            name: "Assam Chai Point",
+            phone: 9876543210,
+            location: "Ahmedabad",
+            address: "123 Tea Lane, Satellite, Ahmedabad, Gujarat, India",
+            latitude: 23.030357,  // Satellite, Ahmedabad lat-long  [oai_citation:0‡LatLong.net](https://www.latlong.net/place/satellite-ahmedabad-india-8065.html?utm_source=chatgpt.com)
+            longitude: 72.517845,
+            desc: "Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.Lush plantation cafe with mist-covered hills all around.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.3,
+            image: UIImage(named: "tea1")
+        ),
+        TeaPlace(
+            name: "Darjeeling Brew House",
+            phone: 9876501234,
+            location: "Darjeeling",
+            address: "45 Hilltop Rd, Darjeeling, West Bengal, India",
+            latitude: 27.0360,
+            longitude: 88.2626,
+            desc: "Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.7,
+            image: UIImage(named: "tea2")
+        ),
+        TeaPlace(
+            name: "Nilgiri Tea Garden Cafe",
+            phone: 9123456780,
+            location: "Nilgiris",
+            address: "Tea Terrace, Coonoor, Tamil Nadu, India",
+            latitude: 11.3543,
+            longitude: 76.8258,
+            desc: "Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.5,
+            image: UIImage(named: "tea3")
+        ),
+        TeaPlace(
+            name: "Munnar Mist Tea Spot",
+            phone: 9345678123,
+            location: "Munnar",
+            address: "99 Green Valley Rd, Munnar, Kerala, India",
+            latitude: 10.0892,
+            longitude: 77.0595,
+            desc: "Lush plantation cafe with mist-covered hills all around.Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.6,
+            image: UIImage(named: "tea4")
+        ),
+        TeaPlace(
+            name: "Assam Gardens Brew",
+            phone: 9012345678,
+            location: "Jorhat",
+            address: "Tea Estate Rd, Jorhat, Assam, India",
+            latitude: 26.7573,
+            longitude: 94.2020,
+            desc: "Traditional Assam tea experience inside a working plantation.",
+            rating: 4.8,
+            image: UIImage(named: "tea5")
+        ),
+        TeaPlace(
+            name: "Kolukkumalai Peak Tea",
+            phone: 9785634120,
+            location: "Kolukkumalai",
+            address: "Peak Rd, Kolukkumalai, Tamil Nadu, India",
+            latitude: 10.1925,
+            longitude: 77.2550,
+            desc: "Highest tea garden cafe in the world with great views.",
+            rating: 4.9,
+            image: UIImage(named: "tea6")
+        ),
+        TeaPlace(
+            name: "Himalayan Tea Hut",
+            phone: 9678901234,
+            location: "Kurseong",
+            address: "Tea Rd, Kurseong, West Bengal, India",
+            latitude: 26.8222,
+            longitude: 88.2690,
+            desc: "Small mountain cafe surrounded by tea estate.",
+            rating: 4.4,
+            image: UIImage(named: "tea7")
+        ),
+        TeaPlace(
+            name: "Gujarat Chai Junction",
+            phone: 9456123870,
+            location: "Ahmedabad",
+            address: "88 Caffeine St, Naroda, Ahmedabad, Gujarat, India",
+            latitude: 23.068586, // Naroda, Ahmedabad lat-long  [oai_citation:1‡LatLong.net](https://www.latlong.net/place/naroda-ahmedabad-gujarat-india-18808.html?utm_source=chatgpt.com)
+            longitude: 72.653595,
+            desc: "Urban tea cafe with masala chai and snacks.",
+            rating: 4.2,
+            image: UIImage(named: "tea8")
+        ),
+        TeaPlace(
+            name: "Spice & Sip Cafe",
+            phone: 9567890123,
+            location: "Shillong",
+            address: "Tea Plaza, Shillong, Meghalaya, India",
+            latitude: 25.5788,
+            longitude: 91.8933,
+            desc: "Hill cafe serving Assam and Himalayan tea blends.",
+            rating: 4.5,
+            image: UIImage(named: "tea9")
+        ),
+        TeaPlace(
+            name: "Tea Trails Bistro",
+            phone: 9234567890,
+            location: "Ooty",
+            address: "Botanical Rd, Ooty, Tamil Nadu, India",
+            latitude: 11.4064,
+            longitude: 76.6950,
+            desc: "Tea lounge with scenic blue mountains in the backdrop.",
+            rating: 4.6,
+            image: UIImage(named: "tea10")
+        )
+    ])}
 }
