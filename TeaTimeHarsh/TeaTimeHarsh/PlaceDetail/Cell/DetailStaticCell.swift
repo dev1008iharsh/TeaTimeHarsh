@@ -78,6 +78,7 @@ class DetailStaticCell: UITableViewCell {
     }
 
     @IBAction func btnCallTapped(_ sender: UIButton) {
+        HapticHelper.error()
         guard let phone = teaPlace?.phone,
               let url = URL(string: "tel://\(phone)"),
               UIApplication.shared.canOpenURL(url) else { return }
@@ -86,6 +87,7 @@ class DetailStaticCell: UITableViewCell {
 
     @objc func mapTapped() {
         print("Map Tapped! Redirecting...")
+        HapticHelper.heavy()
         openGoogleMaps(lat: targetLat, long: targetLong)
     }
 

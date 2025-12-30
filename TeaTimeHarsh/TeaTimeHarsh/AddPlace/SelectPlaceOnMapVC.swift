@@ -2,7 +2,7 @@
 //  SelectPlaceOnMapVC.swift
 //  TeaTimeHarsh
 //
-//  Created by Harsh on 29/12/25.
+//  Fixed for "0.0 Bug" by Your AI Mentor.
 //
 
 import CoreLocation
@@ -10,200 +10,205 @@ import GoogleMaps
 import UIKit
 
 protocol SelectPlaceOnMapVCDelegate: AnyObject {
-    func didSelectLocation(
-        latitude: Double,
-        longitude: Double,
-        address: String
-    )
+    func didSelectLocation(latitude: Double, longitude: Double, address: String)
 }
 
 class SelectPlaceOnMapVC: UIViewController {
     
+    // MARK: - IBOutlets
     @IBOutlet var lblAddress: UILabel!
     @IBOutlet var mapContainerView: UIView!
-    
-    @IBOutlet var centerPinImageView: UIImageView! // Connect this to your UI Image
+    @IBOutlet var centerPinImageView: UIImageView!
 
-    
-    
-    private var selectedLatitude: Double = 0.0
-    private var selectedLongitude: Double = 0.0
-    private var selectedAddress: String = ""
+    // MARK: - Properties
+    var alreadySelectedLatitude: Double?
+    var alreadySelectedLongitude: Double?
 
+    private var currentLatitude: Double?
+    private var currentLongitude: Double?
+    private var currentAddress: String?
+
+    private var hasCenteredOnUser = false
+    
     weak var delegateMap: SelectPlaceOnMapVCDelegate?
-    
     var googleMapView: GMSMapView?
-    
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupMap()
+        determineInitialState()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
+    }
 
-        setupLocationListeners()
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+
+    // MARK: - Setup
+    func setupMap() {
+        googleMapView = GoogleMapHelper.initializeMap(
+            in: mapContainerView,
+            enableGestures: true,
+            showLocationButton: true,
+            showCompass: true,
+            showIndoorPicker: true,
+            enableTraffic: true,
+            showUserLocation: true
+        )
+        googleMapView?.delegate = self
+    }
+
+    func determineInitialState() {
+        if let lat = alreadySelectedLatitude, let long = alreadySelectedLongitude {
+            print("💾 Loading Previous Selection: \(lat), \(long)")
+            moveCamera(lat: lat, long: long)
+            hasCenteredOnUser = true
+        } else {
+            print("📡 No selection found, searching for user...")
+            setupLocationListeners()
+        }
     }
 
     func setupLocationListeners() {
-        LocationManager.shared.checkAuthorizationStatus(from: self)
-        
-        googleMapView = GoogleMapHelper.initializeMap(in: mapContainerView, enableGestures: true, showLocationButton: true, showCompass: true, showIndoorPicker: true, enableTraffic: true, showUserLocation: true)
-        googleMapView?.delegate = self
+        // 1. Check Permission
+        let status = LocationManager.shared.authorizationStatus
+        if status == .denied || status == .restricted {
+            showPermissionAlert()
+            return
+        }
 
-        // This code waits here until the Manager finds the location
+        // 2. Assign Callback (For FUTURE updates)
         LocationManager.shared.onLocationUpdate = { [weak self] location in
-            guard let self else { return }
-            // This runs whenever the location updates
-            let lat = location.coordinate.latitude
-            let long = location.coordinate.longitude
-            GoogleMapHelper.updateLocation(mapView: googleMapView, lat: lat, long: long, showMarker: true)
-            print("✅ New Location: \(lat), \(long)")
-        }
-
-        // 2. Assign the "Failure" Block
-        LocationManager.shared.onLocationFailure = { [weak self] error in
-            print("❌ Failed: \(error.localizedDescription)")
-            // Show alert to user if needed
-            Utility.shared.showAlert(title: "Failed", message: "Could not get location please check location permission and system location settings.", view: self ?? UIViewController())
-        }
-    }
-    
-    
-    @IBAction func btnSubmitMapTapped(_ sender: UIButton) {
-        print("permisson at submit \(selectedLatitude)", "\(selectedLongitude)", "\(selectedAddress)")
-        
-        delegateMap?.didSelectLocation(
-                    latitude: selectedLatitude,
-                    longitude: selectedLongitude,
-                    address: selectedAddress
-                )
-
-        navigationController?.popViewController(animated: true)
-        
-    }
-    
-//    
-//
-//    func setupGoogleMap(currentLat: Double, currentLong: Double) {
-//        let options = GMSMapViewOptions()
-//        options.camera = GMSCameraPosition.camera(withLatitude: currentLat, longitude: currentLong, zoom: 18.0)
-//        options.frame = mapContainerView.bounds
-//
-//        let mapView = GMSMapView(options: options)
-//        mapView.delegate = self
-//        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-//        mapView.settings.myLocationButton = true
-//        mapView.settings.compassButton = true
-//        mapView.settings.indoorPicker = false
-//
-//        mapView.isTrafficEnabled = true
-//        mapView.isMyLocationEnabled = true
-//
-//        let marker = GMSMarker()
-//        marker.position = CLLocationCoordinate2D(latitude: currentLat, longitude: currentLong)
-//
-//        marker.map = mapView
-//
-//        mapContainerView.addSubview(mapView)
-//    }
-
-    // Move pin UP slightly (User is dragging)
-    func animatePinLift() {
-        UIView.animate(withDuration: 0.2) {
-            // Move up by 10 pixels
-            self.centerPinImageView.transform = CGAffineTransform(translationX: 0, y: -10)
-        }
-    }
-
-    // Move pin DOWN (User stopped)
-    func animatePinDrop() {
-        UIView.animate(withDuration: 0.2) {
-            // Return to normal (center)
-            self.centerPinImageView.transform = .identity
-        }
-    }
-
-    func getAddressFromLatLong(lat: Double, long: Double) {
-        // 1. Create a Location Object
-        let location = CLLocation(latitude: lat, longitude: long)
-
-        // 2. Use Apple's Geocoder
-        let geocoder = CLGeocoder()
-
-        print("🔄 Finding address for: \(lat), \(long)...")
-
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
-
-            // Always go back to Main Thread for UI
-            DispatchQueue.main.async {
-                // Check for errors
-                if let error = error {
-                    print("❌ Geocoding failed: \(error.localizedDescription)")
-                    self?.lblAddress.text = "Address not found"
-                    return
-                }
-
-                // Get the first result (Placemark)
-                guard let place = placemarks?.first else { return }
-
-                var addressComponents: [String?] = [
-                    place.name, // Specific Place Name (e.g., "Apple Store", "Block A") 🏢
-                    place.subThoroughfare, // House/Flat Number (e.g., "12") 🏠
-                    place.thoroughfare, // Street Name (e.g., "Sindhu Bhavan Road") 🛣️
-                    place.subLocality, // Area (e.g., "Bodakdev") 📍
-                    place.locality, // City (e.g., "Ahmedabad") 🏙️
-                    place.administrativeArea, // State (e.g., "Gujarat")
-                    place.postalCode, // Pincode
-                    place.country, // Country
-                ]
-
-                // 2. Remove Duplicate (Smart Filter) 🧠
-                // NSOrderedSet to remove duplicate
-
-                let fullAddress = addressComponents
-                    .compactMap { $0 } // remove nil
-                    .reduce([]) { result, component -> [String] in
-                        // (Duplicates remove)
-                        if let last = result.last, last.contains(component) {
-                            return result
-                        }
-                        return result + [component]
-                    }
-                    .joined(separator: ", ")
-
-                // 3. Update UI
-                print("📍 Super Detail Address: \(fullAddress)")
-                self?.lblAddress.text = fullAddress
-                self?.selectedAddress = fullAddress
+            guard let self = self else { return }
+            if !self.hasCenteredOnUser {
+                self.hasCenteredOnUser = true
+                self.moveCamera(lat: location.coordinate.latitude, long: location.coordinate.longitude)
             }
         }
+        
+        LocationManager.shared.onLocationFailure = { [weak self] error in
+            if let clError = error as? CLError, clError.code == .locationUnknown { return }
+            print("❌ Failed: \(error.localizedDescription)")
+            guard let self = self else { return }
+            HapticHelper.warning()
+            Utility.showAlert(title: "Location Error", message: "Could not find location.", viewController: self)
+        }
+        
+        // 🛠️ FIX: Check IMMEDIATE Location
+        // If the GPS is already warm (running), get the location NOW.
+        // Don't wait for the next update cycle.
+        if let lastLocation = LocationManager.shared.lastKnownLocation {
+            print("🚀 Found Cached Location! Moving immediately.")
+            hasCenteredOnUser = true
+            moveCamera(lat: lastLocation.coordinate.latitude, long: lastLocation.coordinate.longitude)
+        }
+        
+        // 3. Keep Listening (in case we didn't have a cached location)
+        LocationManager.shared.checkAuthorizationStatus(from: self)
+    }
+
+    func moveCamera(lat: Double, long: Double) {
+        let camera = GMSCameraPosition.camera(withLatitude: lat, longitude: long, zoom: 16.0)
+        googleMapView?.animate(to: camera)
+
+        if lat != 0.0 && long != 0.0 {
+            getAddressFromLatLong(lat: lat, long: long)
+        }
+    }
+    
+    func showPermissionAlert() {
+        let alert = UIAlertController(title: "Permission Denied", message: "Please enable Location Services in Settings.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Settings", style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                HapticHelper.medium()
+                UIApplication.shared.open(url) }
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            HapticHelper.error()
+            self.navigationController?.popViewController(animated: true)
+        })
+        present(alert, animated: true)
+    }
+
+    // MARK: - Actions
+    @IBAction func btnSubmitMapTapped(_ sender: UIButton) {
+        HapticHelper.success()
+        guard let lat = currentLatitude, let long = currentLongitude, let address = currentAddress else { return }
+        delegateMap?.didSelectLocation(latitude: lat, longitude: long, address: address)
+        navigationController?.popViewController(animated: true)
+    }
+
+    // MARK: - Animations
+    func animatePinLift() {
+        UIView.animate(withDuration: 0.2) { self.centerPinImageView.transform = CGAffineTransform(translationX: 0, y: -10) }
+    }
+
+    func animatePinDrop() {
+        UIView.animate(withDuration: 0.2) { self.centerPinImageView.transform = .identity }
     }
 }
 
-// MARK: - Google Maps Delegate (The Magic Happens Here)
-
+// MARK: - Map Delegate
 extension SelectPlaceOnMapVC: GMSMapViewDelegate {
-    // This runs when the map STOPS moving
-    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
-        // 1. Get coordinates from center
-        let lat = position.target.latitude
-        let long = position.target.longitude
-
-        
-        // 2. Drop the pin visually
-        animatePinDrop()
-        
-        selectedLatitude = lat
-        selectedLongitude = long
-
-        print("idleAt position \(selectedLatitude) \(selectedLatitude)")
-        // 3. CALL THE NEW FUNCTION HERE 👇
-        getAddressFromLatLong(lat: lat, long: long)
-    }
-
-    // This runs when the map STARTS moving
     func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
         if gesture {
             animatePinLift()
+            lblAddress.text = "Locating place of marker..."
+            hasCenteredOnUser = true
+        }
+    }
 
-            // Optional: Show "Loading..." while they drag
-            lblAddress.text = "Locating the address..."
+    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+        animatePinDrop()
+        HapticHelper.light()
+        
+        let lat = position.target.latitude
+        let long = position.target.longitude
+        
+        // 🛑 Ignore Null Island (0,0)
+        if lat == 0.0 && long == 0.0 { return }
+
+        currentLatitude = lat
+        currentLongitude = long
+        getAddressFromLatLong(lat: lat, long: long)
+    }
+}
+
+// MARK: - Geocoding
+extension SelectPlaceOnMapVC {
+    func getAddressFromLatLong(lat: Double, long: Double) {
+        let location = CLLocation(latitude: lat, longitude: long)
+        let geocoder = CLGeocoder()
+        
+        print("🔄 Geocoding: \(lat), \(long)")
+        
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if let error = error {
+                    print("❌ Error: \(error.localizedDescription)")
+                    self.lblAddress.text = "Address not found"
+                    return
+                }
+                guard let place = placemarks?.first else { return }
+                
+                let components = [place.name, place.subThoroughfare, place.thoroughfare, place.subLocality, place.locality, place.administrativeArea, place.postalCode, place.country]
+                let fullAddress = components.compactMap { $0 }.reduce([]) { result, component -> [String] in
+                    if let last = result.last, last.contains(component) { return result }
+                    return result + [component]
+                }.joined(separator: ", ")
+                
+                self.lblAddress.text = fullAddress
+                self.currentAddress = fullAddress
+                self.currentLatitude = lat
+                self.currentLongitude = long
+            }
         }
     }
 }

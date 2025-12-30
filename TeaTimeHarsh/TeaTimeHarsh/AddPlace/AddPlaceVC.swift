@@ -2,74 +2,98 @@
 //  AddPlaceVC.swift
 //  TeaTimeHarsh
 //
-//  Created by Harsh on 29/12/25.
+//  Fixed by Your AI Mentor on 30/12/25.
 //
 
-import UIKit
 import GoogleMaps
+import UIKit
 
-class AddPlaceVC: UIViewController {
-    
-
+class AddPlaceVC: UIViewController,UITextFieldDelegate {
     // MARK: - IBOutlets
-    @IBOutlet weak var imgPlace: UIImageView!
+
+    @IBOutlet var lblAddress : UILabel!
+    
+    @IBOutlet var imgPlace: UIImageView!{
+        didSet {
+            imgPlace.layer.cornerRadius = 20
+            imgPlace.clipsToBounds = true
+        }
+    }
     @IBOutlet var txtDesc: UITextField!
     @IBOutlet var txtRating: UITextField! {
         didSet { txtRating.inputView = UIView() }
     }
+
     @IBOutlet var txtPhone: UITextField!
-    @IBOutlet var txtAdress: UITextField!
+    //@IBOutlet var txtAddress: UITextField!
     @IBOutlet var txtLocation: UITextField! {
         didSet { txtLocation.inputView = UIView() }
     }
+
     @IBOutlet var txtName: UITextField!
-    
-    @IBOutlet var mapContainerView: UIView!{
-        didSet{
+    @IBOutlet var mapContainerView: UIView! {
+        didSet {
             mapContainerView.layer.cornerRadius = 20
             mapContainerView.clipsToBounds = true
         }
     }
-    
-    var googleMapView: GMSMapView?
 
     // MARK: - Properties
-    private var imagePickerManager: ImagePickerManager?
-    
+
+    private var googleMapView: GMSMapView?
     
     var onPlaceAdded: ((TeaPlace) -> Void)?
 
-    private var selectedRating: String?
-    private var selectedLocation: String?
+    // Dropdown Data
+    private var selectedOptionRating: String?
+    private var selectedOptionLocation: String?
     private var hasSelectedImage = false
-    
-    private var selectedLatitude = 0.0
-    private var selectedLongitude = 0.0
- 
+
+    // 💾 STATE: Saved Location Data
+    private var selectedLatitude: Double?
+    private var selectedLongitude: Double?
+    // Note: We use txtAddress.text to store the address string
+
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Add New Place"
-        mapContainerView.isHidden = true // show map after selection
-        
-        imagePickerManager = ImagePickerManager(presentationController: self)
+        title = "Add New Place"
+         
+        // Hide container until a location is picked
+        mapContainerView.isHidden = true
+        // Stop user from typing manually. They MUST use the map button.
+
         
         setupNavBar()
         setupMenuSelection()
         setupImageSelection()
-        setupGoogleMap()
+        setupMiniMap()
     }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            switch textField {
+            case txtName:
+                txtLocation.becomeFirstResponder()
+            case txtLocation:
+                txtPhone.becomeFirstResponder()
+            case txtPhone:
+                txtDesc.becomeFirstResponder()
+            case txtDesc:
+                txtRating.becomeFirstResponder()
+            default:
+                textField.resignFirstResponder()
+            }
+            return true
+        }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
     }
-   
-    func setupGoogleMap(){
-        self.googleMapView = GoogleMapHelper.initializeMap(in: mapContainerView, enableGestures: false, showLocationButton: false, showCompass: false, showIndoorPicker: false, enableTraffic: false, showUserLocation: false)
-    }
-     
-    // MARK: - Navigation Bar
+
+    // MARK: - UI Setup
+
     private func setupNavBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             title: "Cancel",
@@ -79,98 +103,89 @@ class AddPlaceVC: UIViewController {
         )
     }
 
-    @objc private func didTapCancelBarButton() {
-        showDiscardAlert() // discard lost form details
+    private func setupMiniMap() {
+        // Initialize map for display only (Static)
+        googleMapView = GoogleMapHelper.initializeMap(
+            in: mapContainerView,
+            enableGestures: false,
+            showLocationButton: false,
+            showCompass: false,
+            showIndoorPicker: false,
+            enableTraffic: false,
+            showUserLocation: false
+        )
     }
 
-    // MARK: - Image Selection
     private func setupImageSelection() {
         imgPlace.image = UIImage(systemName: "photo")
         imgPlace.tintColor = .secondaryLabel
         imgPlace.isUserInteractionEnabled = true
 
-        let tapGesture = UITapGestureRecognizer(
-            target: self,
-            action: #selector(didTapPlaceImage)
-        )
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapPlaceImage))
         imgPlace.addGestureRecognizer(tapGesture)
     }
 
-    @objc private func didTapPlaceImage() {
-        openImagePicker()
-    }
-    
-    private func openImagePicker() {
-        imagePickerManager?.selectImage { [weak self] selectedImage in
-            guard let self, let image = selectedImage else {
-                print("No image selected or permission denied")
-                return
-            }
-            self.hasSelectedImage = true
-            self.imgPlace.image = image
-        }
-        
-        // Call the function to open the gallery
-        imagePickerManager?.selectImage { [weak self] selectedImage in
-            guard let self else { return }
-            // Check if we actually got an image
-            guard let selectedImage = selectedImage else {
-                print("User cancelled or no image found")
-                return
-            }
-            
-            // Update the UI
-            hasSelectedImage = true
-            imgPlace.image = selectedImage
-            print("Successfully updated profile photo! 📸")
-        }
-    }
-    
-    // MARK: - Menu Selection
     private func setupMenuSelection() {
+        let ratingOptions = ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]
+        let locationOptions = ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad", "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Surat"]
 
-        let ratingOptions = ["1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"]
-
-        let locationOptions = [
-            "Mumbai","Delhi","Bengaluru","Chennai","Hyderabad",
-            "Pune","Kolkata","Ahmedabad","Jaipur","Surat"
-        ]
-
-        txtRating.applySingleSelectionMenu(
-            title: "Select your rating",
-            items: ratingOptions,
-            selectedItem: selectedRating
-        ) { [weak self] selected in
-            self?.selectedRating = selected
+        txtRating.applySingleSelectionMenu(title: "Select Rating", items: ratingOptions, selectedItem: selectedOptionRating) { [weak self] selected in
+            self?.selectedOptionRating = selected
+            HapticHelper.light()
         }
 
-        txtLocation.applySingleSelectionMenu(
-            title: "Select your city location",
-            items: locationOptions,
-            selectedItem: selectedLocation
-        ) { [weak self] selected in
-            self?.selectedLocation = selected
+        txtLocation.applySingleSelectionMenu(title: "Select City", items: locationOptions, selectedItem: selectedOptionLocation) { [weak self] selected in
+            self?.selectedOptionLocation = selected
+            HapticHelper.light()
         }
     }
 
     // MARK: - Actions
+
+    @objc private func didTapCancelBarButton() {
+        showDiscardAlert()
+    }
+
+    @objc private func didTapPlaceImage() {
+        HapticHelper.light()
+        ImagePickerManager.shared.pickSingleImage(from: self) { [weak self] selectedImage in
+            guard let self = self, let image = selectedImage else { return }
+            self.hasSelectedImage = true
+            self.imgPlace.image = image
+        }
+    }
+
     @IBAction func btnSelectLocationMap(_ sender: UIButton) {
-        let mapVC = UIStoryboard(name: "Main", bundle: nil)
-            .instantiateViewController(withIdentifier: "SelectPlaceOnMapVC") as! SelectPlaceOnMapVC 
-       
+        HapticHelper.medium()
+        // 1. Instantiate the Fixed Map VC
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let mapVC = storyboard.instantiateViewController(withIdentifier: "SelectPlaceOnMapVC") as? SelectPlaceOnMapVC else {
+            print("❌ Could not instantiate SelectPlaceOnMapVC")
+            return
+        }
+
+        // 2. Pass Saved Data (If available)
+        // This ensures the map opens at the last selected location (Logic Fix 🧠)
+        if let lat = selectedLatitude, let long = selectedLongitude {
+            mapVC.alreadySelectedLatitude = lat
+            mapVC.alreadySelectedLongitude = long
+        }
+
+        // 3. Connect Delegate
         mapVC.delegateMap = self
 
         navigationController?.pushViewController(mapVC, animated: true)
- 
     }
 
     @IBAction func btnSubmitTapped(_ sender: UIButton) {
+        HapticHelper.success()
         if let errorMessage = validateFields() {
-            Utility.shared.showAlert(
-                title: "Invalid Data",
-                message: errorMessage,
-                view: self
-            )
+            Utility
+                .showAlert(
+                    title: "Invalid Data",
+                    message: errorMessage,
+                    viewController: self
+                )
             return
         }
 
@@ -179,86 +194,71 @@ class AddPlaceVC: UIViewController {
         navigationController?.popViewController(animated: true)
     }
 
-    // MARK: - Validation
+    // MARK: - Validation & Helper
+
     private func validateFields() -> String? {
+        guard let name = txtName.text?.trimmed, !name.isEmpty else { return "Please enter tea place name" }
+        guard let phone = txtPhone.text, phone.count == 10 else { return "Enter valid 10-digit phone number" }
+        guard selectedOptionLocation != nil else { return "Please select city location" }
+        guard let desc = txtDesc.text?.trimmed, !desc.isEmpty else { return "Please enter description" }
+        guard selectedOptionRating != nil else { return "Please select rating" }
+        guard hasSelectedImage else { return "Please select an image" }
 
-        if txtName.text?.trimmingCharacters(in: .whitespaces).isEmpty == true {
-            return "Please enter tea place name"
-        }
-
-        if txtPhone.text?.count != 10 {
-            return "Please enter valid 10-digit phone number (Do not include +91 or 0)"
-        }
-
-        if txtLocation.text?.trimmingCharacters(in: .whitespaces).isEmpty == true {
-            return "Please select location"
-        }
-
-        if txtDesc.text?.trimmingCharacters(in: .whitespaces).isEmpty == true {
-            return "Please enter description"
-        }
-
-        if txtRating.text?.trimmingCharacters(in: .whitespaces).isEmpty == true {
-            return "Please select rating"
-        }
-
-        if hasSelectedImage == false {
-            return "Please select an image"
-        }
+        // Map Validation
+        guard selectedLatitude != nil, selectedLongitude != nil else { return "Please select location on map" }
 
         return nil
     }
 
-    // MARK: - Model Creation
     private func createTeaPlace() -> TeaPlace {
-
-        let ratingValue = Double(selectedRating ?? "") ?? 0.0
-
         return TeaPlace(
-            name: txtName.text ?? "Unknown Tea Place",
+            name: txtName.text ?? "",
             phone: Int(txtPhone.text ?? "") ?? 0,
-            location: txtLocation.text ?? "Unknown Location",
-            address: "Ahmedabad Ring Road address available",
+            location: selectedOptionLocation ?? "",
+            address: lblAddress.text ?? "", // Uses the map address
             latitude: selectedLatitude,
             longitude: selectedLongitude,
-            desc: txtDesc.text ?? "No description available",
-            rating: ratingValue,
+            desc: txtDesc.text ?? "",
+            rating: Double(selectedOptionRating ?? "") ?? 0.0,
             image: imgPlace.image
         )
     }
-    
-    // MARK: - Alerts
-    private func showDiscardAlert() {
-        let alert = UIAlertController(
-            title: "Discard Changes?",
-            message: "All entered details will be lost.",
-            preferredStyle: .alert
-        )
 
-        alert.addAction(UIAlertAction(title: "Keep Editing", style: .cancel))
+    private func showDiscardAlert() {
+        HapticHelper.warning()
+        let alert = UIAlertController(title: "Discard Changes?", message: "All entered details will be lost.", preferredStyle: .alert)
+         alert.addAction(UIAlertAction(title: "Keep Editing", style: .cancel) { _ in
+             HapticHelper.success()
+        })
+        
         alert.addAction(UIAlertAction(title: "Discard", style: .destructive) { _ in
             self.navigationController?.popViewController(animated: true)
+            HapticHelper.error()
         })
-
         present(alert, animated: true)
     }
 }
 
+// MARK: - Map Delegate Implementation
 
 extension AddPlaceVC: SelectPlaceOnMapVCDelegate {
+    func didSelectLocation(latitude: Double, longitude: Double, address: String) {
+        print("📍 Received: \(latitude), \(longitude) - \(address)")
 
-    func didSelectLocation(
-        latitude: Double,
-        longitude: Double,
-        address: String
-    ) {
-        print("Location received:", latitude, longitude, address)
-        
-        txtAdress.text = address
+        // 1. Update State (So we remember it next time)
         selectedLatitude = latitude
         selectedLongitude = longitude
+
+        // 2. Update UI
+        lblAddress.text = address
         mapContainerView.isHidden = false
-        
-        GoogleMapHelper.updateLocation(mapView: googleMapView, lat: latitude, long: longitude, showMarker: true)
+
+        // 3. Update Mini Map to show the selected spot
+        GoogleMapHelper.updateLocation(
+            mapView: googleMapView,
+            lat: latitude,
+            long: longitude,
+            showMarker: true
+        )
     }
 }

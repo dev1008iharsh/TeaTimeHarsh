@@ -29,6 +29,17 @@ class HomeVC: UIViewController {
 
         // detectLongPressOnCell()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
+    }
+
 
     private func configureNavBar() {
         addPlaceNavBar()
@@ -51,12 +62,14 @@ class HomeVC: UIViewController {
 
     @objc private func didTapAddNavBar() {
         print("Plus button tapped")
+        HapticHelper.success()
         let addPlaceVC = navigationController?.storyboard?
             .instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
 
         addPlaceVC.onPlaceAdded = { [weak self] newPlace in
             self?.arrTeaPlaces.insert(newPlace, at: 0)
             self?.tblTeaPlaces.reloadData()
+            HapticHelper.heavy()
         }
         navigationController?.pushViewController(addPlaceVC, animated: true)
         
@@ -144,6 +157,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
              if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == placeID }) {
                  self.arrTeaPlaces[index].toggleIsVisited()
              }*/
+            HapticHelper.heavy()
         }
 
         navigationController?.pushViewController(detailVC, animated: true)
@@ -185,6 +199,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
                       let url = URL(string: "tel://\(phone)"),
                       UIApplication.shared.canOpenURL(url) else { return }
                 UIApplication.shared.open(url)
+                HapticHelper.heavy()
             }
 
             // ❤️ Favourite
@@ -197,8 +212,8 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
                 if FavouritePlacesStore.favourites.remove(place.id) == nil {
                     FavouritePlacesStore.favourites.insert(place.id)
                 }
-                tableView.reloadRows(at: [indexPath], with: .none)
-
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                HapticHelper.heavy()
                 /* Same code as above == nil
                  if FavouritePlacesStore.favourites.contains(placeID) {
                      FavouritePlacesStore.favourites.remove(placeID)
@@ -214,7 +229,8 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
                 image: UIImage(systemName: place.isVisited ? "checkmark.app" : "checkmark.app.fill")
             ) { _ in
                 self.arrTeaPlaces[indexPath.row].toggleIsVisited()
-                tableView.reloadRows(at: [indexPath], with: .none)
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                HapticHelper.heavy()
             }
 
             return UIMenu(title: "", children: [
@@ -232,6 +248,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             guard let self else { return }
             self.arrTeaPlaces.remove(at: indexPath.row)
             table.deleteRows(at: [indexPath], with: .automatic)
+            HapticHelper.heavy()
             completion(true)
         }
 
@@ -255,7 +272,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
                 popover.sourceView = table
                 popover.sourceRect = table.rectForRow(at: indexPath)
             }
-
+            HapticHelper.heavy()
             self.present(activityVC, animated: true)
             completion(true)
         }
@@ -302,8 +319,8 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             } else {
                 FavouritePlacesStore.favourites.insert(place.id)
             }
-
-            table.reloadRows(at: [indexPath], with: .none)
+            HapticHelper.heavy()
+            table.reloadRows(at: [indexPath], with: .left)
             completion(true)
         }
         favAction.image = UIImage(systemName: isFav ? "heart.slash" : "heart.fill")
@@ -311,9 +328,9 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 
         let visitedAction = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
             guard let self else { return }
-
+            HapticHelper.heavy()
             self.arrTeaPlaces[indexPath.row].toggleIsVisited()
-            table.reloadRows(at: [indexPath], with: .none)
+            table.reloadRows(at: [indexPath], with: .left)
             completion(true)
         }
 

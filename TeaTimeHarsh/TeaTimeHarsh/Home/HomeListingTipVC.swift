@@ -19,21 +19,17 @@ struct HomeListingTipManager {
 }
 
 class HomeListingTipVC: UIViewController {
-    @IBOutlet var lblQuickTip: UILabel! {
-        didSet {
-            lblQuickTip.text = """
-
-            • Long-press a place for more actions
-            • Swipe left for mark visited and favourite
-            • Swipe Right for share and delete
-
-            """
-        }
-    }
+    @IBOutlet var lblQuickTip: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        lblQuickTip.text = """
 
+        • Long-press a place for more actions
+        • Swipe left for mark visited and favourite
+        • Swipe Right for share and delete
+
+        """
         view.backgroundColor = UIColor.black.withAlphaComponent(0.9)
         addDismissGesture()
         // Do any additional setup after loading the view.

@@ -94,7 +94,7 @@ private extension PlaceDetailVC {
 
                 let isFav = FavouritePlacesStore.favourites.contains(placeID)
                 header.updateFavouriteButton(isFavourite: isFav)
-
+                HapticHelper.heavy()
             case .visit:
                 // 🔥 Tell HOME to update the real model
                 self.onVisitToggle?(placeID)
@@ -105,6 +105,7 @@ private extension PlaceDetailVC {
                 header.updateVisitedButton(
                     isVisited: self.place?.isVisited ?? false
                 )
+                HapticHelper.heavy()
             }
         }
 
