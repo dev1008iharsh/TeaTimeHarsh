@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="DetailStaticCell" customModule="TeaTimeHarsh" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="496" height="629"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Va9-nX-pyY">
+                    <rect key="frame" x="20" y="10" width="460" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="45" id="DSy-VF-6tj"/>
+                    </constraints>
+                    <buttonConfiguration key="configuration" style="filled" title="Call" imagePadding="20" cornerStyle="capsule">
+                        <imageReference key="image" image="phone" catalog="system" symbolScale="large"/>
+                        <backgroundConfiguration key="background">
+                            <color key="backgroundColor" systemColor="systemTealColor"/>
+                        </backgroundConfiguration>
+                        <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                        </preferredSymbolConfiguration>
+                        <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="20"/>
+                    </buttonConfiguration>
+                    <connections>
+                        <action selector="btnCallTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="Z4G-Ka-hv3"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KeE-hf-Isj">
+                    <rect key="frame" x="20" y="65" width="460" height="203"/>
+                    <string key="text">imply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ckj-Ze-DxT">
+                    <rect key="frame" x="20" y="278" width="460" height="81"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U9i-MA-mHs">
+                            <rect key="frame" x="0.0" y="0.0" width="460" height="1"/>
+                            <color key="backgroundColor" systemColor="systemGray4Color"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="1" id="naM-J9-Fxz"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="cXQ-b4-r8X">
+                            <rect key="frame" x="5" y="23.666666666666668" width="35" height="33.666666666666657"/>
+                            <color key="tintColor" systemColor="systemTealColor"/>
+                            <constraints>
+                                <constraint firstAttribute="width" secondItem="cXQ-b4-r8X" secondAttribute="height" multiplier="1:1" id="K7x-Wc-bEV"/>
+                                <constraint firstAttribute="height" constant="35" id="hen-4e-8wZ"/>
+                            </constraints>
+                            <imageReference key="image" image="mappin.and.ellipse.circle.fill" catalog="system" symbolScale="default" renderingMode="template"/>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="imply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard" textAlignment="justified" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wWQ-5K-05t">
+                            <rect key="frame" x="50" y="10" width="405" height="61"/>
+                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="U9i-MA-mHs" secondAttribute="trailing" id="3vm-gA-INc"/>
+                        <constraint firstItem="U9i-MA-mHs" firstAttribute="top" secondItem="Ckj-Ze-DxT" secondAttribute="top" id="3wh-Qx-xDW"/>
+                        <constraint firstItem="cXQ-b4-r8X" firstAttribute="leading" secondItem="Ckj-Ze-DxT" secondAttribute="leading" constant="5" id="8Z8-u3-RoR"/>
+                        <constraint firstItem="cXQ-b4-r8X" firstAttribute="centerY" secondItem="wWQ-5K-05t" secondAttribute="centerY" id="B54-44-oPH"/>
+                        <constraint firstItem="wWQ-5K-05t" firstAttribute="top" secondItem="Ckj-Ze-DxT" secondAttribute="top" constant="10" id="E4E-2c-CTX"/>
+                        <constraint firstAttribute="trailing" secondItem="wWQ-5K-05t" secondAttribute="trailing" constant="5" id="TOA-QU-Aig"/>
+                        <constraint firstItem="wWQ-5K-05t" firstAttribute="leading" secondItem="cXQ-b4-r8X" secondAttribute="trailing" constant="10" id="UzF-z8-4jL"/>
+                        <constraint firstAttribute="bottom" secondItem="wWQ-5K-05t" secondAttribute="bottom" constant="10" id="eCa-RT-8kI"/>
+                        <constraint firstItem="U9i-MA-mHs" firstAttribute="leading" secondItem="Ckj-Ze-DxT" secondAttribute="leading" id="tG9-ps-gNp"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xfe-R5-3Jd" customClass="Map">
+                    <rect key="frame" x="20" y="359" width="460" height="250"/>
+                    <color key="backgroundColor" systemColor="systemGray6Color"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="250" id="NhQ-Vu-fMm"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="Va9-nX-pyY" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="10" id="3l9-sL-dwl"/>
+                <constraint firstItem="xfe-R5-3Jd" firstAttribute="trailing" secondItem="Ckj-Ze-DxT" secondAttribute="trailing" id="DaD-JG-Uw8"/>
+                <constraint firstItem="KeE-hf-Isj" firstAttribute="top" secondItem="Va9-nX-pyY" secondAttribute="bottom" constant="10" id="FO4-po-kcs"/>
+                <constraint firstItem="Ckj-Ze-DxT" firstAttribute="trailing" secondItem="KeE-hf-Isj" secondAttribute="trailing" id="M3U-Pv-ZKQ"/>
+                <constraint firstItem="Ckj-Ze-DxT" firstAttribute="top" secondItem="KeE-hf-Isj" secondAttribute="bottom" constant="10" id="YPn-Af-LoZ"/>
+                <constraint firstItem="Ckj-Ze-DxT" firstAttribute="leading" secondItem="KeE-hf-Isj" secondAttribute="leading" id="ZA3-lp-tMb"/>
+                <constraint firstItem="xfe-R5-3Jd" firstAttribute="top" secondItem="Ckj-Ze-DxT" secondAttribute="bottom" id="bpo-Gr-NQw"/>
+                <constraint firstItem="KeE-hf-Isj" firstAttribute="trailing" secondItem="Va9-nX-pyY" secondAttribute="trailing" id="hZw-md-cYx"/>
+                <constraint firstAttribute="bottom" secondItem="xfe-R5-3Jd" secondAttribute="bottom" constant="20" id="n0U-uU-F7o"/>
+                <constraint firstItem="Va9-nX-pyY" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="20" id="q6M-Ua-fvL"/>
+                <constraint firstAttribute="trailing" secondItem="Va9-nX-pyY" secondAttribute="trailing" constant="16" id="rB0-N1-Mum"/>
+                <constraint firstItem="xfe-R5-3Jd" firstAttribute="leading" secondItem="Ckj-Ze-DxT" secondAttribute="leading" id="vvg-9u-yfq"/>
+                <constraint firstItem="KeE-hf-Isj" firstAttribute="leading" secondItem="Va9-nX-pyY" secondAttribute="leading" id="zpS-Ou-j0h"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="btnPhone" destination="Va9-nX-pyY" id="EnF-G3-Xcc"/>
+                <outlet property="lblAddress" destination="wWQ-5K-05t" id="32z-3g-2La"/>
+                <outlet property="lblDesc" destination="KeE-hf-Isj" id="Gj5-U9-bPe"/>
+                <outlet property="mapContainerView" destination="xfe-R5-3Jd" id="fOl-oX-JPR"/>
+            </connections>
+            <point key="canvasLocation" x="100.76335877862596" y="48.943661971830991"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="mappin.and.ellipse.circle.fill" catalog="system" width="128" height="123"/>
+        <image name="phone" catalog="system" width="128" height="115"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray4Color">
+            <color red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemGray6Color">
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemTealColor">
+            <color red="0.18823529410000001" green="0.69019607839999997" blue="0.78039215689999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

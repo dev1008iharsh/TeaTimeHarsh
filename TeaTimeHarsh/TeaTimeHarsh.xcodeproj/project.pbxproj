@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		043671EF2F0449E000A791F8 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 043671EE2F0449E000A791F8 /* IQKeyboardManagerSwift */; };
+		04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 04E5B6FA2F026542005AAB46 /* GoogleMaps */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		042105152EFE74D30078B30A /* TeaTimeHarsh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TeaTimeHarsh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +41,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */,
+				043671EF2F0449E000A791F8 /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +85,8 @@
 			);
 			name = TeaTimeHarsh;
 			packageProductDependencies = (
+				04E5B6FA2F026542005AAB46 /* GoogleMaps */,
+				043671EE2F0449E000A791F8 /* IQKeyboardManagerSwift */,
 			);
 			productName = TeaTimeHarsh;
 			productReference = 042105152EFE74D30078B30A /* TeaTimeHarsh.app */;
@@ -107,6 +116,10 @@
 			);
 			mainGroup = 0421050C2EFE74D30078B30A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */,
+				043671ED2F0449E000A791F8 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 042105162EFE74D30078B30A /* Products */;
 			projectDirPath = "";
@@ -145,10 +158,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 87M7TK5K4U;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TeaTimeHarsh/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TeaTimeHarsh;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Allow location access to instantly find your current address and see it on the map.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to select images for tea places.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -180,10 +196,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 87M7TK5K4U;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TeaTimeHarsh/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TeaTimeHarsh;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Allow location access to instantly find your current address and see it on the map.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to select images for tea places.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -349,6 +368,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		043671ED2F0449E000A791F8 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.2;
+			};
+		};
+		04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		043671EE2F0449E000A791F8 /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 043671ED2F0449E000A791F8 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			productName = IQKeyboardManagerSwift;
+		};
+		04E5B6FA2F026542005AAB46 /* GoogleMaps */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */;
+			productName = GoogleMaps;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0421050D2EFE74D30078B30A /* Project object */;
 }

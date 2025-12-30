@@ -11,14 +11,111 @@ class HomeVC: UIViewController {
     @IBOutlet var tblTeaPlaces: UITableView!
 
     var arrTeaPlaces = [TeaPlace]()
-    var setFavPlaces = Set<String>() // For managing favourite places ❤️
+
+    /*
+      var setFavPlaces: Set<String> {
+          get { FavouritePlacesSet.favourites }
+          set { FavouritePlacesSet.favourites = newValue }
+      }
+     var setFavPlaces = Set<String>() // For managing favourite places ❤️
+      */
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tblTeaPlaces.register(UINib(nibName: "TeaListCell", bundle: nil), forCellReuseIdentifier: "TeaListCell")
         createDummyModel()
+        presentTipIfNeeded()
+        configureNavBar()
+
+        // detectLongPressOnCell()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
+    }
+
+
+    private func configureNavBar() {
+        addPlaceNavBar()
+
+        hideBackButtonNavBar(hidden: true, swipeEnabled: true)
+        setLargeTitleSpacingNavBar(20)
+        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+        // setCustomBackButton(image: UIImage(named: "backButtonIcon") ?? UIImage(), text: "Back", color: .systemIndigo)
+    }
+
+    private func addPlaceNavBar() {
+        let addButton = UIBarButtonItem(
+            image: UIImage(systemName: "plus"),
+            style: .plain,
+            target: self,
+            action: #selector(didTapAddNavBar)
+        )
+        navigationItem.rightBarButtonItem = addButton
+    }
+
+    @objc private func didTapAddNavBar() {
+        print("Plus button tapped")
+        HapticHelper.success()
+        let addPlaceVC = navigationController?.storyboard?
+            .instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
+
+        addPlaceVC.onPlaceAdded = { [weak self] newPlace in
+            self?.arrTeaPlaces.insert(newPlace, at: 0)
+            self?.tblTeaPlaces.reloadData()
+            HapticHelper.heavy()
+        }
+        navigationController?.pushViewController(addPlaceVC, animated: true)
+        
+        /*
+        // 🔴 Embed in Navigation Controller
+        let navVC = UINavigationController(rootViewController: vc)
+
+        present(navVC, animated: true)*/
+    }
+
+    private func presentTipIfNeeded() {
+        guard HomeListingTipManager.shouldShowTip() else { return }
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let tipVC = storyboard.instantiateViewController(
+            withIdentifier: "HomeListingTipVC"
+        ) as! HomeListingTipVC
+
+        tipVC.modalPresentationStyle = .overFullScreen
+        tipVC.modalTransitionStyle = .crossDissolve
+
+        present(tipVC, animated: true)
+    }
+
+    /*
+      func detectLongPressOnCell() {
+          let longPressGesture = UILongPressGestureRecognizer(
+              target: self,
+              action: #selector(handleLongPress(_:))
+          )
+          tblTeaPlaces.addGestureRecognizer(longPressGesture)
+      }
+
+     @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+         // fire only once (not continuously)
+         guard gesture.state == .began else { return }
+
+         let point = gesture.location(in: tblTeaPlaces)
+         guard let indexPath = tblTeaPlaces.indexPathForRow(at: point) else { return }
+
+         // reuse your existing logic
+         performDidSelectOpenActionSheetOperations(table: tblTeaPlaces, indexPath: indexPath)
+     }*/
 }
+
+// MARK: - UITableViewDelegate UITableViewDelegate
 
 extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -29,7 +126,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         let teaCell = tableView.dequeueReusableCell(withIdentifier: "TeaListCell", for: indexPath) as! TeaListCell
         teaCell.configure(teaPlace: arrTeaPlaces[indexPath.row])
 
-        let isFav = setFavPlaces.contains(arrTeaPlaces[indexPath.row].id)
+        let isFav = FavouritePlacesStore.favourites.contains(arrTeaPlaces[indexPath.row].id)
         teaCell.isFavImage.image = UIImage(systemName: isFav ? "heart.fill" : "heart")
 
         return teaCell
@@ -40,7 +137,32 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performDidSelectOperations(table: tableView, indexPath: indexPath)
+        let detailVC = UIStoryboard(name: "Main", bundle: nil)
+            .instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
+
+        detailVC.place = arrTeaPlaces[indexPath.row]
+        detailVC.onBackToHome = { [weak self] in
+            guard let self else { return }
+            print("⬅️ User came back from Detail to Home")
+            // ✅ Refresh UI / reload table / sync favourites
+            self.tblTeaPlaces.reloadRows(at: [indexPath], with: .automatic)
+        }
+
+        detailVC.onVisitToggle = { [weak self] _ in
+            guard let self else { return }
+
+            self.arrTeaPlaces[indexPath.row].toggleIsVisited()
+            /*
+             //this is after finding index getting back from detail
+             if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == placeID }) {
+                 self.arrTeaPlaces[index].toggleIsVisited()
+             }*/
+            HapticHelper.heavy()
+        }
+
+        navigationController?.pushViewController(detailVC, animated: true)
+
+        // performDidSelectOpenActionSheetOperations(table: tableView, indexPath: indexPath)
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -51,7 +173,72 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         _ tableView: UITableView,
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        return makeLeadingSwipeActions(table: tableView, indexPath: indexPath)
+        makeLeadingSwipeActions(table: tableView, indexPath: indexPath)
+    }
+
+    // MARK: - UIContextMenu on cell tap
+
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        let place = arrTeaPlaces[indexPath.row]
+
+        return UIContextMenuConfiguration(
+            identifier: indexPath as NSIndexPath,
+            previewProvider: nil
+        ) { _ in
+
+            // 📞 Call
+            let callAction = UIAction(
+                title: "Call",
+                image: UIImage(systemName: "phone")
+            ) { _ in
+                guard let phone = place.phone,
+                      let url = URL(string: "tel://\(phone)"),
+                      UIApplication.shared.canOpenURL(url) else { return }
+                UIApplication.shared.open(url)
+                HapticHelper.heavy()
+            }
+
+            // ❤️ Favourite
+            let isFav = FavouritePlacesStore.favourites.contains(place.id)
+            let favAction = UIAction(
+                title: isFav ? "Remove Favourite" : "Add Favourite",
+                image: UIImage(systemName: isFav ? "heart.slash" : "heart"),
+                attributes: []
+            ) { _ in
+                if FavouritePlacesStore.favourites.remove(place.id) == nil {
+                    FavouritePlacesStore.favourites.insert(place.id)
+                }
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                HapticHelper.heavy()
+                /* Same code as above == nil
+                 if FavouritePlacesStore.favourites.contains(placeID) {
+                     FavouritePlacesStore.favourites.remove(placeID)
+                 } else {
+                     FavouritePlacesStore.favourites.insert(placeID)
+                 }
+                 */
+            }
+
+            // ✅ Visited
+            let visitedAction = UIAction(
+                title: place.isVisited ? "Remove Visited" : "Mark Visited",
+                image: UIImage(systemName: place.isVisited ? "checkmark.app" : "checkmark.app.fill")
+            ) { _ in
+                self.arrTeaPlaces[indexPath.row].toggleIsVisited()
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                HapticHelper.heavy()
+            }
+
+            return UIMenu(title: "", children: [
+                callAction,
+                favAction,
+                visitedAction,
+            ])
+        }
     }
 
     // MARK: - Trailing swipe on cell
@@ -61,6 +248,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
             guard let self else { return }
             self.arrTeaPlaces.remove(at: indexPath.row)
             table.deleteRows(at: [indexPath], with: .automatic)
+            HapticHelper.heavy()
             completion(true)
         }
 
@@ -84,7 +272,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
                 popover.sourceView = table
                 popover.sourceRect = table.rectForRow(at: indexPath)
             }
-
+            HapticHelper.heavy()
             self.present(activityVC, animated: true)
             completion(true)
         }
@@ -106,7 +294,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         🏷️ Place Name: \(place.name ?? "N/A \(appName)")
         📌 Location: \(place.location ?? "N/A \(appName)")
         📞 Phone: \(place.phone.map(String.init) ?? "N/A \(appName)")
-        ☕ Type: \(place.type ?? "N/A \(appName)")
+        ☕ Description: \(place.desc ?? "N/A \(appName)")
         ⭐ Rating: \(place.rating.map { String(format: "%.1f", $0) } ?? "N/A \(appName)")
 
         ——————————————
@@ -120,214 +308,205 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
 
     private func makeLeadingSwipeActions(table: UITableView, indexPath: IndexPath) -> UISwipeActionsConfiguration {
         let place = arrTeaPlaces[indexPath.row]
-        let placeID = place.id
 
-        let isFavourite = setFavPlaces.contains(placeID)
-        let isVisited = place.isVisited
+        let isFav = FavouritePlacesStore.favourites.contains(place.id)
 
-        let favouriteAction = UIContextualAction(style: .normal, title: isFavourite ? "Unfavourite" : "Favourite") { [weak self] _, _, completion in
-            guard let self else { return }
+        let favAction = UIContextualAction(style: .normal, title: isFav ? "Unfavourite" : "Favourite") { [weak self] _, _, completion in
+            // guard let self else { return }
 
-            if self.setFavPlaces.contains(placeID) {
-                self.setFavPlaces.remove(placeID)
+            if FavouritePlacesStore.favourites.contains(place.id) {
+                FavouritePlacesStore.favourites.remove(place.id)
             } else {
-                self.setFavPlaces.insert(placeID)
+                FavouritePlacesStore.favourites.insert(place.id)
             }
-
-            table.reloadRows(at: [indexPath], with: .none)
+            HapticHelper.heavy()
+            table.reloadRows(at: [indexPath], with: .left)
             completion(true)
         }
-        favouriteAction.image = UIImage(systemName: isFavourite ? "heart.slash" : "heart.fill")
-        favouriteAction.backgroundColor = .systemPink
+        favAction.image = UIImage(systemName: isFav ? "heart.slash" : "heart.fill")
+        favAction.backgroundColor = isFav ? .systemGray : .systemPink
 
-        let visitedAction = UIContextualAction(style: .normal, title: isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
+        let visitedAction = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisited" : "Visited") { [weak self] _, _, completion in
             guard let self else { return }
-
-            self.arrTeaPlaces[indexPath.row].toggleIsVisisted()
-            table.reloadRows(at: [indexPath], with: .none)
+            HapticHelper.heavy()
+            self.arrTeaPlaces[indexPath.row].toggleIsVisited()
+            table.reloadRows(at: [indexPath], with: .left)
             completion(true)
         }
-        visitedAction.image = UIImage(systemName: isVisited ? "eye.slash" : "eye.fill")
-        visitedAction.backgroundColor = .systemGreen
 
-        let configuration = UISwipeActionsConfiguration(actions: [visitedAction, favouriteAction])
+        visitedAction.image = UIImage(systemName: place.isVisited ? "checkmark.circle" : "checkmark.circle.fill")
+
+        visitedAction.backgroundColor = place.isVisited ? .systemGray4 : .systemGreen
+
+        let configuration = UISwipeActionsConfiguration(actions: [visitedAction, favAction])
         configuration.performsFirstActionWithFullSwipe = true
 
         return configuration
     }
 
-    // MARK: - ActionSheet on cell tap
+    /*
+     // MARK: - ActionSheet on cell tap
 
-    func performDidSelectOperations(table: UITableView, indexPath: IndexPath) {
-        let place = arrTeaPlaces[indexPath.row]
-        let placeID = place.id
+     func performDidSelectOpenActionSheetOperations(table: UITableView, indexPath: IndexPath) {
+         let place = arrTeaPlaces[indexPath.row]
+         let placeID = place.id
 
-        let actionSheet = UIAlertController(
-            title: "What action do you want to perform with \(place.name ?? "Selected Place") ?",
-            message: nil,
-            preferredStyle: .actionSheet
-        )
+         let actionSheet = UIAlertController(
+             title: "What action do you want to perform with \(place.name ?? "Selected Place") ?",
+             message: nil,
+             preferredStyle: .actionSheet
+         )
 
-        // 📞 Call
-        actionSheet.addAction(UIAlertAction(title: "Call", style: .default) { _ in
-            guard let phone = place.phone,
-                  let url = URL(string: "tel://\(phone)"),
-                  UIApplication.shared.canOpenURL(url) else { return }
-            UIApplication.shared.open(url)
-        })
+         // 📞 Call
+         actionSheet.addAction(UIAlertAction(title: "Call", style: .default) { _ in
+             guard let phone = place.phone,
+                   let url = URL(string: "tel://\(phone)"),
+                   UIApplication.shared.canOpenURL(url) else { return }
+             UIApplication.shared.open(url)
+         })
 
-        // ❤️ Favourite
-        let favTitle = setFavPlaces.contains(placeID) ? "Remove from Favourites" : "Add to Favourites"
-        actionSheet.addAction(UIAlertAction(title: favTitle, style: .default) { [weak self] _ in
-            guard let self else { return }
-            if setFavPlaces.remove(placeID) == nil {
-                setFavPlaces.insert(placeID)
-            }
-            table.reloadRows(at: [indexPath], with: .none)
-        })
+         // ❤️ Favourite
+         let favTitle = FavouritePlacesStore.favourites.contains(placeID) ? "Remove from Favourites" : "Add to Favourites"
+         actionSheet.addAction(UIAlertAction(title: favTitle, style: .default) { [weak self] _ in
+             guard let self else { return }
+             if FavouritePlacesStore.favourites.remove(placeID) == nil {
+                 FavouritePlacesStore.favourites.insert(placeID)
+             }
+             table.reloadRows(at: [indexPath], with: .none)
+         })
 
-        // ✅ Visited
-        let visitedTitle = place.isVisited ? "Remove from Visited" : "Add to Visited"
-        actionSheet.addAction(UIAlertAction(title: visitedTitle, style: .default) { [weak self] _ in
-            guard let self else { return }
-            arrTeaPlaces[indexPath.row].toggleIsVisisted()
-            table.reloadRows(at: [indexPath], with: .none)
-        })
+         // ✅ Visited
+         let visitedTitle = place.isVisited ? "Remove from Visited" : "Add to Visited"
+         actionSheet.addAction(UIAlertAction(title: visitedTitle, style: .default) { [weak self] _ in
+             guard let self else { return }
+             arrTeaPlaces[indexPath.row].toggleIsVisited()
+             table.reloadRows(at: [indexPath], with: .none)
+         })
 
-        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-        // 📱 iPad support
-        if let popover = actionSheet.popoverPresentationController {
-            popover.sourceView = table
-            popover.sourceRect = table.rectForRow(at: indexPath)
-            popover.permittedArrowDirections = [.up, .down]
-        }
+         // 📱 iPad support
+         if let popover = actionSheet.popoverPresentationController {
+             popover.sourceView = table
+             popover.sourceRect = table.rectForRow(at: indexPath)
+             popover.permittedArrowDirections = [.up, .down]
+         }
 
-        present(actionSheet, animated: true)
-    }
+         present(actionSheet, animated: true)
+     }*/
 }
 
 extension HomeVC {
-    func createDummyModel() {
-        arrTeaPlaces.append(contentsOf: [TeaPlace(name: "Assam Chai Point",
-                                                  phone: 9876543210,
-                                                  location: "Ahmedabad",
-                                                  type: "Street Tea",
-                                                  rating: 4.3,
-                                                  image: UIImage(named: "tea1")),
-
-                                         TeaPlace(name: "Darjeeling Tea House",
-                                                  phone: 9876543211,
-                                                  location: "Mumbai",
-                                                  type: "Premium Tea",
-                                                  rating: 4.6,
-                                                  image: UIImage(named: "tea2")),
-
-                                         TeaPlace(name: "Masala Chai Adda",
-                                                  phone: 9876543212,
-                                                  location: "Delhi",
-                                                  type: "Masala Tea",
-                                                  rating: 4.1,
-                                                  image: UIImage(named: "tea3")),
-
-                                         TeaPlace(name: "Green Leaf Café",
-                                                  phone: 9876543213,
-                                                  location: "Pune",
-                                                  type: "Organic Tea",
-                                                  rating: 4.5,
-                                                  image: UIImage(named: "tea4")),
-
-                                         TeaPlace(name: "Royal Kulhad Chai",
-                                                  phone: 9876543214,
-                                                  location: "Jaipur",
-                                                  type: "Kulhad Tea",
-                                                  rating: 4.4,
-                                                  image: UIImage(named: "tea5")),
-
-                                         TeaPlace(name: "Evening Chaiwala",
-                                                  phone: 9876543215,
-                                                  location: "Indore",
-                                                  type: "Street Tea",
-                                                  rating: 4.0,
-                                                  image: UIImage(named: "tea6")),
-
-                                         TeaPlace(name: "Himalayan Tea Lounge",
-                                                  phone: 9876543216,
-                                                  location: "Shimla",
-                                                  type: "Herbal Tea",
-                                                  rating: 4.7,
-                                                  image: UIImage(named: "tea7")),
-
-                                         TeaPlace(name: "South Sip Chai",
-                                                  phone: 9876543217,
-                                                  location: "Bangalore",
-                                                  type: "Filter Tea",
-                                                  rating: 4.2,
-                                                  image: UIImage(named: "tea8")),
-
-                                         TeaPlace(name: "Midnight Chai Hub",
-                                                  phone: 9876543218,
-                                                  location: "Hyderabad",
-                                                  type: "Late Night Tea",
-                                                  rating: 4.1,
-                                                  image: UIImage(named: "tea9")),
-
-                                         TeaPlace(name: "Urban Tea Café",
-                                                  phone: 9876543219,
-                                                  location: "Gurgaon",
-                                                  type: "Modern Café",
-                                                  rating: 4.3,
-                                                  image: UIImage(named: "tea10")),
-
-                                         TeaPlace(name: "Classic Cutting Chai",
-                                                  phone: 9876543220,
-                                                  location: "Surat",
-                                                  type: "Cutting Chai",
-                                                  rating: 4.4,
-                                                  image: UIImage(named: "tea11")),
-
-                                         TeaPlace(name: "Morning Brew Chai",
-                                                  phone: 9876543221,
-                                                  location: "Vadodara",
-                                                  type: "Morning Tea",
-                                                  rating: 3.9,
-                                                  image: UIImage(named: "tea12")),
-
-                                         TeaPlace(name: "Soulful Sips",
-                                                  phone: 9876543222,
-                                                  location: "Udaipur",
-                                                  type: "Lake View Café",
-                                                  rating: 4.6,
-                                                  image: UIImage(named: "tea13")),
-
-                                         TeaPlace(name: "Campus Chai Stop",
-                                                  phone: 9876543223,
-                                                  location: "Gandhinagar",
-                                                  type: "Student Favorite",
-                                                  rating: 4.0,
-                                                  image: UIImage(named: "tea14")),
-
-                                         TeaPlace(name: "Vintage Tea Corner",
-                                                  phone: 9876543224,
-                                                  location: "Kolkata",
-                                                  type: "Traditional Tea",
-                                                  rating: 4.5,
-                                                  image: UIImage(named: "tea15")),
-
-                                         TeaPlace(name: "Highway Chai Dhaba",
-                                                  phone: 9876543225,
-                                                  location: "NH-8",
-                                                  type: "Highway Tea",
-                                                  rating: 4.2,
-                                                  image: UIImage(named: "tea16")),
-
-                                         TeaPlace(name: "Sunset Tea Garden",
-                                                  phone: 9876543226,
-                                                  location: "Mount Abu",
-                                                  type: "Scenic Tea",
-                                                  rating: 4.7,
-                                                  image: UIImage(named: "tea17")),
-
-            ])
-    }
+    func createDummyModel() { arrTeaPlaces.append(contentsOf: [
+        TeaPlace(
+            name: "Assam Chai Point",
+            phone: 9876543210,
+            location: "Ahmedabad",
+            address: "123 Tea Lane, Satellite, Ahmedabad, Gujarat, India",
+            latitude: 23.030357, // Satellite, Ahmedabad lat-long  [oai_citation:0‡LatLong.net](https://www.latlong.net/place/satellite-ahmedabad-india-8065.html?utm_source=chatgpt.com)
+            longitude: 72.517845,
+            desc: "Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.Lush plantation cafe with mist-covered hills all around.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.3,
+            image: UIImage(named: "tea1")
+        ),
+        TeaPlace(
+            name: "Darjeeling Brew House",
+            phone: 9876501234,
+            location: "Darjeeling",
+            address: "45 Hilltop Rd, Darjeeling, West Bengal, India",
+            latitude: 27.0360,
+            longitude: 88.2626,
+            desc: "Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.7,
+            image: UIImage(named: "tea2")
+        ),
+        TeaPlace(
+            name: "Nilgiri Tea Garden Cafe",
+            phone: 9123456780,
+            location: "Nilgiris",
+            address: "Tea Terrace, Coonoor, Tamil Nadu, India",
+            latitude: 11.3543,
+            longitude: 76.8258,
+            desc: "Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.Cozy chai place with rich Assam blends and city views.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.5,
+            image: UIImage(named: "tea3")
+        ),
+        TeaPlace(
+            name: "Munnar Mist Tea Spot",
+            phone: 9345678123,
+            location: "Munnar",
+            address: "99 Green Valley Rd, Munnar, Kerala, India",
+            latitude: 10.0892,
+            longitude: 77.0595,
+            desc: "Lush plantation cafe with mist-covered hills all around.Fresh Nilgiri brews with panoramic garden views.Scenic spot for authentic Darjeeling tea above the clouds.Fresh Nilgiri brews with panoramic garden views.",
+            rating: 4.6,
+            image: UIImage(named: "tea4")
+        ),
+        TeaPlace(
+            name: "Assam Gardens Brew",
+            phone: 9012345678,
+            location: "Jorhat",
+            address: "Tea Estate Rd, Jorhat, Assam, India",
+            latitude: 26.7573,
+            longitude: 94.2020,
+            desc: "Traditional Assam tea experience inside a working plantation.",
+            rating: 4.8,
+            image: UIImage(named: "tea5")
+        ),
+        TeaPlace(
+            name: "Kolukkumalai Peak Tea",
+            phone: 9785634120,
+            location: "Kolukkumalai",
+            address: "Peak Rd, Kolukkumalai, Tamil Nadu, India",
+            latitude: 10.1925,
+            longitude: 77.2550,
+            desc: "Highest tea garden cafe in the world with great views.",
+            rating: 4.9,
+            image: UIImage(named: "tea6")
+        ),
+        TeaPlace(
+            name: "Himalayan Tea Hut",
+            phone: 9678901234,
+            location: "Kurseong",
+            address: "Tea Rd, Kurseong, West Bengal, India",
+            latitude: 26.8222,
+            longitude: 88.2690,
+            desc: "Small mountain cafe surrounded by tea estate.",
+            rating: 4.4,
+            image: UIImage(named: "tea7")
+        ),
+        TeaPlace(
+            name: "Gujarat Chai Junction",
+            phone: 9456123870,
+            location: "Ahmedabad",
+            address: "88 Caffeine St, Naroda, Ahmedabad, Gujarat, India",
+            latitude: 23.068586, // Naroda, Ahmedabad lat-long  [oai_citation:1‡LatLong.net](https://www.latlong.net/place/naroda-ahmedabad-gujarat-india-18808.html?utm_source=chatgpt.com)
+            longitude: 72.653595,
+            desc: "Urban tea cafe with masala chai and snacks.",
+            rating: 4.2,
+            image: UIImage(named: "tea8")
+        ),
+        TeaPlace(
+            name: "Spice & Sip Cafe",
+            phone: 9567890123,
+            location: "Shillong",
+            address: "Tea Plaza, Shillong, Meghalaya, India",
+            latitude: 25.5788,
+            longitude: 91.8933,
+            desc: "Hill cafe serving Assam and Himalayan tea blends.",
+            rating: 4.5,
+            image: UIImage(named: "tea9")
+        ),
+        TeaPlace(
+            name: "Tea Trails Bistro",
+            phone: 9234567890,
+            location: "Ooty",
+            address: "Botanical Rd, Ooty, Tamil Nadu, India",
+            latitude: 11.4064,
+            longitude: 76.6950,
+            desc: "Tea lounge with scenic blue mountains in the backdrop.",
+            rating: 4.6,
+            image: UIImage(named: "tea10")
+        ),
+    ]) }
 }

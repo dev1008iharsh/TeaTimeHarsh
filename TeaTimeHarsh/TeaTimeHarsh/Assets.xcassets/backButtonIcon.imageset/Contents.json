@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "left-arrow-in-circular-button-black-symbol.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "left-arrow-in-circular-button-black-symbol 1.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "left-arrow-in-circular-button-black-symbol 2.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
