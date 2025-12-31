@@ -20,8 +20,8 @@ struct TeaPlace {
     let desc: String?
     let rating: Double?
     let image: UIImage?
-    var isFav: Bool = false
     private(set) var isVisited: Bool = false
+    private(set) var isFav: Bool = false
 
     init(name: String?,
          phone: Int?,
@@ -46,5 +46,8 @@ struct TeaPlace {
 
     mutating func toggleIsVisited() {
         isVisited.toggle()
+    }
+    mutating func toggleIsFav() {
+        isFav.toggle()
     }
 }

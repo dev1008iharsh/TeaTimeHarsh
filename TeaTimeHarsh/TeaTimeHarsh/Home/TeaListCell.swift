@@ -20,11 +20,11 @@ class TeaListCell: UITableViewCell {
     @IBOutlet var lblPhoneTeaPlace: UILabel!
     @IBOutlet var lblNameTeaPlace: UILabel!
 
-    @IBOutlet var isFavImage: UIImageView! {
+    @IBOutlet var imgFav: UIImageView! {
         didSet {
-            isFavImage.tintColor = .red
-            isFavImage.backgroundColor = .white
-            isFavImage.layer.cornerRadius = 5
+            imgFav.tintColor = .red
+            imgFav.backgroundColor = .white
+            imgFav.layer.cornerRadius = 5
         }
     }
 
@@ -48,5 +48,8 @@ class TeaListCell: UITableViewCell {
         
         // lblVisited.isHidden = !teaPlace.isVisited //same as under 
         lblVisited.isHidden = teaPlace.isVisited ? false : true
+        imgFav.image = UIImage(
+            systemName: teaPlace.isFav ? "heart.fill" : "heart"
+        )
     }
 }

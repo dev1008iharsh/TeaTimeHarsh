@@ -17,6 +17,7 @@ class PlaceDetailVC: UIViewController {
     var place: TeaPlace?
     var onBackToHome: (() -> Void)?
     var onVisitToggle: ((String) -> Void)? // pass placeID
+    var onFavToggle: ((String) -> Void)? // pass placeID
 
     // MARK: - Header Properties
 
@@ -86,6 +87,20 @@ private extension PlaceDetailVC {
 
             switch buttonType {
             case .favourite:
+                // 🔥 Tell HOME to update the real model
+                self.onFavToggle?(placeID)
+
+                
+                // 🔄 Update local copy only for UI
+                self.place?.toggleIsFav()
+
+                header
+                    .updateFavouriteButton(
+                        isFavourite: self.place?.isFav ?? false
+                    )
+                
+                HapticHelper.heavy()
+                /*
                 if FavouritePlacesStore.favourites.contains(placeID) {
                     FavouritePlacesStore.favourites.remove(placeID)
                 } else {
@@ -94,6 +109,7 @@ private extension PlaceDetailVC {
 
                 let isFav = FavouritePlacesStore.favourites.contains(placeID)
                 header.updateFavouriteButton(isFavourite: isFav)
+                 */
                 HapticHelper.heavy()
             case .visit:
                 // 🔥 Tell HOME to update the real model
@@ -106,6 +122,7 @@ private extension PlaceDetailVC {
                     isVisited: self.place?.isVisited ?? false
                 )
                 HapticHelper.heavy()
+
             }
         }
 

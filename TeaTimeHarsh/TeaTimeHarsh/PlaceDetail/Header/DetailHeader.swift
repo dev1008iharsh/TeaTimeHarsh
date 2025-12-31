@@ -52,12 +52,14 @@ class DetailHeader: UIView {
         imgPlace.image = place.image
        
         updateVisitedButton(isVisited: place.isVisited)
+        updateFavouriteButton(isFavourite: place.isFav)
 
+        /*
         if FavouritePlacesStore.favourites.contains(place.id) {
             updateFavouriteButton(isFavourite: true)
         } else {
             updateFavouriteButton(isFavourite: false)
-        }
+        }*/
     }
 
     // MARK: - Button Actions

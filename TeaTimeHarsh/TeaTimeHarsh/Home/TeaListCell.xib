@@ -109,8 +109,8 @@
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
+                <outlet property="imgFav" destination="xJb-bQ-dYj" id="dlz-JP-DNX"/>
                 <outlet property="imgTeaPlace" destination="32n-8N-POC" id="5Q0-sB-jzH"/>
-                <outlet property="isFavImage" destination="xJb-bQ-dYj" id="zKQ-t3-ZpU"/>
                 <outlet property="lblLocationTeaPlace" destination="Ww0-4B-Esc" id="251-1m-P1g"/>
                 <outlet property="lblNameTeaPlace" destination="6TC-hW-X2G" id="FdG-Iz-gF9"/>
                 <outlet property="lblPhoneTeaPlace" destination="Ssp-QR-lHg" id="OS3-jW-D1X"/>
