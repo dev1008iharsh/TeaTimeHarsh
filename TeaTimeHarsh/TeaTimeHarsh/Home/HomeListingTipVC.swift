@@ -34,6 +34,10 @@ class HomeListingTipVC: UIViewController {
         addDismissGesture()
         // Do any additional setup after loading the view.
     }
+    
+    deinit {
+        print("💀 deinit HomeListingTipVC is dead. Memory Free!")
+    }
 
     private func addDismissGesture() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissTip))

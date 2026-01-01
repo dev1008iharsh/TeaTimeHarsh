@@ -29,6 +29,10 @@ class PlaceDetailVC: UIViewController {
         setupTableView()
         setupTableHeader()
     }
+    
+    deinit {
+        print("💀 deinit PlaceDetailVC is dead. Memory Free!")
+    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

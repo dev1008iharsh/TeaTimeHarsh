@@ -16,6 +16,10 @@ class LaunchVC: UIViewController {
         }
     }
 
+    deinit {
+        print("💀 deinit LaunchVC is dead. Memory Free!")
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)

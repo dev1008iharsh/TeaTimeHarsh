@@ -38,6 +38,10 @@ class SelectPlaceOnMapVC: UIViewController {
         determineInitialState()
     }
     
+    deinit {
+        print("💀 SelectPlaceOnMapVC is dead. Memory Free!")
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = false

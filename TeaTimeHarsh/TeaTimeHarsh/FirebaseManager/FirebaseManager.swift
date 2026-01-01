@@ -16,7 +16,7 @@ class FirebaseManager {
     
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
-    private let currentUserId = Constant.currentUserID.rawValue
+    private let currentUserId = Constants.Strings.currentUserID
     
     // Add these functions inside your existing FirebaseManager class
 

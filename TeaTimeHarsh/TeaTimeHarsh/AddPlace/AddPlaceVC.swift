@@ -85,6 +85,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         configureScreenMode()
     }
     
+    deinit {
+        print("💀 deinit AddPlaceVC is dead. Memory Free!")
+    }
+    
     // MARK: - Mode Configuration 🛠️
     
     private func configureScreenMode() {
@@ -100,7 +104,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             mapContainerView.isHidden = false
             
             // 🔒 Security Check
-            let currentUserId = Constant.currentUserID.rawValue
+            let currentUserId = Constants.Strings.currentUserID
             if place.createdByUserId != currentUserId {
                 Utility.showAlert(title: "Access Denied", message: "You can only edit places created by you.", viewController: self)
                 self.view.isUserInteractionEnabled = false
@@ -207,7 +211,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                         openingTime: selectedOpeningTime,
                         closingTime: selectedClosingTime,
                         holiday: selectedHoliday,
-                        createdByUserId: Constant.currentUserID.rawValue,
+                        createdByUserId: Constants.Strings.currentUserID,
                         createdAt: Date()
                     )
                     print("**** newPlace",newPlace)
@@ -360,9 +364,15 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         txtClostingTime.applySingleSelectionMenu(title: "Select closing time", items: closingTimeOptions, selectedItem: selectedClosingTime) { [weak self] sel in self?.selectedClosingTime = sel }
         txtHoliday.applySingleSelectionMenu(title: "Select holiday", items: holidayOptions, selectedItem: selectedHoliday) { [weak self] sel in self?.selectedHoliday = sel }
     }
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
+        switch textField {
+        case txtName:
+            txtDesc.becomeFirstResponder()
+        case txtDesc:
+            txtPhone.becomeFirstResponder()
+        default:
+            textField.resignFirstResponder()
+        }
         return true
     }
 }

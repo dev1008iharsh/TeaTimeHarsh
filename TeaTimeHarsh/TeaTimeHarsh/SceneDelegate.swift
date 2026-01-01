@@ -5,16 +5,53 @@
 //  Created by Harsh on 26/12/25.
 //
 
+import FirebaseAuth
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+
+        // 1. Create a new Window manually
+        let window = UIWindow(windowScene: windowScene)
+
+        // 2. Check Logic: User Login che ke nahi?
+        if let user = Auth.auth().currentUser { 
+            // ✅ SUCCESS: User Found
+            print("User is Logged In. ID: \(user.uid)")
+
+            // 💾 STORE ID GLOBALLY
+            Constants.Strings.currentUserID = user.uid
+
+            // ✅ CASE 1: USER LOGGED IN -> Go to Main Storyboard (Home)
+            print("User is Logged In. Going to Home.")
+
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            // Note: Make sure your HomeVC has Storyboard ID "HomeVC"
+            let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeVC")
+
+            // Wrap in Navigation Controller (Recommended for Home flow)
+            let navVC = UINavigationController(rootViewController: homeVC)
+            window.rootViewController = navVC
+
+        } else {
+            // ❌ CASE 2: USER NOT LOGGED IN -> Go to Auth Storyboard (Login)
+            print("User is NOT Logged In. Going to Login.")
+
+            let storyboard = UIStoryboard(name: "Auth", bundle: nil)
+            // Note: Make sure LoginRegisterVC has Storyboard ID "LoginRegisterVC"
+            let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginRegisterVC")
+
+            // Wrap in Navigation Controller (Optional, but good for structure)
+            let navVC = UINavigationController(rootViewController: loginVC)
+            window.rootViewController = navVC
+        }
+
+        // 3. Make the window visible
+        self.window = window
+        window.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
