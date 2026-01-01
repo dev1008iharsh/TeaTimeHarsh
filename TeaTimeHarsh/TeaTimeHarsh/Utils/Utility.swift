@@ -71,4 +71,45 @@ final class Utility {
         
         targetVC.present(alert, animated: true, completion: nil)
     }
+    
+    
+    // 🗓️ Static function to calculate the duration
+        static func getServingDuration(from date: Date) -> String {
+            
+            let calendar = Calendar.current
+            let now = Date()
+            
+            // 1. Ask the calendar to calculate the Years, Months, and Days between the saved date and Now.
+            let components = calendar.dateComponents([.year, .month, .day], from: date, to: now)
+            
+            // 2. We will store the parts of the string here (e.g., ["1 Year", "2 Months"])
+            var resultParts: [String] = []
+            
+            // --- YEAR LOGIC ---
+            // If years are greater than 0, add it. If 0, we skip it (emit it).
+            if let year = components.year, year > 0 {
+                let yearString = year == 1 ? "Year" : "Years" // Handle plural
+                resultParts.append("\(year) \(yearString)")
+            }
+            
+            // --- MONTH LOGIC ---
+            // If months are greater than 0, add it.
+            if let month = components.month, month > 0 {
+                let monthString = month == 1 ? "Month" : "Months"
+                resultParts.append("\(month) \(monthString)")
+            }
+            
+            // --- DAY LOGIC (Special Case) ---
+            // We look at the calculated days.
+            let calculatedDays = components.day ?? 0
+            
+            // YOUR RULE: If it is 0 days (meaning today), force it to 1.
+            let finalDays = calculatedDays == 0 ? 1 : calculatedDays
+            
+            let dayString = finalDays == 1 ? "Day" : "Days"
+            resultParts.append("\(finalDays) \(dayString)")
+            
+            // 3. Join all parts with a comma and space
+            return resultParts.joined(separator: ", ")
+        }
 }

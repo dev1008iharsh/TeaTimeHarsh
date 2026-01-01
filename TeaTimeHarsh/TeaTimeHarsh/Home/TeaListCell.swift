@@ -15,7 +15,7 @@ class TeaListCell: UITableViewCell {
             imgTeaPlace.layer.cornerRadius = 10
         }
     }
-
+    @IBOutlet var lblRating: UILabel!
     @IBOutlet var lblLocationTeaPlace: UILabel!
     @IBOutlet var lblPhoneTeaPlace: UILabel!
     @IBOutlet var lblNameTeaPlace: UILabel!
@@ -41,7 +41,14 @@ class TeaListCell: UITableViewCell {
     // MARK: - Configure Data
 
     func configure(teaPlace: TeaPlace) {
-        imgTeaPlace.image = teaPlace.image
+        //imgTeaPlace.image = teaPlace.image
+        ImageManagerKF
+            .setImage(
+                from: teaPlace.imageURL,
+                into: imgTeaPlace,
+                placeholderName: "photo"
+            )
+        lblRating.text = "⭐️ " + (teaPlace.rating?.description ?? "5") 
         lblLocationTeaPlace.text = teaPlace.location
         lblPhoneTeaPlace.text = teaPlace.phone?.description ?? "N/A"
         lblNameTeaPlace.text = teaPlace.name

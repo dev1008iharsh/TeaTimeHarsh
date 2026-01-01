@@ -8,7 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		043671EF2F0449E000A791F8 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 043671EE2F0449E000A791F8 /* IQKeyboardManagerSwift */; };
+		04A6A8A02F051ED0006FB7FE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A89F2F051ED0006FB7FE /* FirebaseAuth */; };
+		04A6A8A22F051ED0006FB7FE /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A12F051ED0006FB7FE /* FirebaseCore */; };
+		04A6A8A42F051ED0006FB7FE /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A32F051ED0006FB7FE /* FirebaseDatabase */; };
+		04A6A8A62F051ED0006FB7FE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A52F051ED0006FB7FE /* FirebaseFirestore */; };
+		04A6A8A82F051ED0006FB7FE /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A72F051ED0006FB7FE /* FirebaseStorage */; };
 		04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 04E5B6FA2F026542005AAB46 /* GoogleMaps */; };
+		04EE9A032F065E48001DB805 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 04EE9A022F065E48001DB805 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,8 +47,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04A6A8A42F051ED0006FB7FE /* FirebaseDatabase in Frameworks */,
 				04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */,
+				04A6A8A02F051ED0006FB7FE /* FirebaseAuth in Frameworks */,
+				04A6A8A22F051ED0006FB7FE /* FirebaseCore in Frameworks */,
+				04EE9A032F065E48001DB805 /* Kingfisher in Frameworks */,
+				04A6A8A82F051ED0006FB7FE /* FirebaseStorage in Frameworks */,
 				043671EF2F0449E000A791F8 /* IQKeyboardManagerSwift in Frameworks */,
+				04A6A8A62F051ED0006FB7FE /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +99,12 @@
 			packageProductDependencies = (
 				04E5B6FA2F026542005AAB46 /* GoogleMaps */,
 				043671EE2F0449E000A791F8 /* IQKeyboardManagerSwift */,
+				04A6A89F2F051ED0006FB7FE /* FirebaseAuth */,
+				04A6A8A12F051ED0006FB7FE /* FirebaseCore */,
+				04A6A8A32F051ED0006FB7FE /* FirebaseDatabase */,
+				04A6A8A52F051ED0006FB7FE /* FirebaseFirestore */,
+				04A6A8A72F051ED0006FB7FE /* FirebaseStorage */,
+				04EE9A022F065E48001DB805 /* Kingfisher */,
 			);
 			productName = TeaTimeHarsh;
 			productReference = 042105152EFE74D30078B30A /* TeaTimeHarsh.app */;
@@ -119,6 +137,8 @@
 			packageReferences = (
 				04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */,
 				043671ED2F0449E000A791F8 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				04EE9A012F065E48001DB805 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 042105162EFE74D30078B30A /* Products */;
@@ -378,12 +398,28 @@
 				minimumVersion = 8.0.2;
 			};
 		};
+		04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
 		04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 10.7.0;
+			};
+		};
+		04EE9A012F065E48001DB805 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.6.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -394,10 +430,40 @@
 			package = 043671ED2F0449E000A791F8 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
 		};
+		04A6A89F2F051ED0006FB7FE /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		04A6A8A12F051ED0006FB7FE /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		04A6A8A32F051ED0006FB7FE /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		04A6A8A52F051ED0006FB7FE /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		04A6A8A72F051ED0006FB7FE /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
 		04E5B6FA2F026542005AAB46 /* GoogleMaps */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */;
 			productName = GoogleMaps;
+		};
+		04EE9A022F065E48001DB805 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04EE9A012F065E48001DB805 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

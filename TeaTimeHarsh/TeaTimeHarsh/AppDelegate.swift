@@ -9,6 +9,7 @@ import CoreData
 import UIKit
 import GoogleMaps
 import IQKeyboardManagerSwift
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GMSServices.provideAPIKey("AIzaSyASy1OZ0tgXMWAYYPN2chKgO_T_gWSJj8Y")
         IQKeyboardManager.shared.isEnabled = true
         IQKeyboardManager.shared.resignOnTouchOutside = true
+        FirebaseApp.configure()
         
         return true
     }

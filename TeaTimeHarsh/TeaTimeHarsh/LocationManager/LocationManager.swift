@@ -1,9 +1,7 @@
 //
 //  LocationManager.swift
 //  TeaTimeHarsh
-//
-//  Fixed for "0.0 Bug" by Your AI Mentor.
-//
+
 
 import UIKit
 import CoreLocation

@@ -1,9 +1,7 @@
 //
 //  SelectPlaceOnMapVC.swift
 //  TeaTimeHarsh
-//
-//  Fixed for "0.0 Bug" by Your AI Mentor.
-//
+
 
 import CoreLocation
 import GoogleMaps

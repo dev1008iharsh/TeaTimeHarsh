@@ -1,69 +1,63 @@
 //
-//  PlaceDetailHeader.swift
+//  DetailHeader.swift
 //  TeaTimeHarsh
-//
-//  Created by Harsh on 27/12/25.
-//
+
 
 import UIKit
 
 class DetailHeader: UIView {
-    // MARK: - IBOutlet
-
-    @IBOutlet var lblName: UILabel!
-    @IBOutlet var lblLocaton: UILabel! {
-        didSet {
-            lblLocaton.textColor = .systemBackground
-            lblLocaton.backgroundColor = .systemYellow
-            lblLocaton.clipsToBounds = true
-            lblLocaton.layer.cornerRadius = 10
-        }
-    }
-
-    @IBOutlet var imgPlace: UIImageView!
-
-    @IBOutlet var btnFav: UIButton! {
-        didSet {
-            btnFav.layer.cornerRadius = 20
-        }
-    }
-
-    @IBOutlet var btnVisited: UIButton! {
-        didSet {
-            btnVisited.layer.cornerRadius = 20
-        }
-    }
-
-    // MARK: - Properties
-
-    // ONE closure, not two
-    var onButtonTap: ((HeaderButtonType) -> Void)?
-
+    
+    // MARK: - Enums
     enum HeaderButtonType {
         case visit
         case favourite
     }
 
-    // MARK: - Lifecycle
+    // MARK: - IBOutlets
+    @IBOutlet var lblOpenCloseNow: UILabel!
+    @IBOutlet var lblRating: UILabel!
+    @IBOutlet var lblName: UILabel!
+   
+    @IBOutlet var lblCityLocaton: UILabel! 
 
+    @IBOutlet var imgPlace: UIImageView! {
+        didSet {
+            imgPlace.contentMode = .scaleAspectFill
+            imgPlace.clipsToBounds = true
+        }
+    }
+
+    @IBOutlet var btnFav: UIButton! {
+        didSet { btnFav.layer.cornerRadius = 20 }
+    }
+
+    @IBOutlet var btnVisited: UIButton! {
+        didSet { btnVisited.layer.cornerRadius = 20 }
+    }
+
+    // MARK: - Properties
+    var onButtonTap: ((HeaderButtonType) -> Void)?
+
+    // MARK: - Configuration Method
     func configure(place: TeaPlace) {
         lblName.text = place.name
-        lblLocaton.text = "  \(place.location ?? "")  "
-        imgPlace.image = place.image
-       
+        lblOpenCloseNow.text = place.isOpenNow ? "🔴 Open Now" : "🔴 Closed Now"
+        lblRating.text = "⭐️ " + (place.rating?.description ?? "5")
+        lblCityLocaton.text = "\(place.location ?? "Default Location")"
+        
+        // Load Image using our Kingfisher Manager 🖼️
+        ImageManagerKF.setImage(
+            from: place.imageURL,
+            into: imgPlace,
+            placeholderName: "photo"
+        )
+        
+        // Set Initial Button States
         updateVisitedButton(isVisited: place.isVisited)
         updateFavouriteButton(isFavourite: place.isFav)
-
-        /*
-        if FavouritePlacesStore.favourites.contains(place.id) {
-            updateFavouriteButton(isFavourite: true)
-        } else {
-            updateFavouriteButton(isFavourite: false)
-        }*/
     }
 
     // MARK: - Button Actions
-
     @IBAction func visitButtonTapped(_ sender: UIButton) {
         onButtonTap?(.visit)
     }
@@ -71,9 +65,8 @@ class DetailHeader: UIView {
     @IBAction func favouriteButtonTapped(_ sender: UIButton) {
         onButtonTap?(.favourite)
     }
-
     
-
+    // MARK: - UI Updates (Animatable)
     func updateVisitedButton(isVisited: Bool) {
         if isVisited {
             btnVisited.animateAndConfigure(title: "Remove from Visited", systemImageName: "checkmark.circle.fill", backgroundColor: .systemGreen)
@@ -89,12 +82,4 @@ class DetailHeader: UIView {
             btnFav.animateAndConfigure(title: "Mark Favourite", systemImageName: "heart", backgroundColor: .systemGray)
         }
     }
-
-    /*
-     var onSubmitTap: (() -> Void)?
-
-     @IBAction func submitButton(_ sender: UIButton) {
-     print("Header button tapped - UserHeaderView: UIView")
-     onSubmitTap?()
-     }*/
 }
