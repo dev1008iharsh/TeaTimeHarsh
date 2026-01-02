@@ -1,6 +1,13 @@
+//
+//  LoginRegisterVC.swift
+//  TeaTimeHarsh
+//
+//  Created by Harsh on 31/12/25.
+//
+
 import UIKit
 
-class LoginRegisterVC: UIViewController {
+class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     // MARK: - 1. Define Logic States
 
     enum AuthMode {
@@ -26,22 +33,11 @@ class LoginRegisterVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupInitials()
+        updateUI(mode: .login)
     }
 
     deinit {
         print("💀 deinit LoginRegisterVC is dead. Memory Free!")
-    }
-    
-    // MARK: - Setup UI
-
-    func setupInitials() {
-        // Secure text entry for passwords
-        txtPassword.isSecureTextEntry = true
-        txtConfirmPassword.isSecureTextEntry = true
-
-        // Start with Login UI
-        updateUI(mode: .login)
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -196,8 +192,7 @@ class LoginRegisterVC: UIViewController {
         LoaderManager.shared.startLoading()
 
         AuthManager.shared.resetPassword(email: email) {
- [weak self] success,
- error in
+            [weak self] success, error in
 
             LoaderManager.shared.stopLoading()
             guard let self = self else { return }
@@ -209,7 +204,7 @@ class LoginRegisterVC: UIViewController {
                         message: "A password reset link has been sent to \(email). Please check your inbox.",
                         viewController: self) { _ in
                             self.updateUI(mode: .login)
-                        }
+                    }
 
             } else {
                 Utility.showAlert(title: "Error", message: error ?? "Failed to send link.", viewController: self)
@@ -241,7 +236,13 @@ class LoginRegisterVC: UIViewController {
                 window.rootViewController = navVC
 
                 // Smooth transition animation
-                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
+                UIView.transition(
+                        with: window,
+                        duration: 0.3,
+                        options: .transitionFlipFromLeft,
+                        animations: nil,
+                        completion: nil
+                    )
             }
 
         } else {

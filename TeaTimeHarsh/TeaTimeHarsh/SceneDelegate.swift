@@ -20,13 +20,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 2. Check Logic: User Login che ke nahi?
         if let user = Auth.auth().currentUser { 
             // ✅ SUCCESS: User Found
-            print("User is Logged In. ID: \(user.uid)")
+            print("*** User is Logged In. Going to Home. Current Firebase USER ID: \(user.uid)")
 
             // 💾 STORE ID GLOBALLY
             Constants.Strings.currentUserID = user.uid
 
             // ✅ CASE 1: USER LOGGED IN -> Go to Main Storyboard (Home)
-            print("User is Logged In. Going to Home.")
+            
 
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             // Note: Make sure your HomeVC has Storyboard ID "HomeVC"

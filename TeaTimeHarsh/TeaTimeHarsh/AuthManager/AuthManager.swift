@@ -1,4 +1,11 @@
-import FirebaseAuth // Import Firebase Auth module
+//
+//  AuthManager.swift
+//  TeaTimeHarsh
+//
+//  Created by Harsh on 31/12/25.
+//
+
+import FirebaseAuth
 import Foundation
 
 class AuthManager {
@@ -68,9 +75,6 @@ class AuthManager {
         }
     }
 
-    // MARK: - 🔒 Private Error Helper (The Translator)
-
-    /// This function translates Firebase Errors into simple English Strings
 
     // MARK: - 🔒 Private Error Helper (The Translator)
 

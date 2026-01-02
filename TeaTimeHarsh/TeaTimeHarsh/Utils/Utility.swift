@@ -105,8 +105,8 @@ final class Utility {
         let dayString = finalDays == 1 ? "Day" : "Days"
         resultParts.append("\(finalDays) \(dayString)")
 
-        // 3. Join all parts with a comma and space
-        return resultParts.joined(separator: ", ")
+        // 3. Join all parts with space
+        return resultParts.joined(separator: " ")
     }
 
     static func isPasswordValid(_ password: String) -> Bool {

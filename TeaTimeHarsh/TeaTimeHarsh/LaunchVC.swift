@@ -11,7 +11,7 @@ class LaunchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.goToHome()
         }
     }

@@ -16,7 +16,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="amj-nr-ZJr">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SIGNUP_VECTOR" translatesAutoresizingMaskIntoConstraints="NO" id="amj-nr-ZJr">
                                 <rect key="frame" x="96.666666666666686" y="188" width="200" height="200"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="amj-nr-ZJr" secondAttribute="height" multiplier="1:1" id="I5E-UX-v1n"/>
@@ -24,7 +24,7 @@
                                 </constraints>
                             </imageView>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="479-yt-StS">
-                                <rect key="frame" x="126.66666666666669" y="418" width="140" height="32"/>
+                                <rect key="frame" x="126.66666666666669" y="408" width="140" height="32"/>
                                 <segments>
                                     <segment title="Login "/>
                                     <segment title="Register"/>
@@ -34,7 +34,7 @@
                                 </connections>
                             </segmentedControl>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="wEb-8U-tnB">
-                                <rect key="frame" x="30" y="469" width="333" height="165"/>
+                                <rect key="frame" x="30" y="454" width="333" height="165"/>
                                 <subviews>
                                     <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter email address" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="LxV-4V-W3t">
                                         <rect key="frame" x="0.0" y="0.0" width="333" height="45"/>
@@ -66,9 +66,9 @@
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dFx-My-g4R">
-                                <rect key="frame" x="96.666666666666686" y="654" width="200" height="45"/>
+                                <rect key="frame" x="106.66666666666669" y="639" width="180" height="45"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="200" id="Y9g-Ph-iUB"/>
+                                    <constraint firstAttribute="width" constant="180" id="Y9g-Ph-iUB"/>
                                     <constraint firstAttribute="height" constant="45" id="YfT-cT-7le"/>
                                 </constraints>
                                 <color key="tintColor" systemColor="systemIndigoColor"/>
@@ -81,7 +81,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S4I-xn-P98">
-                                <rect key="frame" x="114.66666666666669" y="704" width="164" height="35"/>
+                                <rect key="frame" x="114.66666666666669" y="689" width="164" height="35"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="35" id="8cu-rK-y3z"/>
                                 </constraints>
@@ -94,6 +94,7 @@
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="iconAppRound" translatesAutoresizingMaskIntoConstraints="NO" id="zrv-uR-rkG">
                                 <rect key="frame" x="166.66666666666666" y="118" width="60" height="60"/>
                                 <constraints>
+                                    <constraint firstAttribute="width" secondItem="zrv-uR-rkG" secondAttribute="height" multiplier="1:1" id="YLK-Ks-cJf"/>
                                     <constraint firstAttribute="height" constant="60" id="jg3-nq-vzc"/>
                                 </constraints>
                             </imageView>
@@ -101,17 +102,16 @@
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="479-yt-StS" firstAttribute="top" secondItem="amj-nr-ZJr" secondAttribute="bottom" constant="30" id="07P-ro-keb"/>
+                            <constraint firstItem="479-yt-StS" firstAttribute="top" secondItem="amj-nr-ZJr" secondAttribute="bottom" constant="20" id="07P-ro-keb"/>
                             <constraint firstItem="amj-nr-ZJr" firstAttribute="centerX" secondItem="zrv-uR-rkG" secondAttribute="centerX" id="0cF-83-hSG"/>
                             <constraint firstItem="S4I-xn-P98" firstAttribute="centerX" secondItem="dFx-My-g4R" secondAttribute="centerX" id="0vl-kW-f7B"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="centerX" secondItem="479-yt-StS" secondAttribute="centerX" id="8VE-fy-BXj"/>
                             <constraint firstItem="479-yt-StS" firstAttribute="centerX" secondItem="amj-nr-ZJr" secondAttribute="centerX" id="G3Q-7i-4Fw"/>
                             <constraint firstItem="amj-nr-ZJr" firstAttribute="top" secondItem="zrv-uR-rkG" secondAttribute="bottom" constant="10" id="LTq-Lt-rsk"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="30" id="Qdu-9q-lPT"/>
-                            <constraint firstItem="wEb-8U-tnB" firstAttribute="top" secondItem="479-yt-StS" secondAttribute="bottom" constant="20" id="Sn4-y9-xJQ"/>
+                            <constraint firstItem="wEb-8U-tnB" firstAttribute="top" secondItem="479-yt-StS" secondAttribute="bottom" constant="15" id="Sn4-y9-xJQ"/>
                             <constraint firstItem="dFx-My-g4R" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="V66-C2-URP"/>
                             <constraint firstItem="S4I-xn-P98" firstAttribute="top" secondItem="dFx-My-g4R" secondAttribute="bottom" constant="5" id="XXx-NI-pEs"/>
-                            <constraint firstItem="zrv-uR-rkG" firstAttribute="width" secondItem="zrv-uR-rkG" secondAttribute="height" multiplier="1:1" id="YLK-Ks-cJf"/>
                             <constraint firstItem="dFx-My-g4R" firstAttribute="top" secondItem="wEb-8U-tnB" secondAttribute="bottom" constant="20" id="eMh-Gq-5VE"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="centerX" secondItem="vDu-zF-Fre" secondAttribute="centerX" id="ivU-yt-eEE"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="tE1-0L-cyg"/>
@@ -151,12 +151,13 @@
         </scene>
     </scenes>
     <resources>
+        <image name="SIGNUP_VECTOR" width="612" height="408"/>
         <image name="iconAppRound" width="1024" height="1024"/>
         <systemColor name="systemIndigoColor">
-            <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

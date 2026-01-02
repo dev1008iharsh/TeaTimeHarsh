@@ -353,7 +353,7 @@
                         <outlet property="imgPlace" destination="mQW-nh-a8p" id="iw4-Qz-rKH"/>
                         <outlet property="lblAddress" destination="n19-Yh-H1l" id="JUE-Fj-eN5"/>
                         <outlet property="mapContainerView" destination="MkY-Oj-gXa" id="1NB-Mo-RQf"/>
-                        <outlet property="txtClostingTime" destination="aFS-aG-ibg" id="mer-Ue-N3M"/>
+                        <outlet property="txtClosingTime" destination="aFS-aG-ibg" id="mer-Ue-N3M"/>
                         <outlet property="txtDesc" destination="Urq-lJ-CQY" id="psX-gr-bxZ"/>
                         <outlet property="txtHoliday" destination="u79-LX-jkZ" id="Jhc-yf-a5d"/>
                         <outlet property="txtLocation" destination="x7l-49-3Vl" id="9g0-Pf-mNb"/>

@@ -12,7 +12,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="DetailStaticCell" customModule="TeaTimeHarsh" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="496" height="740"/>
+            <rect key="frame" x="0.0" y="0.0" width="496" height="860"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vn7-Qq-smM">
@@ -102,13 +102,13 @@
                                 </userDefinedRuntimeAttribute>
                             </userDefinedRuntimeAttributes>
                         </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Seving since 10 Days" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="No6-hY-rOz" customClass="PaddedLabel" customModule="TeaTimeHarsh" customModuleProvider="target">
-                            <rect key="frame" x="140.33333333333337" y="120" width="175.66666666666663" height="25"/>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Place registerted in-app 1 Day ago" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.40000000000000002" translatesAutoresizingMaskIntoConstraints="NO" id="No6-hY-rOz" customClass="PaddedLabel" customModule="TeaTimeHarsh" customModuleProvider="target">
+                            <rect key="frame" x="98.333333333333343" y="120" width="259.33333333333326" height="25"/>
                             <color key="backgroundColor" red="0.95294117647058818" green="0.90196078431372551" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="25" id="Pf0-V0-jPB"/>
                             </constraints>
-                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="16"/>
                             <color key="textColor" systemColor="systemPurpleColor"/>
                             <nil key="highlightedColor"/>
                             <userDefinedRuntimeAttributes>
@@ -129,6 +129,7 @@
                         <constraint firstItem="wJ0-NJ-sGF" firstAttribute="leading" secondItem="7ux-AN-hP7" secondAttribute="trailing" constant="10" id="1sE-Kj-U1p"/>
                         <constraint firstItem="Omk-h1-1as" firstAttribute="leading" secondItem="jgI-cy-iX9" secondAttribute="trailing" constant="15" id="3dE-1Y-yDm"/>
                         <constraint firstItem="HTh-qw-vnM" firstAttribute="top" secondItem="Vn7-Qq-smM" secondAttribute="top" constant="20" id="Duq-zx-6J5"/>
+                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="No6-hY-rOz" secondAttribute="trailing" constant="10" id="FDm-Sq-XZQ"/>
                         <constraint firstItem="wJ0-NJ-sGF" firstAttribute="height" secondItem="7ux-AN-hP7" secondAttribute="height" id="HgL-wW-RwN"/>
                         <constraint firstItem="Omk-h1-1as" firstAttribute="centerY" secondItem="jgI-cy-iX9" secondAttribute="centerY" id="Qmq-Im-L42"/>
                         <constraint firstItem="No6-hY-rOz" firstAttribute="top" secondItem="jgI-cy-iX9" secondAttribute="bottom" constant="15" id="TRI-UG-irC"/>
@@ -150,9 +151,9 @@
                     </userDefinedRuntimeAttributes>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Va9-nX-pyY">
-                    <rect key="frame" x="20" y="200" width="456" height="50"/>
+                    <rect key="frame" x="20" y="200" width="456" height="45"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="50" id="DSy-VF-6tj"/>
+                        <constraint firstAttribute="height" constant="45" id="DSy-VF-6tj"/>
                     </constraints>
                     <buttonConfiguration key="configuration" style="filled" title="Call" imagePadding="10" cornerStyle="capsule">
                         <imageReference key="image" image="phone" catalog="system" symbolScale="large"/>
@@ -162,21 +163,77 @@
                         <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
                             <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
                         </preferredSymbolConfiguration>
-                        <fontDescription key="titleFontDescription" type="boldSystem" pointSize="22"/>
+                        <fontDescription key="titleFontDescription" type="boldSystem" pointSize="20"/>
                     </buttonConfiguration>
                     <connections>
-                        <action selector="btnCallTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="Z4G-Ka-hv3"/>
+                        <action selector="btnCallTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="tMX-mp-u6r"/>
                     </connections>
                 </button>
+                <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="yYc-dL-d0O">
+                    <rect key="frame" x="20" y="255" width="456" height="35"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FvO-uk-gEH">
+                            <rect key="frame" x="0.0" y="0.0" width="145.33333333333334" height="35"/>
+                            <buttonConfiguration key="configuration" style="filled" title="Edit" imagePadding="10" cornerStyle="capsule">
+                                <imageReference key="image" image="square.and.pencil" catalog="system" symbolScale="medium"/>
+                                <backgroundConfiguration key="background">
+                                    <color key="backgroundColor" systemColor="systemMintColor"/>
+                                </backgroundConfiguration>
+                                <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                </preferredSymbolConfiguration>
+                                <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="16"/>
+                            </buttonConfiguration>
+                            <connections>
+                                <action selector="btnEditTappedDetail:" destination="iN0-l3-epB" eventType="touchUpInside" id="o5X-33-yXB"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ofU-6T-HbD">
+                            <rect key="frame" x="155.33333333333331" y="0.0" width="145.33333333333331" height="35"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="35" id="x9Q-Hl-Jnc"/>
+                            </constraints>
+                            <buttonConfiguration key="configuration" style="filled" title="Share" imagePadding="10" cornerStyle="capsule">
+                                <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="small"/>
+                                <backgroundConfiguration key="background">
+                                    <color key="backgroundColor" systemColor="systemOrangeColor"/>
+                                </backgroundConfiguration>
+                                <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                </preferredSymbolConfiguration>
+                                <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="16"/>
+                            </buttonConfiguration>
+                            <connections>
+                                <action selector="btnShareTappedDetail:" destination="iN0-l3-epB" eventType="touchUpInside" id="mOx-Ty-a6Y"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C7r-pG-RTD">
+                            <rect key="frame" x="310.66666666666669" y="0.0" width="145.33333333333331" height="35"/>
+                            <buttonConfiguration key="configuration" style="filled" title="Delete" imagePadding="10" cornerStyle="capsule">
+                                <imageReference key="image" image="trash" catalog="system" symbolScale="medium"/>
+                                <backgroundConfiguration key="background">
+                                    <color key="backgroundColor" systemColor="systemCyanColor"/>
+                                </backgroundConfiguration>
+                                <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                </preferredSymbolConfiguration>
+                                <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="16"/>
+                            </buttonConfiguration>
+                            <connections>
+                                <action selector="btnDeleteTappedDetail:" destination="iN0-l3-epB" eventType="touchUpInside" id="SGP-Su-9lW"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                </stackView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KeE-hf-Isj">
-                    <rect key="frame" x="20" y="270" width="456" height="84"/>
+                    <rect key="frame" x="20" y="305" width="456" height="149"/>
                     <string key="text">imply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </string>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ckj-Ze-DxT">
-                    <rect key="frame" x="20" y="374" width="456" height="86"/>
+                    <rect key="frame" x="20" y="474" width="456" height="86"/>
                     <subviews>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U9i-MA-mHs">
                             <rect key="frame" x="0.0" y="0.0" width="456" height="1"/>
@@ -219,10 +276,10 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xfe-R5-3Jd" customClass="Map">
-                    <rect key="frame" x="20" y="460" width="456" height="250"/>
+                    <rect key="frame" x="20" y="560" width="456" height="270"/>
                     <color key="backgroundColor" systemColor="systemGray6Color"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="250" id="NhQ-Vu-fMm"/>
+                        <constraint firstAttribute="height" constant="270" id="NhQ-Vu-fMm"/>
                     </constraints>
                 </view>
             </subviews>
@@ -230,25 +287,31 @@
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
             <constraints>
                 <constraint firstItem="Ckj-Ze-DxT" firstAttribute="top" secondItem="KeE-hf-Isj" secondAttribute="bottom" constant="20" id="6SM-0o-Pkp"/>
-                <constraint firstItem="KeE-hf-Isj" firstAttribute="top" secondItem="Va9-nX-pyY" secondAttribute="bottom" constant="20" id="7uY-5G-Dzi"/>
                 <constraint firstItem="Vn7-Qq-smM" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="20" id="BkC-w9-L2L"/>
                 <constraint firstItem="xfe-R5-3Jd" firstAttribute="trailing" secondItem="Ckj-Ze-DxT" secondAttribute="trailing" id="DaD-JG-Uw8"/>
                 <constraint firstItem="Vn7-Qq-smM" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="20" id="Fsz-5D-CxU"/>
+                <constraint firstItem="yYc-dL-d0O" firstAttribute="trailing" secondItem="Va9-nX-pyY" secondAttribute="trailing" id="IEk-dx-gCG"/>
                 <constraint firstItem="Ckj-Ze-DxT" firstAttribute="trailing" secondItem="KeE-hf-Isj" secondAttribute="trailing" id="M3U-Pv-ZKQ"/>
+                <constraint firstItem="KeE-hf-Isj" firstAttribute="leading" secondItem="yYc-dL-d0O" secondAttribute="leading" id="ORm-no-65m"/>
+                <constraint firstItem="yYc-dL-d0O" firstAttribute="leading" secondItem="Va9-nX-pyY" secondAttribute="leading" id="SJC-WK-9dT"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="Vn7-Qq-smM" secondAttribute="trailing" constant="20" id="YLX-A2-uCN"/>
                 <constraint firstItem="Ckj-Ze-DxT" firstAttribute="leading" secondItem="KeE-hf-Isj" secondAttribute="leading" id="ZA3-lp-tMb"/>
                 <constraint firstItem="xfe-R5-3Jd" firstAttribute="top" secondItem="Ckj-Ze-DxT" secondAttribute="bottom" id="bpo-Gr-NQw"/>
                 <constraint firstAttribute="bottom" secondItem="xfe-R5-3Jd" secondAttribute="bottom" constant="30" id="dOa-aT-OX6"/>
-                <constraint firstItem="KeE-hf-Isj" firstAttribute="trailing" secondItem="Va9-nX-pyY" secondAttribute="trailing" id="ghF-wf-Fdm"/>
+                <constraint firstItem="KeE-hf-Isj" firstAttribute="top" secondItem="yYc-dL-d0O" secondAttribute="bottom" constant="15" id="jrO-1z-Xzt"/>
                 <constraint firstItem="Va9-nX-pyY" firstAttribute="top" secondItem="Vn7-Qq-smM" secondAttribute="bottom" constant="15" id="kZT-GD-cAl"/>
+                <constraint firstItem="yYc-dL-d0O" firstAttribute="top" secondItem="Va9-nX-pyY" secondAttribute="bottom" constant="10" id="ptV-dw-ARO"/>
+                <constraint firstItem="KeE-hf-Isj" firstAttribute="trailing" secondItem="yYc-dL-d0O" secondAttribute="trailing" id="vum-Xq-fMa"/>
                 <constraint firstItem="xfe-R5-3Jd" firstAttribute="leading" secondItem="Ckj-Ze-DxT" secondAttribute="leading" id="vvg-9u-yfq"/>
                 <constraint firstItem="Va9-nX-pyY" firstAttribute="trailing" secondItem="Vn7-Qq-smM" secondAttribute="trailing" id="xS6-lj-wLq"/>
-                <constraint firstItem="KeE-hf-Isj" firstAttribute="leading" secondItem="Va9-nX-pyY" secondAttribute="leading" id="yUk-ce-RJV"/>
                 <constraint firstItem="Va9-nX-pyY" firstAttribute="leading" secondItem="Vn7-Qq-smM" secondAttribute="leading" id="yr5-oN-VG7"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="btnDelete" destination="C7r-pG-RTD" id="f4I-zn-O8v"/>
+                <outlet property="btnEdit" destination="FvO-uk-gEH" id="cE7-iy-7qH"/>
                 <outlet property="btnPhone" destination="Va9-nX-pyY" id="EnF-G3-Xcc"/>
+                <outlet property="btnShare" destination="ofU-6T-HbD" id="Wpv-CF-9Lp"/>
                 <outlet property="lblAddress" destination="wWQ-5K-05t" id="32z-3g-2La"/>
                 <outlet property="lblClosingTime" destination="wJ0-NJ-sGF" id="FV8-RQ-GnW"/>
                 <outlet property="lblDesc" destination="KeE-hf-Isj" id="Gj5-U9-bPe"/>
@@ -257,7 +320,7 @@
                 <outlet property="lblServingSince" destination="No6-hY-rOz" id="T9v-Pm-Xkv"/>
                 <outlet property="mapContainerView" destination="xfe-R5-3Jd" id="fOl-oX-JPR"/>
             </connections>
-            <point key="canvasLocation" x="100.76335877862596" y="88.028169014084511"/>
+            <point key="canvasLocation" x="116" y="121"/>
         </view>
     </objects>
     <resources>
@@ -265,11 +328,17 @@
         <image name="dollarsign.circle.fill" catalog="system" width="128" height="123"/>
         <image name="mappin.and.ellipse.circle.fill" catalog="system" width="128" height="123"/>
         <image name="phone" catalog="system" width="128" height="115"/>
+        <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
+        <image name="square.and.pencil" catalog="system" width="128" height="121"/>
+        <image name="trash" catalog="system" width="117" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBlueColor">
             <color red="0.0" green="0.53333333333333333" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemCyanColor">
+            <color red="0.0" green="0.75294117647058822" blue="0.90980392156862744" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGray4Color">
             <color red="0.81960784313725488" green="0.81960784313725488" blue="0.83921568627450982" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -282,6 +351,12 @@
         </systemColor>
         <systemColor name="systemIndigoColor">
             <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.78431372549019607" blue="0.70196078431372544" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemOrangeColor">
+            <color red="1" green="0.55294117647058827" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemPurpleColor">
             <color red="0.79607843137254897" green="0.18823529411764706" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
