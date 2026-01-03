@@ -11,6 +11,8 @@ class LaunchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // this launchvc for preload data from internet if needed
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.goToHome()
         }
@@ -32,7 +34,5 @@ class LaunchVC: UIViewController {
 
     private func goToHome() {
         let homeVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HomeVC")
-        // homeVC.modalPresentationStyle = .fullScreen
-        navigationController?.pushViewController(homeVC, animated: false)
-    }
+        navigationController?.setViewControllers([homeVC], animated: true)    }
 }

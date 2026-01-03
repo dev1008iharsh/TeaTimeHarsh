@@ -15,6 +15,7 @@ class TeaListCell: UITableViewCell {
             imgTeaPlace.layer.cornerRadius = 10
         }
     }
+    @IBOutlet weak var bgView: UIView!
     @IBOutlet var lblRating: UILabel!
     @IBOutlet var lblLocationTeaPlace: UILabel!
     @IBOutlet var lblPhoneTeaPlace: UILabel!
