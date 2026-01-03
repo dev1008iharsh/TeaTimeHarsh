@@ -27,7 +27,7 @@ class HomeListingTipVC: UIViewController {
 
         • Long-press a place for more actions
         • Swipe left for mark visited and favourite
-        • Swipe Right for share and delete
+        • Swipe Right for Edit,share and delete
 
         """
         view.backgroundColor = UIColor.black.withAlphaComponent(0.9)

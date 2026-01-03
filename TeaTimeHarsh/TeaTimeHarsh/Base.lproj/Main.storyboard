@@ -25,7 +25,7 @@
                                     <outlet property="delegate" destination="mBx-GQ-H4F" id="nwc-PS-CSQ"/>
                                 </connections>
                             </tableView>
-                            <segmentedControl opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" toolTip="Filter places" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Fi0-HU-VSZ">
+                            <segmentedControl toolTip="Filter places" opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Fi0-HU-VSZ">
                                 <rect key="frame" x="72" y="130" width="249" height="32"/>
                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                 <segments>
@@ -68,7 +68,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Kya-Cz-jPo">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Kya-Cz-jPo">
                                 <rect key="frame" x="0.0" y="118" width="393" height="734"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <sections/>
@@ -397,7 +397,7 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IBv-X0-B6F">
-                                <rect key="frame" x="25" y="138" width="343" height="50.333333333333343"/>
+                                <rect key="frame" x="25" y="133" width="343" height="50.333333333333343"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Locating place of marker..." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="747-bC-T1j">
                                         <rect key="frame" x="15" y="14.999999999999998" width="313" height="20.333333333333329"/>
@@ -449,7 +449,7 @@
                             <constraint firstAttribute="bottom" secondItem="Y00-Jn-nTO" secondAttribute="bottom" id="6bg-Xm-dRw"/>
                             <constraint firstItem="RJ5-z8-wrP" firstAttribute="centerX" secondItem="Y00-Jn-nTO" secondAttribute="centerX" id="E38-oK-5qN"/>
                             <constraint firstItem="RJ5-z8-wrP" firstAttribute="centerY" secondItem="Y00-Jn-nTO" secondAttribute="centerY" constant="-40" id="Ixo-Bb-AbZ"/>
-                            <constraint firstItem="IBv-X0-B6F" firstAttribute="top" secondItem="eh8-vN-N8p" secondAttribute="top" constant="20" id="KjF-8E-eUa"/>
+                            <constraint firstItem="IBv-X0-B6F" firstAttribute="top" secondItem="eh8-vN-N8p" secondAttribute="top" constant="15" id="KjF-8E-eUa"/>
                             <constraint firstItem="IBv-X0-B6F" firstAttribute="leading" secondItem="eh8-vN-N8p" secondAttribute="leading" constant="25" id="Kvd-Px-o3G"/>
                             <constraint firstItem="eh8-vN-N8p" firstAttribute="bottom" secondItem="Hzd-EM-Obx" secondAttribute="bottom" constant="20" id="RNU-9M-cWP"/>
                             <constraint firstItem="eh8-vN-N8p" firstAttribute="trailing" secondItem="Y00-Jn-nTO" secondAttribute="trailing" id="Zf9-zb-bZB"/>

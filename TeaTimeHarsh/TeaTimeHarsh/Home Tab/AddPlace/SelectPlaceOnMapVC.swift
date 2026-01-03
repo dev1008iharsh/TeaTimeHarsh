@@ -144,7 +144,16 @@ class SelectPlaceOnMapVC: UIViewController {
     // MARK: - Actions
     @IBAction func btnSubmitMapTapped(_ sender: UIButton) {
         HapticHelper.success()
-        guard let lat = currentLatitude, let long = currentLongitude, let address = currentAddress else { return }
+        guard let lat = currentLatitude, let long = currentLongitude, let address = currentAddress
+        else {
+            Utility
+                .showAlert(
+                    title: "Location Not Found",
+                    message: "We couldn't catch that spot. 📍 Please try moving the map or zooming in to pick a specific location.",
+                    viewController: self
+                )
+            return
+        }
         delegateMap?.didSelectLocation(latitude: lat, longitude: long, address: address)
         navigationController?.popViewController(animated: true)
     }

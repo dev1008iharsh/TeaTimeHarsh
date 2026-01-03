@@ -15,8 +15,33 @@
             <rect key="frame" x="0.0" y="0.0" width="496" height="860"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oLf-Ry-rro">
+                    <rect key="frame" x="20" y="20" width="456" height="45"/>
+                    <color key="backgroundColor" systemColor="systemGreenColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="45" id="R3b-83-MLH"/>
+                    </constraints>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="10" maxY="0.0"/>
+                    <state key="normal" title="Call">
+                        <imageReference key="image" image="phone.circle.fill" catalog="system" symbolScale="large"/>
+                        <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="font" scale="large" weight="bold">
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                        </preferredSymbolConfiguration>
+                    </state>
+                    <buttonConfiguration key="configuration" style="plain" title="Call" imagePadding="10" titleAlignment="center">
+                        <imageReference key="image" image="phone.circle.fill" catalog="system" symbolScale="large"/>
+                        <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="semibold">
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                        </preferredSymbolConfiguration>
+                        <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                    </buttonConfiguration>
+                    <connections>
+                        <action selector="btnCallTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="yfv-Nq-EQt"/>
+                    </connections>
+                </button>
                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vn7-Qq-smM">
-                    <rect key="frame" x="20" y="20" width="456" height="165"/>
+                    <rect key="frame" x="20" y="85" width="456" height="165"/>
                     <subviews>
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="HTh-qw-vnM">
                             <rect key="frame" x="15" y="20.666666666666668" width="35" height="33.666666666666657"/>
@@ -150,30 +175,11 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </view>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Va9-nX-pyY">
-                    <rect key="frame" x="20" y="200" width="456" height="45"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="45" id="DSy-VF-6tj"/>
-                    </constraints>
-                    <buttonConfiguration key="configuration" style="filled" title="Call" imagePadding="10" cornerStyle="capsule">
-                        <imageReference key="image" image="phone" catalog="system" symbolScale="large"/>
-                        <backgroundConfiguration key="background">
-                            <color key="backgroundColor" systemColor="systemGreenColor"/>
-                        </backgroundConfiguration>
-                        <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
-                            <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
-                        </preferredSymbolConfiguration>
-                        <fontDescription key="titleFontDescription" type="boldSystem" pointSize="20"/>
-                    </buttonConfiguration>
-                    <connections>
-                        <action selector="btnCallTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="tMX-mp-u6r"/>
-                    </connections>
-                </button>
                 <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="yYc-dL-d0O">
-                    <rect key="frame" x="20" y="255" width="456" height="35"/>
+                    <rect key="frame" x="20" y="270" width="456" height="45"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FvO-uk-gEH">
-                            <rect key="frame" x="0.0" y="0.0" width="145.33333333333334" height="35"/>
+                            <rect key="frame" x="0.0" y="0.0" width="145.33333333333334" height="45"/>
                             <buttonConfiguration key="configuration" style="filled" title="Edit" imagePadding="10" cornerStyle="capsule">
                                 <imageReference key="image" image="square.and.pencil" catalog="system" symbolScale="medium"/>
                                 <backgroundConfiguration key="background">
@@ -189,9 +195,9 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ofU-6T-HbD">
-                            <rect key="frame" x="155.33333333333331" y="0.0" width="145.33333333333331" height="35"/>
+                            <rect key="frame" x="155.33333333333331" y="0.0" width="145.33333333333331" height="45"/>
                             <constraints>
-                                <constraint firstAttribute="height" constant="35" id="x9Q-Hl-Jnc"/>
+                                <constraint firstAttribute="height" constant="45" id="x9Q-Hl-Jnc"/>
                             </constraints>
                             <buttonConfiguration key="configuration" style="filled" title="Share" imagePadding="10" cornerStyle="capsule">
                                 <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="small"/>
@@ -208,7 +214,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C7r-pG-RTD">
-                            <rect key="frame" x="310.66666666666669" y="0.0" width="145.33333333333331" height="35"/>
+                            <rect key="frame" x="310.66666666666669" y="0.0" width="145.33333333333331" height="45"/>
                             <buttonConfiguration key="configuration" style="filled" title="Delete" imagePadding="10" cornerStyle="capsule">
                                 <imageReference key="image" image="trash" catalog="system" symbolScale="medium"/>
                                 <backgroundConfiguration key="background">
@@ -226,14 +232,14 @@
                     </subviews>
                 </stackView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KeE-hf-Isj">
-                    <rect key="frame" x="20" y="305" width="456" height="149"/>
+                    <rect key="frame" x="20" y="330" width="456" height="144"/>
                     <string key="text">imply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </string>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ckj-Ze-DxT">
-                    <rect key="frame" x="20" y="474" width="456" height="86"/>
+                    <rect key="frame" x="20" y="494" width="456" height="86"/>
                     <subviews>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U9i-MA-mHs">
                             <rect key="frame" x="0.0" y="0.0" width="456" height="1"/>
@@ -261,7 +267,7 @@
                             <nil key="highlightedColor"/>
                         </label>
                     </subviews>
-                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="U9i-MA-mHs" secondAttribute="trailing" id="3vm-gA-INc"/>
                         <constraint firstItem="U9i-MA-mHs" firstAttribute="top" secondItem="Ckj-Ze-DxT" secondAttribute="top" id="3wh-Qx-xDW"/>
@@ -276,41 +282,41 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xfe-R5-3Jd" customClass="Map">
-                    <rect key="frame" x="20" y="560" width="456" height="270"/>
+                    <rect key="frame" x="20" y="580" width="456" height="250"/>
                     <color key="backgroundColor" systemColor="systemGray6Color"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="270" id="NhQ-Vu-fMm"/>
+                        <constraint firstAttribute="height" constant="250" id="NhQ-Vu-fMm"/>
                     </constraints>
                 </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
             <constraints>
+                <constraint firstItem="yYc-dL-d0O" firstAttribute="leading" secondItem="Vn7-Qq-smM" secondAttribute="leading" id="2oS-x8-yAJ"/>
                 <constraint firstItem="Ckj-Ze-DxT" firstAttribute="top" secondItem="KeE-hf-Isj" secondAttribute="bottom" constant="20" id="6SM-0o-Pkp"/>
-                <constraint firstItem="Vn7-Qq-smM" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="20" id="BkC-w9-L2L"/>
                 <constraint firstItem="xfe-R5-3Jd" firstAttribute="trailing" secondItem="Ckj-Ze-DxT" secondAttribute="trailing" id="DaD-JG-Uw8"/>
-                <constraint firstItem="Vn7-Qq-smM" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="20" id="Fsz-5D-CxU"/>
-                <constraint firstItem="yYc-dL-d0O" firstAttribute="trailing" secondItem="Va9-nX-pyY" secondAttribute="trailing" id="IEk-dx-gCG"/>
+                <constraint firstItem="yYc-dL-d0O" firstAttribute="trailing" secondItem="Vn7-Qq-smM" secondAttribute="trailing" id="Jwm-tJ-7Mj"/>
                 <constraint firstItem="Ckj-Ze-DxT" firstAttribute="trailing" secondItem="KeE-hf-Isj" secondAttribute="trailing" id="M3U-Pv-ZKQ"/>
                 <constraint firstItem="KeE-hf-Isj" firstAttribute="leading" secondItem="yYc-dL-d0O" secondAttribute="leading" id="ORm-no-65m"/>
-                <constraint firstItem="yYc-dL-d0O" firstAttribute="leading" secondItem="Va9-nX-pyY" secondAttribute="leading" id="SJC-WK-9dT"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="Vn7-Qq-smM" secondAttribute="trailing" constant="20" id="YLX-A2-uCN"/>
+                <constraint firstItem="Vn7-Qq-smM" firstAttribute="leading" secondItem="oLf-Ry-rro" secondAttribute="leading" id="QSR-3v-sTR"/>
+                <constraint firstItem="oLf-Ry-rro" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="Ua0-gL-hY4"/>
                 <constraint firstItem="Ckj-Ze-DxT" firstAttribute="leading" secondItem="KeE-hf-Isj" secondAttribute="leading" id="ZA3-lp-tMb"/>
                 <constraint firstItem="xfe-R5-3Jd" firstAttribute="top" secondItem="Ckj-Ze-DxT" secondAttribute="bottom" id="bpo-Gr-NQw"/>
+                <constraint firstAttribute="trailing" secondItem="oLf-Ry-rro" secondAttribute="trailing" constant="20" id="cPf-2Y-vnf"/>
                 <constraint firstAttribute="bottom" secondItem="xfe-R5-3Jd" secondAttribute="bottom" constant="30" id="dOa-aT-OX6"/>
+                <constraint firstItem="Vn7-Qq-smM" firstAttribute="top" secondItem="oLf-Ry-rro" secondAttribute="bottom" constant="20" id="ezk-zO-CFp"/>
+                <constraint firstItem="yYc-dL-d0O" firstAttribute="top" secondItem="Vn7-Qq-smM" secondAttribute="bottom" constant="20" id="hjX-MD-ATb"/>
                 <constraint firstItem="KeE-hf-Isj" firstAttribute="top" secondItem="yYc-dL-d0O" secondAttribute="bottom" constant="15" id="jrO-1z-Xzt"/>
-                <constraint firstItem="Va9-nX-pyY" firstAttribute="top" secondItem="Vn7-Qq-smM" secondAttribute="bottom" constant="15" id="kZT-GD-cAl"/>
-                <constraint firstItem="yYc-dL-d0O" firstAttribute="top" secondItem="Va9-nX-pyY" secondAttribute="bottom" constant="10" id="ptV-dw-ARO"/>
+                <constraint firstItem="oLf-Ry-rro" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="20" id="o0j-2s-X4L"/>
+                <constraint firstItem="Vn7-Qq-smM" firstAttribute="trailing" secondItem="oLf-Ry-rro" secondAttribute="trailing" id="tTI-CS-efy"/>
                 <constraint firstItem="KeE-hf-Isj" firstAttribute="trailing" secondItem="yYc-dL-d0O" secondAttribute="trailing" id="vum-Xq-fMa"/>
                 <constraint firstItem="xfe-R5-3Jd" firstAttribute="leading" secondItem="Ckj-Ze-DxT" secondAttribute="leading" id="vvg-9u-yfq"/>
-                <constraint firstItem="Va9-nX-pyY" firstAttribute="trailing" secondItem="Vn7-Qq-smM" secondAttribute="trailing" id="xS6-lj-wLq"/>
-                <constraint firstItem="Va9-nX-pyY" firstAttribute="leading" secondItem="Vn7-Qq-smM" secondAttribute="leading" id="yr5-oN-VG7"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="btnDelete" destination="C7r-pG-RTD" id="f4I-zn-O8v"/>
                 <outlet property="btnEdit" destination="FvO-uk-gEH" id="cE7-iy-7qH"/>
-                <outlet property="btnPhone" destination="Va9-nX-pyY" id="EnF-G3-Xcc"/>
+                <outlet property="btnPhone" destination="oLf-Ry-rro" id="RhM-Bn-Dy5"/>
                 <outlet property="btnShare" destination="ofU-6T-HbD" id="Wpv-CF-9Lp"/>
                 <outlet property="lblAddress" destination="wWQ-5K-05t" id="32z-3g-2La"/>
                 <outlet property="lblClosingTime" destination="wJ0-NJ-sGF" id="FV8-RQ-GnW"/>
@@ -327,7 +333,7 @@
         <image name="clock.circle.fill" catalog="system" width="128" height="123"/>
         <image name="dollarsign.circle.fill" catalog="system" width="128" height="123"/>
         <image name="mappin.and.ellipse.circle.fill" catalog="system" width="128" height="123"/>
-        <image name="phone" catalog="system" width="128" height="115"/>
+        <image name="phone.circle.fill" catalog="system" width="128" height="123"/>
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <image name="square.and.pencil" catalog="system" width="128" height="121"/>
         <image name="trash" catalog="system" width="117" height="128"/>

@@ -11,7 +11,12 @@ class DetailStaticCell: UITableViewCell {
     // MARK: - IBOutlets
 
     // Basic Information
-    @IBOutlet var btnPhone: UIButton!
+    @IBOutlet var btnPhone: UIButton! {
+        didSet {
+            btnPhone.layer.cornerRadius = btnPhone.bounds.height / 2
+        }
+    }
+
     @IBOutlet var lblDesc: UILabel!
     @IBOutlet var lblAddress: UILabel!
 

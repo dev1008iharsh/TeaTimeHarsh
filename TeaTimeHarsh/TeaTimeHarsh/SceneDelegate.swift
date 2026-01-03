@@ -14,6 +14,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
+        AppNetworkManager.shared.startMonitoring()
+        
         let window = UIWindow(windowScene: windowScene)
         
         if let user = Auth.auth().currentUser {

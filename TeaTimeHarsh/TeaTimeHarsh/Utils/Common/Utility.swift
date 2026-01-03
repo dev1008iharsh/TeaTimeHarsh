@@ -129,4 +129,22 @@ final class Utility {
         let emailPred = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
     }
+    
+    @discardableResult
+        static func presentNetworkBlockingAlert(title: String, message: String, rightSideActionName: String, leftSideActionName: String, viewController: UIViewController?, rightAction: @escaping (UIAlertAction) -> Void, leftAction: @escaping (UIAlertAction) -> Void) -> UIAlertController? {
+            
+            guard let targetVC = viewController else { return nil }
+
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
+            // Left Action
+            alert.addAction(UIAlertAction(title: leftSideActionName, style: .default, handler: leftAction))
+
+            // Right Action
+            alert.addAction(UIAlertAction(title: rightSideActionName, style: .default, handler: rightAction))
+
+            targetVC.present(alert, animated: true, completion: nil)
+            
+            return alert // Returning instance to manage dismissal
+        }
 }
