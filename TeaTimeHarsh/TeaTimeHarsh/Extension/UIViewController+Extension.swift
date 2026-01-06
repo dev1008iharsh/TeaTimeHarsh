@@ -10,6 +10,9 @@ import UIKit
 import UIKit
 
 extension UIViewController {
+    
+    
+    
     func hideBackButtonNavBar(hidden: Bool, swipeEnabled: Bool) {
         // 1. Control the Visual Button (The Arrow)
         // animated: false is best for viewDidLoad to prevent "flickering"

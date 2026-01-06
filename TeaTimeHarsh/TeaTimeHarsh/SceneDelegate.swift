@@ -5,16 +5,36 @@
 //  Created by Harsh on 26/12/25.
 //
 
+import FirebaseAuth
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        AppNetworkManager.shared.startMonitoring()
+        
+        let window = UIWindow(windowScene: windowScene)
+        
+        if let user = Auth.auth().currentUser {
+            print("*** ✅ User is Logged In. Going to Home. Current Firebase USER ID: \(user.uid)")
+            Constants.Strings.currentUserID = user.uid
+            
+            let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+            let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
+            window.rootViewController = tabBarVC
+        } else {
+            print("*** ❌ User is NOT Logged In. Going to Login.")
+            let authStoryboard = UIStoryboard(name: "Auth", bundle: nil)
+            let loginVC = authStoryboard.instantiateViewController(withIdentifier: "LoginRegisterVC")
+            let navVC = UINavigationController(rootViewController: loginVC)
+            window.rootViewController = navVC
+        }
+        
+        self.window = window
+        window.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

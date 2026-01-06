@@ -11,11 +11,17 @@ class LaunchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        // this launchvc for preload data from internet if needed
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.goToHome()
         }
     }
 
+    deinit {
+        print("💀 deinit LaunchVC is dead. Memory Free!")
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
@@ -28,7 +34,5 @@ class LaunchVC: UIViewController {
 
     private func goToHome() {
         let homeVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HomeVC")
-        // homeVC.modalPresentationStyle = .fullScreen
-        navigationController?.pushViewController(homeVC, animated: false)
-    }
+        navigationController?.setViewControllers([homeVC], animated: true)    }
 }

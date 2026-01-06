@@ -9,4 +9,7 @@ extension String {
     var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }
+    var removeAllSpaces: String {
+        return self.filter { !$0.isWhitespace }
+    }
 }
