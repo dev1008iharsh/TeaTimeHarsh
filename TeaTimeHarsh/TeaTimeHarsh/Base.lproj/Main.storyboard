@@ -26,12 +26,13 @@
                                 </connections>
                             </tableView>
                             <segmentedControl toolTip="Filter places" opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Fi0-HU-VSZ">
-                                <rect key="frame" x="72" y="130" width="249" height="32"/>
+                                <rect key="frame" x="30.666666666666657" y="130" width="332" height="32"/>
                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                 <segments>
                                     <segment title="All"/>
                                     <segment title="Favourites"/>
                                     <segment title="Visited"/>
+                                    <segment title="My Places"/>
                                 </segments>
                                 <color key="selectedSegmentTintColor" systemColor="systemIndigoColor"/>
                                 <connections>
@@ -47,6 +48,7 @@
                             <constraint firstItem="Fi0-HU-VSZ" firstAttribute="top" secondItem="yVn-yi-dDK" secondAttribute="top" constant="12" id="Wdf-LK-xnS"/>
                             <constraint firstItem="yVn-yi-dDK" firstAttribute="leading" secondItem="QAD-26-J0e" secondAttribute="leading" id="chp-52-PVF"/>
                             <constraint firstItem="yVn-yi-dDK" firstAttribute="top" secondItem="QAD-26-J0e" secondAttribute="top" id="jeJ-tv-epO"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Fi0-HU-VSZ" secondAttribute="trailing" id="vsM-Ui-Ljo"/>
                             <constraint firstAttribute="trailing" secondItem="yVn-yi-dDK" secondAttribute="trailing" id="ym7-wE-01U"/>
                         </constraints>
                     </view>

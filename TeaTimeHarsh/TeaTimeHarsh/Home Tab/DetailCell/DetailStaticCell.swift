@@ -1,6 +1,9 @@
 //
 //  DetailStaticCell.swift
 //  TeaTimeHarsh
+//
+//  Created by Harsh on 31/12/25.
+//
  
 
 import GoogleMaps

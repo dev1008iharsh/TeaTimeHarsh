@@ -34,10 +34,24 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateUI(mode: .login)
+        setupGradientBackground()
     }
 
     deinit {
         print("💀 deinit LoginRegisterVC is dead. Memory Free!")
+    }
+    
+    private func setupGradientBackground() {
+        let gradient = CAGradientLayer()
+        gradient.colors = [
+            UIColor.systemPurple.cgColor,
+            UIColor.systemPink.cgColor,
+            UIColor.systemOrange.cgColor
+        ]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 1, y: 1)
+        gradient.frame = view.bounds
+        view.layer.insertSublayer(gradient, at: 0)
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

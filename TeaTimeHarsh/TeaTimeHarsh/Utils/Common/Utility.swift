@@ -1,7 +1,9 @@
 //
 //  Utility.swift
-//  ApiHarsh
-
+//  TeaTimeHarsh
+//
+//  Created by Harsh on 01/01/26.
+//
 /*
  func getHeaderAlmo()-> HTTPHeaders {
      return [ "Authorization": "Bearer \(Constant.accessToken)","Content-Type": "application/json"]
@@ -22,7 +24,7 @@ final class Utility {
     /// Call like: Utility.showAlert(title: "...", message: "...", vc: self)
     @MainActor
     static func showAlert(title: String, message: String, viewController: UIViewController?) {
-        // ✅ Safety Check: vc 'nil' -> return 
+        // ✅ Safety Check: vc 'nil' -> return
         guard let targetVC = viewController else { return }
 
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -129,22 +131,38 @@ final class Utility {
         let emailPred = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
     }
-    
+
     @discardableResult
-        static func presentNetworkBlockingAlert(title: String, message: String, rightSideActionName: String, leftSideActionName: String, viewController: UIViewController?, rightAction: @escaping (UIAlertAction) -> Void, leftAction: @escaping (UIAlertAction) -> Void) -> UIAlertController? {
-            
-            guard let targetVC = viewController else { return nil }
+    static func presentNetworkBlockingAlert(title: String, message: String, rightSideActionName: String, leftSideActionName: String, viewController: UIViewController?, rightAction: @escaping (UIAlertAction) -> Void, leftAction: @escaping (UIAlertAction) -> Void) -> UIAlertController? {
+        guard let targetVC = viewController else { return nil }
 
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
-            // Left Action
-            alert.addAction(UIAlertAction(title: leftSideActionName, style: .default, handler: leftAction))
+        // Left Action
+        alert.addAction(UIAlertAction(title: leftSideActionName, style: .default, handler: leftAction))
 
-            // Right Action
-            alert.addAction(UIAlertAction(title: rightSideActionName, style: .default, handler: rightAction))
+        // Right Action
+        alert.addAction(UIAlertAction(title: rightSideActionName, style: .default, handler: rightAction))
 
-            targetVC.present(alert, animated: true, completion: nil)
-            
-            return alert // Returning instance to manage dismissal
-        }
+        targetVC.present(alert, animated: true, completion: nil)
+
+        return alert // Returning instance to manage dismissal
+    }
+
+    // 🎨 Style a TextView to look like a TextField
+    static func styleTextView(_ textView: UITextView) {
+        // 1. Border Color (Light Gray like a TextField)
+        // We use 'cgColor' because we are touching the underlying Layer
+        textView.layer.borderColor = UIColor.systemGray4.cgColor
+
+        // 2. Border Width
+        textView.layer.borderWidth = 1.0
+
+        // 3. Rounded Corners
+        textView.layer.cornerRadius = 8.0
+
+        // 4. Padding (Crucial!)
+        // By default, TextView text touches the edges. This pushes it inside.
+        textView.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    }
 }

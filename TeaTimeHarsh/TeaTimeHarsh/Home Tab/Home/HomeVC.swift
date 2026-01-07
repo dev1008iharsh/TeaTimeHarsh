@@ -2,7 +2,7 @@
 //  HomeVC.swift
 //  TeaTimeHarsh
 //
-//  Created by your AI Mentor 🤖
+//  Created by Harsh on 07/01/26.
 //
 
 import UIKit
@@ -42,6 +42,9 @@ class HomeVC: UIViewController {
             return arrTeaPlaces.filter { $0.isFav }
         case 2: // Visited
             return arrTeaPlaces.filter { $0.isVisited }
+        case 3: // Mine (✨ NEW FILTER ADDED)
+            let currentUserId = Constants.Strings.currentUserID
+            return arrTeaPlaces.filter { $0.createdByUserId == currentUserId }
         default: // 0 or others -> All
             return arrTeaPlaces
         }
@@ -184,6 +187,10 @@ class HomeVC: UIViewController {
             config.text = "Zero Visits? Are you on a diet? 😜"
             config.secondaryText = "Go have a cup! Then swipe right on the list to mark it as visited place."
 
+        } else if segmentFilter.selectedSegmentIndex == 3 {
+            config.text = "No places added by you 🧑‍💻"
+            config.secondaryText = "You haven't uploaded any tea spots yet. Tap the + button to add one!"
+
         } else {
             // 🏠 Default All
             config.text = "It’s Tea-rribly Empty Here!"
@@ -207,7 +214,7 @@ class HomeVC: UIViewController {
                 self?.didTapAddNavBar()
             }
         } else {
-            // Case 2: "Fav" or "Visited" is empty -> Show "Back to All" Button 🔙
+            // Case 2: "Fav", "Visited" OR "Mine" is empty -> Show "Back to All" Button 🔙
             buttonConfig.title = "Show All Places"
             buttonConfig.image = UIImage(systemName: "list.bullet")
 
@@ -258,11 +265,9 @@ class HomeVC: UIViewController {
 
     private func setupNavBar() {
         let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(didTapAddNavBar))
-        let logoutButton = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(confirmLogout))
-
+ 
         navigationItem.rightBarButtonItem = addButton
-        navigationItem.leftBarButtonItem = logoutButton
-
+ 
         // hideBackButtonNavBar(hidden: true, swipeEnabled: true)
         setLargeTitleSpacingNavBar(20)
         setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
@@ -327,37 +332,8 @@ class HomeVC: UIViewController {
         addVC.onPlaceAdded = { [weak self] _ in self?.fetchDataFromFirebase() }
         navigationController?.pushViewController(addVC, animated: true)
     }
-
-    @objc private func confirmLogout() {
-        Utility.showYesNoConfirmAlert(
-            title: "Logout Alert",
-            message: "Logging out will end your current session. Do you want to continue?",
-            viewController: self
-        ) { [weak self] _ in
-            self?.performLogout()
-        } noAction: { _ in }
-    }
-
-    private func performLogout() {
-        let success = AuthManager.shared.signOut()
-        if success {
-            navigateToLogin()
-        } else {
-            Utility.showAlert(title: "Error", message: "Could not log out.", viewController: self)
-        }
-    }
-
-    private func navigateToLogin() {
-        let storyboard = UIStoryboard(name: "Auth", bundle: nil)
-        let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginRegisterVC")
-        let navVC = UINavigationController(rootViewController: loginVC)
-
-        if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate,
-           let window = sceneDelegate.window {
-            window.rootViewController = navVC
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
-        }
-    }
+ 
+    
 
     private func presentTipIfNeeded() {
         guard HomeListingTipManager.shouldShowTip() else { return }

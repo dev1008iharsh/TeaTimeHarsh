@@ -6,13 +6,9 @@
 //
 
 import UIKit
-
-import UIKit
+import SafariServices
 
 extension UIViewController {
-    
-    
-    
     func hideBackButtonNavBar(hidden: Bool, swipeEnabled: Bool) {
         // 1. Control the Visual Button (The Arrow)
         // animated: false is best for viewDidLoad to prevent "flickering"
@@ -145,5 +141,25 @@ extension UIViewController {
         navController.navigationBar.standardAppearance = appearance
         navController.navigationBar.scrollEdgeAppearance = appearance
         navController.navigationBar.compactAppearance = appearance
+    }
+
+    /// 🌍 Opens a URL in the internal Safari Browser
+    func openSafari(url urlString: String) {
+        // 1. Validate the URL
+        guard let url = URL(string: urlString) else {
+            print("❌ Invalid URL: \(urlString)")
+            return
+        }
+
+        // 2. Create the Safari View Controller
+        let safariVC = SFSafariViewController(url: url)
+
+        // 3. Customize it (Make it look like YOUR app)
+        safariVC.preferredControlTintColor = .systemIndigo // Your Theme Color 💜
+        safariVC.modalPresentationStyle = .pageSheet
+
+        // 4. Present it
+        // 'self' here refers to whichever screen calls this function
+        present(safariVC, animated: true, completion: nil)
     }
 }

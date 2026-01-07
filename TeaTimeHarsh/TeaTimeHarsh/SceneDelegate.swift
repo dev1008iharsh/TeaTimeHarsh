@@ -33,6 +33,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.rootViewController = navVC
         }
         
+        let savedTheme = ThemeManager.shared.getCurrentTheme()
+        ThemeManager.shared.apply(theme: savedTheme)
+        
         self.window = window
         window.makeKeyAndVisible()
     }
