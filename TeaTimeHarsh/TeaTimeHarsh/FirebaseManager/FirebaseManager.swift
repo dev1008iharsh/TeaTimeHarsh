@@ -16,7 +16,6 @@ class FirebaseManager {
 
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
-    private let currentUserId = Constants.Strings.currentUserID
 
     // MARK: - Fetch Data (Merge Global + User) 📥
 
@@ -27,7 +26,7 @@ class FirebaseManager {
 
         // 2. Fetch User Specific Actions (Fav/Visited)
         let userSnapshot = try await db.collection("users")
-            .document(currentUserId)
+            .document(Constants.Strings.currentUserID)
             .collection("user_actions")
             .getDocuments()
 
@@ -57,7 +56,7 @@ class FirebaseManager {
 
     func updateUserAction(placeId: String, isFav: Bool, isVisited: Bool) async throws {
         let userActionRef = db.collection("users")
-            .document(currentUserId)
+            .document(Constants.Strings.currentUserID)
             .collection("user_actions")
             .document(placeId)
 
@@ -78,7 +77,7 @@ class FirebaseManager {
         // Delete from Global
         try await db.collection("places").document(placeId).delete()
         // Delete from User Actions (Optional, but good for cleanup)
-        try await db.collection("users").document(currentUserId)
+        try await db.collection("users").document(Constants.Strings.currentUserID)
             .collection("user_actions").document(placeId).delete()
     }
 
@@ -106,7 +105,7 @@ class FirebaseManager {
         let batch = db.batch()
 
         let placesRef = db.collection("places").document(place.id)
-        let userActionRef = db.collection("users").document(currentUserId)
+        let userActionRef = db.collection("users").document(Constants.Strings.currentUserID)
             .collection("user_actions").document(place.id)
 
         let userActionData: [String: Any] = [
@@ -168,7 +167,7 @@ class FirebaseManager {
 
         // 2️⃣ Have badho data Firestore ma 'bugs' collection ma save karo
         let bugData: [String: Any] = [
-            "userId": currentUserId, // Tamo pass karelu ID
+            "userId": Constants.Strings.currentUserID, // Tamo pass karelu ID
             "email": email,
             "description": desc,
             "imageUrl": imageUrlString, // Image URL (kholi hoy to empty)
@@ -183,20 +182,32 @@ class FirebaseManager {
     func deleteAllPlacesCreatedByUser() async throws {
         // 1. Get all documents created by current user
         let snapshot = try await db.collection("places")
-            .whereField("userId", isEqualTo: currentUserId)
+            .whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID) // Or Constants.Strings.currentUserID
             .getDocuments()
 
         // Check if there are places to delete
         guard !snapshot.documents.isEmpty else { return }
 
-        // 2. Batch Delete (Performance Optimization)
+        // 2. Create Batch (Performance Optimization) 🚀
         let batch = db.batch()
 
         for doc in snapshot.documents {
+            // --- STEP A: Queue the Place for deletion ---
             batch.deleteDocument(doc.reference)
+
+            // --- STEP B: Queue the User Action for deletion (NEW) ✨ ---
+            // Since the document ID in 'user_actions' IS the placeId, we can find it directly!
+            let placeId = doc.documentID
+
+            let userActionRef = db.collection("users")
+                .document(Constants.Strings.currentUserID)
+                .collection("user_actions")
+                .document(placeId) // 🎯 Targeting the specific action for this place
+
+            batch.deleteDocument(userActionRef)
         }
 
-        // 3. Commit the batch (Execute delete)
+        // 3. Commit the batch (Execute all deletes at once) ✅
         try await batch.commit()
     }
 
@@ -209,22 +220,31 @@ class FirebaseManager {
 
         // 3. Filter manually using Swift
         let myPlaces = allPlaces.filter { place in
-            place.createdByUserId == currentUserId
+            place.createdByUserId == Constants.Strings.currentUserID
         }
 
         return myPlaces.sorted(by: { $0.createdAt > $1.createdAt })
     }
 
-    // 1. Main Delete Function (Safe: Ignores missing images)
+    // 1. Re-Authentication (We call this FIRST now)
+    func reauthenticateWithPassword(_ password: String) async throws {
+        guard let user = Auth.auth().currentUser, let email = user.email else { return }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        // This checks if the password is correct
+        try await user.reauthenticate(with: credential)
+    }
+
+    // 2. Main Delete Function (Called ONLY after re-auth succeeds)
     func deleteEntireAccount() async throws {
         guard let user = Auth.auth().currentUser else { return }
-        let currentUserId = user.uid
+
+        // Create Batch
         let batch = db.batch()
 
         // --- STEP A: Gather Data ---
-        let placesSnapshot = try await db.collection("places").whereField("userId", isEqualTo: currentUserId).getDocuments()
-        let bugsSnapshot = try await db.collection("bugs").whereField("userId", isEqualTo: currentUserId).getDocuments()
-        let userActionsSnapshot = try await db.collection("users").document(currentUserId).collection("user_actions").getDocuments()
+        let placesSnapshot = try await db.collection("places").whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
+        let bugsSnapshot = try await db.collection("bugs").whereField("userId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
+        let userActionsSnapshot = try await db.collection("users").document(Constants.Strings.currentUserID).collection("user_actions").getDocuments()
 
         // --- STEP B: Queue Database Deletions ---
         var imageRefsToDelete: [StorageReference] = []
@@ -232,48 +252,34 @@ class FirebaseManager {
         // Queue Places & their images
         for doc in placesSnapshot.documents {
             batch.deleteDocument(doc.reference)
-            // Safely grab image URL
-            if let imageUrl = doc.data()["imageURL"] as? String,
-               let storageRef = try? storage.reference(forURL: imageUrl) {
+            
+            // 1. Get String
+            if let imageUrl = doc.data()["imageURL"] as? String {
+                // 2. Create Reference (No 'try?' needed here)
+                // Note: This assumes the URL is valid. If your DB has bad URLs, this could crash.
+                let storageRef = storage.reference(forURL: imageUrl)
                 imageRefsToDelete.append(storageRef)
             }
         }
 
-        // Queue Bugs & Actions
         for doc in bugsSnapshot.documents { batch.deleteDocument(doc.reference) }
         for doc in userActionsSnapshot.documents { batch.deleteDocument(doc.reference) }
 
-        // Queue User Profile
-        batch.deleteDocument(db.collection("users").document(currentUserId))
+        // Delete User Profile Document
+        batch.deleteDocument(db.collection("users").document(Constants.Strings.currentUserID))
 
-        // --- STEP C: Commit Database Changes (Atomic) ---
+        // --- STEP C: Commit Database Changes ---
         try await batch.commit()
 
-        // --- STEP D: Clean Storage (Parallel & Safe) ---
+        // --- STEP D: Clean Storage ---
         await withTaskGroup(of: Void.self) { group in
             for ref in imageRefsToDelete {
-                group.addTask {
-                    // try? ignores errors if image is already gone
-                    try? await ref.delete()
-                }
+                group.addTask { try? await ref.delete() }
             }
         }
 
         // --- STEP E: Delete Auth Account ---
-        // If this fails with "recent login required", the VC will handle it.
+        // Since we just re-authenticated, this will succeed 100%
         try await user.delete()
-    }
-
-    // 2. Re-Authentication Helper (For Security Check)
-    func reauthenticateWithPassword(_ password: String) async throws {
-        guard let user = Auth.auth().currentUser, let email = user.email else { return }
-        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
-        try await user.reauthenticate(with: credential)
-    }
-
-    // 3. Error Translator (Keeps VC clean from Firebase imports)
-    func isRequiresRecentLoginError(_ error: Error) -> Bool {
-        let nsError = error as NSError
-        return nsError.code == AuthErrorCode.requiresRecentLogin.rawValue
     }
 }

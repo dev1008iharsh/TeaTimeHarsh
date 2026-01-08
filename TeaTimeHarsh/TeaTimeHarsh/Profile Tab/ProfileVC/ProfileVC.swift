@@ -424,62 +424,78 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 }
- 
+
 extension ProfileVC {
-    // 1. The Main Trigger (Call this when button DELETE ACCOUNT is tapped)
+
+    // 1. The Main Trigger
+    // Now creates the Password Alert DIRECTLY (No extra "Are you sure" popup first)
     private func performDeleteAccount() {
-        Utility.showYesNoConfirmAlert(
-            title: "Delete Entire Account?",
-            message: "This action will delete your profile and all your saved places. 📉 Everything you have added will be deleted. This action cannot be undone. 🚫 Once you delete, all data related to your account will be lost permanently. 🔴",
-            viewController: self
-        ) { [weak self] _ in
-            guard let self = self else { return }
-
-            LoaderManager.shared.startLoading()
-
-            Task {
-                do {
-                    // Try to delete immediately
-                    try await FirebaseManager.shared.deleteEntireAccount()
-
-                    // If successful:
-                    await MainActor.run {
-                        LoaderManager.shared.stopLoading()
-                        self.handleDeleteSuccess()
-                    }
-
-                } catch {
-                    // If error:
-                    await MainActor.run {
-                        LoaderManager.shared.stopLoading()
-
-                        // Check if we need to ask for password (using our Clean Helper)
-                        if FirebaseManager.shared.isRequiresRecentLoginError(error) {
-                            self.showReauthInputAlert()
-                        } else {
-                            self.showErrorAlert(message: error.localizedDescription)
-                        }
-                    }
-                }
-            }
-        } noAction: { _ in
-            print("Delete Account cancelled No Tapped")
-        }
+        showReauthInputAlert()
     }
 
-    // 2. Retry Logic (Called after user enters password)
-    private func retryDeleteWithPassword(_ password: String) {
+    // 2. The Password Popup (With the Full Warning Message)
+    private func showReauthInputAlert() {
+        // We combine your Title and Warning Message here
+        let alertTitle = "Delete Entire Account?"
+        
+        // I added a small line break "\n\n" before the security instruction to make it readable
+        let alertMessage = """
+        This action will delete your profile and all your saved places. 📉 Everything you have added will be deleted. This action cannot be undone. 🚫 Once you delete, all data related to your account will be lost permanently. 🔴
+        
+        For your security, please enter your password to confirm deletion. 🔒
+        """
+
+        let alert = UIAlertController(
+            title: alertTitle,
+            message: alertMessage,
+            preferredStyle: .alert
+        )
+
+        // Add the Password Text Field
+        alert.addTextField { textField in
+            textField.placeholder = "Enter your password"
+            textField.isSecureTextEntry = true
+        }
+
+        // The "Delete" Button
+        let deleteAction = UIAlertAction(title: "Delete Permanently", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            
+            // 1. Check if text field is empty
+            guard let password = alert.textFields?.first?.text, !password.isEmpty else {
+                self.showErrorAlert(message: "Password cannot be empty.")
+                return
+            }
+            
+            // 2. Proceed to Verify & Delete
+            self.deleteAccountWithPassword(password)
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            print("Delete Account cancelled by user")
+        }
+
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+
+        present(alert, animated: true)
+    }
+
+    // 3. The Logic: Verify Password -> Then Delete
+    private func deleteAccountWithPassword(_ password: String) {
         LoaderManager.shared.startLoading()
 
         Task {
             do {
-                // First: Re-login
+                // STEP A: Verify Password with Firebase 🕵️‍♂️
+                // If this fails (wrong password), it jumps to 'catch' block immediately.
                 try await FirebaseManager.shared.reauthenticateWithPassword(password)
 
-                // Second: Delete again
+                // STEP B: Delete Everything 🗑️
+                // We only run this if Step A succeeded
                 try await FirebaseManager.shared.deleteEntireAccount()
 
-                // Success!
+                // STEP C: Success UI
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
                     self.handleDeleteSuccess()
@@ -489,37 +505,14 @@ extension ProfileVC {
                 // Failure (Wrong password, etc.)
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
-                    self.showErrorAlert(message: "Incorrect password or network error.Try again.")
+                    // Show a helpful error message
+                    self.showErrorAlert(message: "Incorrect password or network error. Please try again.")
                 }
             }
         }
     }
 
     // MARK: - UI Helpers
-
-    // 3. Password Popup
-    private func showReauthInputAlert() {
-        let alert = UIAlertController(
-            title: "Security Check 🔒",
-            message: "For your security, please enter your password to confirm deletion.",
-            preferredStyle: .alert
-        )
-
-        alert.addTextField { textField in
-            textField.placeholder = "Enter your password"
-            textField.isSecureTextEntry = true
-        }
-
-        let confirmAction = UIAlertAction(title: "Confirm Delete", style: .destructive) { [weak self] _ in
-            guard let self = self, let password = alert.textFields?.first?.text, !password.isEmpty else { return }
-            self.retryDeleteWithPassword(password)
-        }
-
-        alert.addAction(confirmAction)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-
-        present(alert, animated: true)
-    }
 
     // 4. Success Handler
     private func handleDeleteSuccess() {

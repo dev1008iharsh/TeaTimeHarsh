@@ -172,6 +172,7 @@ class UserPlacesListVC: UIViewController {
                     await MainActor.run {
                         HapticHelper.success()
                         self.dismiss(animated: true)
+                        NotificationCenter.default.post(name: .teaPlacesShouldReload, object: nil)
                         /*
                         Utility.showAlertHandler(
                             title: "All places deleted ✅",

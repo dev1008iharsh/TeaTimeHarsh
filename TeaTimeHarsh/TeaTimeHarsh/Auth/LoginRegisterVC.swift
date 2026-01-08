@@ -237,21 +237,14 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
         if success {
             print("Success! User is in.")
-            // --- 🚀 NAVIGATE TO HOME ---
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-
-            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC else {
-                print("Error: Could not find HomeVC in Main Storyboard")
-                return
-            }
-
-            let navVC = UINavigationController(rootViewController: homeVC)
-            navVC.modalPresentationStyle = .fullScreen
-
+  
+            let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+            let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
+            
             // Swap Root View Controller (Best Practice)
             if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate,
                let window = sceneDelegate.window {
-                window.rootViewController = navVC
+                window.rootViewController = tabBarVC
 
                 // Smooth transition animation
                 UIView.transition(

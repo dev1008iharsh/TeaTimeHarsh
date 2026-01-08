@@ -101,8 +101,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             mapContainerView.isHidden = false
 
             // 🔒 Security Check
-            let currentUserId = Constants.Strings.currentUserID
-            if place.createdByUserId != currentUserId {
+            if place.createdByUserId != Constants.Strings.currentUserID {
                 Utility.showAlert(title: "Access Denied", message: "You can only edit places created by you.", viewController: self)
                 view.isUserInteractionEnabled = false
                 return

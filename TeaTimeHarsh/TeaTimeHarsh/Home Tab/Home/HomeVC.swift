@@ -43,8 +43,7 @@ class HomeVC: UIViewController {
         case 2: // Visited
             return arrTeaPlaces.filter { $0.isVisited }
         case 3: // Mine (✨ NEW FILTER ADDED)
-            let currentUserId = Constants.Strings.currentUserID
-            return arrTeaPlaces.filter { $0.createdByUserId == currentUserId }
+            return arrTeaPlaces.filter { $0.createdByUserId == Constants.Strings.currentUserID }
         default: // 0 or others -> All
             return arrTeaPlaces
         }
@@ -63,6 +62,8 @@ class HomeVC: UIViewController {
         // 🎧 START LISTENING TO NOTIFICATIONS (Restored from your code)
         NotificationCenter.default.addObserver(self, selector: #selector(handleFavNotification(_:)), name: .teaPlaceDidTapFav, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleVisitNotification(_:)), name: .teaPlaceDidTapVisit, object: nil)
+        NotificationCenter.default.addObserver(self, selector:
+            #selector(handleReload), name: .teaPlacesShouldReload, object: nil)
     }
 
     deinit {
@@ -101,7 +102,11 @@ class HomeVC: UIViewController {
         // 2. CALL API
         callApiToToggleStatus(place: arrTeaPlaces[index], type: "fav")
     }
-
+    @objc func handleReload() {
+        DispatchQueue.main.async {
+            self.fetchDataFromFirebase()
+        }
+    }
     @objc func handleVisitNotification(_ notification: Notification) {
         guard let placeID = notification.userInfo?["placeID"] as? String,
               let isVisited = notification.userInfo?["isVisited"] as? Bool,
