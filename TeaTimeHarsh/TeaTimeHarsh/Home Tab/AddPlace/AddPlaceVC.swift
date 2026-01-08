@@ -77,6 +77,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         setupMenuSelection()
         setupImageCofiguration()
         setupMiniMap()
+        setupTextFields()
 
         // Configure UI based on Mode (Add vs Edit)
         configureScreenMode()
@@ -150,6 +151,18 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         ImageManagerKF.setImage(from: place.imageURL, into: imgPlace, placeholderName: "photo")
     }
 
+    func setupTextFields(){
+        txtName.applyDefaultStyle()
+        txtDesc.applyDefaultStyle()
+        txtPhone.applyDefaultStyle()
+        txtRating.applyDefaultStyle()
+        txtLocation.applyDefaultStyle()
+        txtPriceRange.applyDefaultStyle()
+        txtOpeningTime.applyDefaultStyle()
+        txtClosingTime.applyDefaultStyle()
+        txtHoliday.applyDefaultStyle()
+    }
+    
     // MARK: - Save / Update Logic 🚀
 
     func savePlaceToFirebase() {

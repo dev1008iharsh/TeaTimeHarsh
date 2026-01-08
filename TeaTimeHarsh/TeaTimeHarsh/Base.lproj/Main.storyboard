@@ -179,16 +179,17 @@
                                         </constraints>
                                     </imageView>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mQW-nh-a8p">
-                                        <rect key="frame" x="80" y="21" width="233" height="200"/>
+                                        <rect key="frame" x="96.666666666666686" y="21" width="200" height="200"/>
                                         <constraints>
+                                            <constraint firstAttribute="width" secondItem="mQW-nh-a8p" secondAttribute="height" multiplier="1:1" id="jbL-8e-Jnf"/>
                                             <constraint firstAttribute="height" constant="200" id="m15-AD-m7A"/>
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="EtF-O8-v8E">
-                                        <rect key="frame" x="20" y="231" width="353" height="540"/>
+                                        <rect key="frame" x="30" y="231" width="333" height="540"/>
                                         <subviews>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place name" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="oDG-Q1-Ttz">
-                                                <rect key="frame" x="0.0" y="0.0" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place name" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="oDG-Q1-Ttz">
+                                                <rect key="frame" x="0.0" y="0.0" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="45" id="39C-Ap-YAI"/>
@@ -199,8 +200,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="PVT-AV-2Bj"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place description" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Urq-lJ-CQY">
-                                                <rect key="frame" x="0.0" y="55" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place description" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Urq-lJ-CQY">
+                                                <rect key="frame" x="0.0" y="55" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES"/>
@@ -208,8 +209,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="p7h-Vq-9Qa"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place contact number" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="r5R-6E-sDD">
-                                                <rect key="frame" x="0.0" y="110" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place contact number" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="r5R-6E-sDD">
+                                                <rect key="frame" x="0.0" y="110" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" keyboardType="phonePad" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
@@ -217,8 +218,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="LR9-c9-cz5"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select place location (city)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="x7l-49-3Vl">
-                                                <rect key="frame" x="0.0" y="165" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select place location (city)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="x7l-49-3Vl">
+                                                <rect key="frame" x="0.0" y="165" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -226,8 +227,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="UAW-2t-xes"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select place rating(1-5 star)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="WQ1-dr-jae">
-                                                <rect key="frame" x="0.0" y="220" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select place rating(1-5 star)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="WQ1-dr-jae">
+                                                <rect key="frame" x="0.0" y="220" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -235,8 +236,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="Tkx-91-2P2"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select price range(Rs. 200-400)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="kVA-qt-Fjp">
-                                                <rect key="frame" x="0.0" y="275" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select price range(Rs. 200-400)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="kVA-qt-Fjp">
+                                                <rect key="frame" x="0.0" y="275" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -244,8 +245,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="iAi-lV-2b3"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select opening time(09:00 AM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Ylv-hR-OUJ">
-                                                <rect key="frame" x="0.0" y="330" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select opening time(09:00 AM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Ylv-hR-OUJ">
+                                                <rect key="frame" x="0.0" y="330" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -253,8 +254,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="FpG-Y9-SVC"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select closing time(10:00 PM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="aFS-aG-ibg">
-                                                <rect key="frame" x="0.0" y="385" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select closing time(10:00 PM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="aFS-aG-ibg">
+                                                <rect key="frame" x="0.0" y="385" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -262,8 +263,8 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="Een-ir-xjt"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select holidays (Saturday,Sunday)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="u79-LX-jkZ">
-                                                <rect key="frame" x="0.0" y="440" width="353" height="45"/>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select holidays (Saturday,Sunday)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="u79-LX-jkZ">
+                                                <rect key="frame" x="0.0" y="440" width="333" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -271,9 +272,9 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="9JC-4F-0T5"/>
                                                 </connections>
                                             </textField>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address (automatically fetch from map, Please select below button to location on map)" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n19-Yh-H1l">
-                                                <rect key="frame" x="0.0" y="495" width="353" height="45"/>
-                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address (automatically fetch from map, Please select below button to location on map)" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.40000000000000002" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n19-Yh-H1l">
+                                                <rect key="frame" x="0.0" y="495" width="333" height="45"/>
+                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
@@ -300,10 +301,10 @@
                                         </connections>
                                     </button>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiI-7G-HtZ">
-                                        <rect key="frame" x="20" y="836" width="353" height="150"/>
+                                        <rect key="frame" x="30" y="836" width="333" height="150"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MkY-Oj-gXa">
-                                                <rect key="frame" x="0.0" y="0.0" width="353" height="150"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="333" height="150"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="150" id="5wR-re-odY"/>
@@ -313,15 +314,14 @@
                                     </stackView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="517-bF-GIo" firstAttribute="width" secondItem="9oz-FE-eSh" secondAttribute="width" id="5tH-Ja-yCy"/>
-                                    <constraint firstAttribute="trailing" secondItem="517-bF-GIo" secondAttribute="trailing" id="7mV-ty-lmO"/>
+                                    <constraint firstItem="mQW-nh-a8p" firstAttribute="centerX" secondItem="9oz-FE-eSh" secondAttribute="centerX" id="0o1-SE-syk"/>
+                                    <constraint firstAttribute="trailing" secondItem="517-bF-GIo" secondAttribute="trailing" id="8Kr-TK-x2R"/>
                                     <constraint firstItem="p9z-3W-218" firstAttribute="centerX" secondItem="EtF-O8-v8E" secondAttribute="centerX" id="C5J-Q6-Ju7"/>
-                                    <constraint firstItem="mQW-nh-a8p" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="80" id="GGx-O7-Cax"/>
                                     <constraint firstItem="eiI-7G-HtZ" firstAttribute="top" secondItem="p9z-3W-218" secondAttribute="bottom" constant="15" id="N3a-3k-jbZ"/>
-                                    <constraint firstItem="EtF-O8-v8E" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="Ov9-ma-6pK"/>
-                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="mQW-nh-a8p" secondAttribute="trailing" constant="80" id="PPf-8E-Lqr"/>
+                                    <constraint firstItem="EtF-O8-v8E" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="30" id="Ov9-ma-6pK"/>
                                     <constraint firstItem="517-bF-GIo" firstAttribute="leading" secondItem="9oz-FE-eSh" secondAttribute="leading" id="Y8y-L6-fY1"/>
-                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="EtF-O8-v8E" secondAttribute="trailing" constant="20" id="Ygj-pP-huC"/>
+                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="EtF-O8-v8E" secondAttribute="trailing" constant="30" id="Ygj-pP-huC"/>
+                                    <constraint firstItem="517-bF-GIo" firstAttribute="width" secondItem="9oz-FE-eSh" secondAttribute="width" id="YxU-sg-J9e"/>
                                     <constraint firstAttribute="bottom" secondItem="eiI-7G-HtZ" secondAttribute="bottom" constant="90" id="cjv-np-nTb"/>
                                     <constraint firstItem="eiI-7G-HtZ" firstAttribute="leading" secondItem="EtF-O8-v8E" secondAttribute="leading" id="eoy-Ew-bbe"/>
                                     <constraint firstItem="p9z-3W-218" firstAttribute="top" secondItem="EtF-O8-v8E" secondAttribute="bottom" constant="15" id="fUl-lV-BDb"/>
@@ -384,7 +384,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jhx-Ib-nno" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1008" y="823"/>
+            <point key="canvasLocation" x="1006.8702290076335" y="822.53521126760563"/>
         </scene>
         <!--Select Location-->
         <scene sceneID="Ypx-EJ-2DJ">

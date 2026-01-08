@@ -25,9 +25,9 @@ struct User: Identifiable, Codable {
     // MARK: - 🆔 Identity
     @DocumentID var id: String?
     
-    // ⚠️ Made Optional.
-    // Reason: When registering via Email/Pass, you might not ask for a username immediately.
+  
     var username: String?
+    var fullName: String?
     
     var email: String
     
@@ -42,6 +42,12 @@ struct User: Identifiable, Codable {
         guard let birthDate = birthDate else { return nil }
         let calendar = Calendar.current
         return calendar.dateComponents([.year], from: birthDate, to: Date()).year
+    }
+    var birthDateString: String {
+        guard let date = birthDate else { return "" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        return formatter.string(from: date)
     }
     
     // MARK: - 🔗 Social Login Info
@@ -70,6 +76,7 @@ struct User: Identifiable, Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case username
+        case fullName = "full_name"
         case email
         case bio
         case phoneNumber = "phone_number"

@@ -126,6 +126,7 @@ class AuthManager {
             Constants.Strings.currentUserID = ""
             // 3. 🧼 WIPE: Remove all sensitive data from Keychain
             resetKeychain()
+            LocalProfileImageSave.shared.deleteImage()
             return true
         } catch {
             return false

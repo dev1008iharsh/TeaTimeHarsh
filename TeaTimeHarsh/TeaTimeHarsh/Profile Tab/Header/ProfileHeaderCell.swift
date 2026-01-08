@@ -22,23 +22,23 @@ class ProfileHeaderCell: UIView {
     
     func setupView() {
         imgProfile.isUserInteractionEnabled = true
-        
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         imgProfile.addGestureRecognizer(tap)
-        
- 
         imgProfile.clipsToBounds = true
-  
-        imgProfile.layer.cornerRadius = imgProfile.frame.height / 2
+        imgProfile.layer.cornerRadius = 65
     }
+    
     
     @objc func handleTap() {
         // 4. Ring the phone! (Trigger the action)
         didTapProfileImage?()
     }
-    
-    // 5. Helper to set the image
-    func configure(image: UIImage?) {
-        imgProfile.image = image
+   
+    func configureProfileImage(){
+        if let savedImage = LocalProfileImageSave.shared.getSavedImage() {
+            self.imgProfile.image = savedImage
+        } else {
+            self.imgProfile.image = UIImage(systemName: "person.circle")
+        }
     }
 }

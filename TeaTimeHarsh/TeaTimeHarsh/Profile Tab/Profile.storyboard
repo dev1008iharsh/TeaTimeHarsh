@@ -192,10 +192,10 @@
             </objects>
             <point key="canvasLocation" x="1873" y="92"/>
         </scene>
-        <!--View Controller-->
+        <!--Edit ProfileVC-->
         <scene sceneID="lfV-Ru-hgr">
             <objects>
-                <viewController id="YA2-VT-OR2" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="EditProfileVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="YA2-VT-OR2" customClass="EditProfileVC" customModule="TeaTimeHarsh" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="B0w-co-kGH">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -204,18 +204,19 @@
                                 <rect key="frame" x="0.0" y="118" width="393" height="734"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mRO-0z-fkN">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="734"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="800"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GuY-N0-iv9">
-                                                <rect key="frame" x="30" y="30" width="333" height="200"/>
+                                                <rect key="frame" x="121.66666666666669" y="30" width="150" height="150"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="200" id="obU-lu-hiQ"/>
+                                                    <constraint firstAttribute="width" secondItem="GuY-N0-iv9" secondAttribute="height" multiplier="1:1" id="g7c-zr-T5a"/>
+                                                    <constraint firstAttribute="height" constant="150" id="obU-lu-hiQ"/>
                                                 </constraints>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="1W4-JT-ltz">
-                                                <rect key="frame" x="30" y="240" width="333" height="540"/>
+                                                <rect key="frame" x="30" y="200" width="333" height="320"/>
                                                 <subviews>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter your name" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="90s-xD-ecu">
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter your full name" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="90s-xD-ecu">
                                                         <rect key="frame" x="0.0" y="0.0" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <constraints>
@@ -223,72 +224,97 @@
                                                         </constraints>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                         <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="name"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="YA2-VT-OR2" id="zQ1-oj-ndq"/>
+                                                        </connections>
                                                     </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place description" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="pNF-90-DLW">
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter username" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="pNF-90-DLW">
                                                         <rect key="frame" x="0.0" y="55" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES"/>
+                                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="nickname"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="YA2-VT-OR2" id="ITe-PA-89q"/>
+                                                        </connections>
                                                     </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter place contact number" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="17Q-lc-egx">
+                                                    <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter email address" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="3Ad-hb-fcX">
                                                         <rect key="frame" x="0.0" y="110" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" keyboardType="phonePad" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="email"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="YA2-VT-OR2" id="mV2-g3-sMR"/>
+                                                        </connections>
                                                     </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select place location (city)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="9vK-gw-CZw">
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter your phone number" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="IfV-go-jwh">
                                                         <rect key="frame" x="0.0" y="165" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="YA2-VT-OR2" id="Fyi-go-TQr"/>
+                                                        </connections>
                                                     </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select place rating(1-5 star)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Toq-sv-fNP">
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter your current city" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="17Q-lc-egx">
                                                         <rect key="frame" x="0.0" y="220" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" keyboardType="phonePad" returnKeyType="done" enablesReturnKeyAutomatically="YES" textContentType="address-level2"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="YA2-VT-OR2" id="0Km-Pb-AV7"/>
+                                                        </connections>
                                                     </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select price range(Rs. 200-400)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Tbc-hA-hpe">
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select birthdate" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="9vK-gw-CZw">
                                                         <rect key="frame" x="0.0" y="275" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
+                                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" enablesReturnKeyAutomatically="YES" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="YA2-VT-OR2" id="jfe-4X-Fa8"/>
+                                                        </connections>
                                                     </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select opening time(09:00 AM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="3h1-8Y-ux3">
-                                                        <rect key="frame" x="0.0" y="330" width="333" height="45"/>
-                                                        <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
-                                                    </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select closing time(10:00 PM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="BWL-nv-0oi">
-                                                        <rect key="frame" x="0.0" y="385" width="333" height="45"/>
-                                                        <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
-                                                    </textField>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select holidays (Saturday,Sunday)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="pJi-1D-HDE">
-                                                        <rect key="frame" x="0.0" y="440" width="333" height="45"/>
-                                                        <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
-                                                    </textField>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address (automatically fetch from map, Please select below button to location on map)" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XB5-HN-r39">
-                                                        <rect key="frame" x="0.0" y="495" width="333" height="45"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <nil key="textColor"/>
-                                                        <nil key="highlightedColor"/>
-                                                    </label>
                                                 </subviews>
                                             </stackView>
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WhL-QV-S6k">
+                                                <rect key="frame" x="30" y="535" width="333" height="130"/>
+                                                <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="130" id="6CV-UX-O2k"/>
+                                                </constraints>
+                                                <color key="textColor" systemColor="labelColor"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                <connections>
+                                                    <outlet property="delegate" destination="YA2-VT-OR2" id="sD9-2w-CZc"/>
+                                                </connections>
+                                            </textView>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="R0f-Np-bnd">
+                                                <rect key="frame" x="106.66666666666669" y="695" width="180" height="45"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="45" id="Xda-jW-Jua"/>
+                                                    <constraint firstAttribute="width" constant="180" id="bvv-bs-IUk"/>
+                                                </constraints>
+                                                <color key="tintColor" systemColor="systemIndigoColor"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="filled" title="Submit" cornerStyle="capsule">
+                                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
+                                                </buttonConfiguration>
+                                                <connections>
+                                                    <action selector="btnUpdateTapped:" destination="YA2-VT-OR2" eventType="touchUpInside" id="Q79-rY-TQ1"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                         <constraints>
-                                            <constraint firstAttribute="trailing" secondItem="GuY-N0-iv9" secondAttribute="trailing" constant="30" id="0aZ-jt-FoV"/>
-                                            <constraint firstItem="1W4-JT-ltz" firstAttribute="leading" secondItem="GuY-N0-iv9" secondAttribute="leading" id="20k-b1-Jzm"/>
-                                            <constraint firstItem="GuY-N0-iv9" firstAttribute="leading" secondItem="mRO-0z-fkN" secondAttribute="leading" constant="30" id="MKn-J7-Xzf"/>
-                                            <constraint firstAttribute="height" constant="734" id="dHV-8m-4IX"/>
+                                            <constraint firstItem="WhL-QV-S6k" firstAttribute="trailing" secondItem="1W4-JT-ltz" secondAttribute="trailing" id="APa-5S-5yR"/>
+                                            <constraint firstItem="R0f-Np-bnd" firstAttribute="centerX" secondItem="WhL-QV-S6k" secondAttribute="centerX" id="BJ1-kf-Gis"/>
+                                            <constraint firstItem="WhL-QV-S6k" firstAttribute="leading" secondItem="1W4-JT-ltz" secondAttribute="leading" id="W4a-wk-IId"/>
+                                            <constraint firstItem="WhL-QV-S6k" firstAttribute="top" secondItem="1W4-JT-ltz" secondAttribute="bottom" constant="15" id="YBD-7z-Fd0"/>
+                                            <constraint firstAttribute="bottom" secondItem="R0f-Np-bnd" secondAttribute="bottom" constant="60" id="czw-zG-srl"/>
                                             <constraint firstItem="1W4-JT-ltz" firstAttribute="centerX" secondItem="GuY-N0-iv9" secondAttribute="centerX" id="fom-I4-2MZ"/>
-                                            <constraint firstItem="1W4-JT-ltz" firstAttribute="top" secondItem="GuY-N0-iv9" secondAttribute="bottom" constant="10" id="jjb-Ks-wbG"/>
+                                            <constraint firstItem="1W4-JT-ltz" firstAttribute="leading" secondItem="mRO-0z-fkN" secondAttribute="leading" constant="30" id="hfC-4l-Epe"/>
+                                            <constraint firstItem="1W4-JT-ltz" firstAttribute="top" secondItem="GuY-N0-iv9" secondAttribute="bottom" constant="20" id="jjb-Ks-wbG"/>
+                                            <constraint firstItem="R0f-Np-bnd" firstAttribute="top" secondItem="WhL-QV-S6k" secondAttribute="bottom" constant="30" id="pih-wh-g8E"/>
                                             <constraint firstItem="GuY-N0-iv9" firstAttribute="top" secondItem="mRO-0z-fkN" secondAttribute="top" constant="30" id="xAh-DW-L64"/>
                                         </constraints>
                                     </view>
@@ -305,14 +331,26 @@
                             </scrollView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Pq7-28-l6J"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="Pcd-yh-Q61" firstAttribute="leading" secondItem="Pq7-28-l6J" secondAttribute="leading" id="635-16-HvF"/>
+                            <constraint firstItem="GuY-N0-iv9" firstAttribute="centerX" secondItem="Pq7-28-l6J" secondAttribute="centerX" id="R4L-Br-s5G"/>
                             <constraint firstItem="Pcd-yh-Q61" firstAttribute="trailing" secondItem="Pq7-28-l6J" secondAttribute="trailing" id="mzA-Sm-TM7"/>
                             <constraint firstAttribute="bottom" secondItem="Pcd-yh-Q61" secondAttribute="bottom" id="ppf-wQ-8aA"/>
                             <constraint firstItem="Pcd-yh-Q61" firstAttribute="top" secondItem="Pq7-28-l6J" secondAttribute="top" id="qX9-kD-3Ad"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="btnUpdate" destination="R0f-Np-bnd" id="GFw-tc-Ulm"/>
+                        <outlet property="imgProfile" destination="GuY-N0-iv9" id="osf-LW-Ung"/>
+                        <outlet property="txtBirthDate" destination="9vK-gw-CZw" id="wkf-pI-UEC"/>
+                        <outlet property="txtCity" destination="17Q-lc-egx" id="JaK-uf-c86"/>
+                        <outlet property="txtEmail" destination="3Ad-hb-fcX" id="vgf-TN-opO"/>
+                        <outlet property="txtFullName" destination="90s-xD-ecu" id="rUO-c8-oEL"/>
+                        <outlet property="txtPhone" destination="IfV-go-jwh" id="PGd-Vh-Z9E"/>
+                        <outlet property="txtUserName" destination="pNF-90-DLW" id="brg-ws-ymq"/>
+                        <outlet property="txtViewBio" destination="WhL-QV-S6k" id="M7b-aN-e6R"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ROz-g3-pie" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -331,13 +369,13 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemIndigoColor">
-            <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemPinkColor">
-            <color red="1" green="0.1764705882" blue="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.17647058823529413" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

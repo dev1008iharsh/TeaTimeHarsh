@@ -96,10 +96,29 @@ enum ProfileRow {
 
 class ProfileVC: UIViewController {
     @IBOutlet var tblProfile: UITableView!
+    lazy var profileHeader: ProfileHeaderCell = {
+        // A. Load the XIB
+        guard let header = Bundle.main.loadNibNamed("ProfileHeaderCell", owner: nil)?.first as? ProfileHeaderCell else {
+            fatalError("❌ Could not load ProfileHeaderCell XIB file")
+        }
+
+        // B. Set the Frame
+        // Note: We use a default height, but we can update it later
+        header.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 100)
+
+        // C. Configure the Tap Action immediately
+        header.didTapProfileImage = { [weak self] in
+            guard let self = self else { return }
+            self.handleProfileImageTap() // 👇 Keeping logic clean by calling a function
+        }
+        header.configureProfileImage()
+
+        return header
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTableHeader()
+        tblProfile.tableHeaderView = profileHeader
         setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
         if #available(iOS 17.0, *) {
             registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
@@ -108,35 +127,21 @@ class ProfileVC: UIViewController {
         }
     }
 
-    func setupTableHeader() {
-        guard let header = Bundle.main.loadNibNamed("ProfileHeaderCell", owner: nil)?.first as? ProfileHeaderCell
-        else { return }
+    // MARK: - Helper Functions
 
-        header.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: tblProfile.frame.width,
-            height: 100
-        )
-        header.configure(image: UIImage(systemName: "person.circle.fill"))
-        header.didTapProfileImage = { [weak self] in
-            print("Tapped!")
-            guard let self = self else { return }
-
-            if ThemeManager.shared.isDarkModeActive {
-                print("We are in the shadows! 🌑")
-                ImageZoomViewer.shared
-                    .showFullScreen(
-                        from: header.imgProfile,
-                        backgroundColor: .black
-                    )
-            } else {
-                print("Let there be light! ☀️")
-                ImageZoomViewer.shared.showFullScreen(from: header.imgProfile, backgroundColor: .white)
-            }
+    func handleProfileImageTap() {
+        print("Tapped!")
+        // Accessing the global variable easily 👇
+        let imageToZoom = profileHeader.imgProfile
+        if ThemeManager.shared.isDarkModeActive {
+            ImageZoomViewer.shared
+                .showFullScreen(
+                    from: imageToZoom ?? UIImageView(),
+                    backgroundColor: .black
+                )
+        } else {
+            ImageZoomViewer.shared.showFullScreen(from: imageToZoom ?? UIImageView(), backgroundColor: .white)
         }
-
-        tblProfile.tableHeaderView = header
     }
 }
 
@@ -236,6 +241,13 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         // Personal
         case .editProfile:
             print("👤 Edit Profile Tapped")
+            let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
+            guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
+            editVC.onProfileUpdated = { [weak self] in
+                self?.profileHeader.configureProfileImage()
+            }
+            navigationController?.pushViewController(editVC, animated: true)
+
         case .favourites:
             print("❤️ Favourites Tapped")
             navigateToHomeAndFilter(segmentIndex: 1)
@@ -283,7 +295,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         case .deleteAccount:
             print("🗑️ Delete Account Logic")
             performDeleteAccount()
-            
+
         case .logout:
             print("🚪 Logout Logic")
             confirmLogout()
@@ -426,7 +438,6 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 }
 
 extension ProfileVC {
-
     // 1. The Main Trigger
     // Now creates the Password Alert DIRECTLY (No extra "Are you sure" popup first)
     private func performDeleteAccount() {
@@ -437,11 +448,11 @@ extension ProfileVC {
     private func showReauthInputAlert() {
         // We combine your Title and Warning Message here
         let alertTitle = "Delete Entire Account?"
-        
+
         // I added a small line break "\n\n" before the security instruction to make it readable
         let alertMessage = """
         This action will delete your profile and all your saved places. 📉 Everything you have added will be deleted. This action cannot be undone. 🚫 Once you delete, all data related to your account will be lost permanently. 🔴
-        
+
         For your security, please enter your password to confirm deletion. 🔒
         """
 
@@ -460,13 +471,13 @@ extension ProfileVC {
         // The "Delete" Button
         let deleteAction = UIAlertAction(title: "Delete Permanently", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
-            
+
             // 1. Check if text field is empty
             guard let password = alert.textFields?.first?.text, !password.isEmpty else {
                 self.showErrorAlert(message: "Password cannot be empty.")
                 return
             }
-            
+
             // 2. Proceed to Verify & Delete
             self.deleteAccountWithPassword(password)
         }

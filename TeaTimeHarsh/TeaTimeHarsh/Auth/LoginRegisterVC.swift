@@ -41,9 +41,10 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         updateUI(mode: .login)
         //setupGradientBackground()
-        Utility.styleTextField(txtEmail)
-        Utility.styleTextField(txtPassword)
-        Utility.styleTextField(txtConfirmPassword)
+        
+        txtEmail.applyDefaultStyle()
+        txtPassword.applyDefaultStyle()
+        txtConfirmPassword.applyDefaultStyle()
     }
 
     deinit {
