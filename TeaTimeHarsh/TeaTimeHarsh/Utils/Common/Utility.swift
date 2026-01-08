@@ -165,4 +165,21 @@ final class Utility {
         // By default, TextView text touches the edges. This pushes it inside.
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     }
+
+    static func styleTextField(_ textField: UITextField) {
+        // 1. Layer Styling
+        textField.layer.borderColor = UIColor.systemGray4.cgColor
+        textField.layer.cornerRadius = 12.0
+        textField.layer.borderWidth = 1.0
+        textField.backgroundColor = .systemBackground
+
+        let leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: textField.frame.height))
+        textField.leftView = leftView
+        textField.leftViewMode = .always // 👈 Important: Always show this space
+
+
+        let rightView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: textField.frame.height))
+        textField.rightView = rightView
+        textField.rightViewMode = .always
+    }
 }

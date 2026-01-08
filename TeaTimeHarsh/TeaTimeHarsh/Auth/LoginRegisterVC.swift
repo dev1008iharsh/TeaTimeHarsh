@@ -24,7 +24,13 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     @IBOutlet var txtPassword: UITextField!
     @IBOutlet var txtConfirmPassword: UITextField!
     @IBOutlet var btnForgotPassword: UIButton!
-    @IBOutlet var btnLoginRegister: UIButton!
+    @IBOutlet var btnLoginRegister: UIButton!{
+        didSet{
+            btnLoginRegister.layer.cornerRadius = btnLoginRegister.bounds.height/2
+            btnLoginRegister.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+        }
+    }
+    @IBOutlet weak var stackView: UIStackView!
 
     // Variable to track current mode (Default is Login)
     var currentMode: AuthMode = .login
@@ -34,7 +40,10 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateUI(mode: .login)
-        setupGradientBackground()
+        //setupGradientBackground()
+        Utility.styleTextField(txtEmail)
+        Utility.styleTextField(txtPassword)
+        Utility.styleTextField(txtConfirmPassword)
     }
 
     deinit {
@@ -65,45 +74,40 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     func updateUI(mode: AuthMode) {
         currentMode = mode
 
+        // Email is ALWAYS visible
+        self.txtEmail.isHidden = false
+
+        // Password is visible unless we are in Forgot Password mode
+        self.txtPassword.isHidden = (mode == .forgotPassword)
+
+        // Confirm Password is visible ONLY in Register mode
+        self.txtConfirmPassword.isHidden = (mode != .register)
+
+        // Segment Control is hidden in Forgot Password mode
+        self.segmentControl.isHidden = (mode == .forgotPassword)
+
+        // Forgot Button is hidden in Register mode
+        self.btnForgotPassword.isHidden = (mode == .register)
+        
+        switch mode {
+        case .login:
+            self.segmentControl.selectedSegmentIndex = 0
+            self.btnForgotPassword.setTitle("Forgot Password?", for: .normal)
+            self.btnLoginRegister.setTitle("Login", for: .normal)
+            self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
+            
+        case .register:
+            self.segmentControl.selectedSegmentIndex = 1
+            self.btnLoginRegister.setTitle("Register", for: .normal)
+            self.imgLoginRegisterVector.image = UIImage(named: "SIGNUP_VECTOR")
+            
+        case .forgotPassword:
+            self.btnForgotPassword.setTitle("Back to Login", for: .normal)
+            self.btnLoginRegister.setTitle("Send Reset Link", for: .normal)
+            self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
+        }
+
         UIView.animate(withDuration: 0.3) {
-            // --- A. Visibility Logic (Clean One-Liners) ---
-
-            // Email is ALWAYS visible
-            self.txtEmail.isHidden = false
-
-            // Password is visible unless we are in Forgot Password mode
-            self.txtPassword.isHidden = (mode == .forgotPassword)
-
-            // Confirm Password is visible ONLY in Register mode
-            self.txtConfirmPassword.isHidden = (mode != .register)
-
-            // Segment Control is hidden in Forgot Password mode (Focus on recovery)
-            self.segmentControl.isHidden = (mode == .forgotPassword)
-
-            // Forgot Button is hidden in Register mode (Visible in Login and Forgot modes)
-            self.btnForgotPassword.isHidden = (mode == .register)
-
-            // --- B. Text & Image Configuration ---
-            switch mode {
-            case .login:
-                self.segmentControl.selectedSegmentIndex = 0
-                self.btnForgotPassword.setTitle("Forgot Password?", for: .normal)
-                self.btnLoginRegister.setTitle("Login", for: .normal)
-                self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
-
-            case .register:
-                self.segmentControl.selectedSegmentIndex = 1
-                self.btnLoginRegister.setTitle("Register", for: .normal)
-                self.imgLoginRegisterVector.image = UIImage(named: "SIGNUP_VECTOR")
-
-            case .forgotPassword:
-                // Change button to "Back" so user can cancel
-                self.btnForgotPassword.setTitle("Back to Login", for: .normal)
-                self.btnLoginRegister.setTitle("Send Reset Link", for: .normal)
-                self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
-            }
-
-            // Force layout update for animation
             self.view.layoutIfNeeded()
         }
     }

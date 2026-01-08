@@ -278,20 +278,44 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
         case .deleteAllPlaces:
             print("🗑️ Delete All Places ")
-
-            let vc = UserPlacesListVC()
-            vc.isDeleteAccount = false
-            present(vc, animated: true)
+            loadUserData()
 
         case .deleteAccount:
             print("🗑️ Delete Account Logic")
-            let vc = UserPlacesListVC()
-            vc.isDeleteAccount = true
-            present(vc, animated: true)
-
+            performDeleteAccount()
+            
         case .logout:
             print("🚪 Logout Logic")
             confirmLogout()
+        }
+    }
+
+    private func loadUserData() {
+        LoaderManager.shared.startLoading()
+        Task { [weak self] in
+            defer {
+                DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
+            }
+            guard let self = self else { return }
+            do {
+                let places = try await FirebaseManager.shared.fetchCurretnUserPlaces()
+
+                print("Successfully loaded \(places.count) places.")
+
+                if places.isEmpty {
+                    Utility.showAlertHandler(
+                        title: "Oops!",
+                        message: "You haven't added any places.🍵 Tap the ➕ button on the Home screen to get started! ✨",
+                        viewController: self
+                    ) { _ in }
+                } else {
+                    let vc = UserPlacesListVC()
+                    vc.places = places
+                    present(vc, animated: true)
+                }
+            } catch {
+                print("Error fetching user places: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -398,5 +422,126 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
             present(activityVC, animated: true, completion: nil)
         }
+    }
+}
+ 
+extension ProfileVC {
+    // 1. The Main Trigger (Call this when button DELETE ACCOUNT is tapped)
+    private func performDeleteAccount() {
+        Utility.showYesNoConfirmAlert(
+            title: "Delete Entire Account?",
+            message: "This action will delete your profile and all your saved places. 📉 Everything you have added will be deleted. This action cannot be undone. 🚫 Once you delete, all data related to your account will be lost permanently. 🔴",
+            viewController: self
+        ) { [weak self] _ in
+            guard let self = self else { return }
+
+            LoaderManager.shared.startLoading()
+
+            Task {
+                do {
+                    // Try to delete immediately
+                    try await FirebaseManager.shared.deleteEntireAccount()
+
+                    // If successful:
+                    await MainActor.run {
+                        LoaderManager.shared.stopLoading()
+                        self.handleDeleteSuccess()
+                    }
+
+                } catch {
+                    // If error:
+                    await MainActor.run {
+                        LoaderManager.shared.stopLoading()
+
+                        // Check if we need to ask for password (using our Clean Helper)
+                        if FirebaseManager.shared.isRequiresRecentLoginError(error) {
+                            self.showReauthInputAlert()
+                        } else {
+                            self.showErrorAlert(message: error.localizedDescription)
+                        }
+                    }
+                }
+            }
+        } noAction: { _ in
+            print("Delete Account cancelled No Tapped")
+        }
+    }
+
+    // 2. Retry Logic (Called after user enters password)
+    private func retryDeleteWithPassword(_ password: String) {
+        LoaderManager.shared.startLoading()
+
+        Task {
+            do {
+                // First: Re-login
+                try await FirebaseManager.shared.reauthenticateWithPassword(password)
+
+                // Second: Delete again
+                try await FirebaseManager.shared.deleteEntireAccount()
+
+                // Success!
+                await MainActor.run {
+                    LoaderManager.shared.stopLoading()
+                    self.handleDeleteSuccess()
+                }
+
+            } catch {
+                // Failure (Wrong password, etc.)
+                await MainActor.run {
+                    LoaderManager.shared.stopLoading()
+                    self.showErrorAlert(message: "Incorrect password or network error.Try again.")
+                }
+            }
+        }
+    }
+
+    // MARK: - UI Helpers
+
+    // 3. Password Popup
+    private func showReauthInputAlert() {
+        let alert = UIAlertController(
+            title: "Security Check 🔒",
+            message: "For your security, please enter your password to confirm deletion.",
+            preferredStyle: .alert
+        )
+
+        alert.addTextField { textField in
+            textField.placeholder = "Enter your password"
+            textField.isSecureTextEntry = true
+        }
+
+        let confirmAction = UIAlertAction(title: "Confirm Delete", style: .destructive) { [weak self] _ in
+            guard let self = self, let password = alert.textFields?.first?.text, !password.isEmpty else { return }
+            self.retryDeleteWithPassword(password)
+        }
+
+        alert.addAction(confirmAction)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        present(alert, animated: true)
+    }
+
+    // 4. Success Handler
+    private func handleDeleteSuccess() {
+        HapticHelper.success()
+        Utility.showAlertHandler(
+            title: "Account Deleted ✅",
+            message: "Your account has been permanently deleted. See you soon! 👋",
+            viewController: self
+        ) { _ in
+            if AuthManager.shared.signOut() {
+                UtilsProject.logoutAndNavigateToLoginVC()
+            }
+        }
+    }
+
+    // 5. Error Handler
+    private func showErrorAlert(message: String) {
+        HapticHelper.error()
+        Utility.showAlert(
+            title: "Error",
+            message: message,
+            viewController: self
+        )
     }
 }

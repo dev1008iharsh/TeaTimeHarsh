@@ -11,8 +11,7 @@ class UserPlacesListVC: UIViewController {
     // MARK: - Properties
 
     var places: [TeaPlace] = []
-    var isDeleteAccount = false
-
+ 
     // MARK: - UI Components
 
     private let titleLabel: UILabel = {
@@ -81,7 +80,6 @@ class UserPlacesListVC: UIViewController {
         super.viewDidLoad()
         setupConfiguration()
         setupUI()
-        loadUserData()
     }
 
     // MARK: - Setup & Configuration
@@ -96,17 +94,7 @@ class UserPlacesListVC: UIViewController {
             sheet.prefersScrollingExpandsWhenScrolledToEdge = false
         }
 
-        // Configure UI based on mode
-        if isDeleteAccount {
-            titleLabel.text = "Delete Entire Account?"
-            
-            deleteAllButton.setTitle("Delete Account", for: .normal)
-            descriptionLabel.text = "This action will delete your profile and all your saved places. 📉 Everything you have added will be deleted. This action cannot be undone. 🚫 Once you delete, all data related to your account will be lost permanently. 🔴"
-        } else {
-            titleLabel.text = "Delete All Places?"
-            deleteAllButton.setTitle("Delete All Places", for: .normal)
-            descriptionLabel.text = "Here is the list of all the places you have added till now. 📝 These will all be deleted. This action cannot be undone. Once you delete, all data related to these places will be removed permanently. 🔴"
-        }
+         
 
         // Setup TableView
         tableView.delegate = self
@@ -157,87 +145,14 @@ class UserPlacesListVC: UIViewController {
 
     @objc private func didTapDeleteAction() {
         // Refactored: Now handles both cases correctly
-        if isDeleteAccount {
-            performDeleteAccount()
-        } else {
+     
             performDeleteAllPlaces()
-        }
+        
     }
 
     // MARK: - Network Logic
 
-    private func loadUserData() {
-        LoaderManager.shared.startLoading()
-        Task { [weak self] in
-            defer {
-                DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
-            }
-            guard let self = self else { return }
-            do {
-                let places = try await FirebaseManager.shared.fetchCurretnUserPlaces()
-                self.places = places
-                self.tableView.reloadData()
-
-                print("Successfully loaded \(places.count) places.")
-
-                if places.isEmpty {
-                    self.dismiss(animated: true)
-                    Utility.showAlertHandler(
-                        title: "Oops!",
-                        message: "You haven't added any places.🍵 Tap the ➕ button on the Home screen to get started! ✨",
-                        viewController: self
-                    ) { _ in }
-                }
-            } catch {
-                print("Error fetching user places: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    private func performDeleteAccount() {
-        Utility.showYesNoConfirmAlert(
-            title: "Delete Entire account with all created places?",
-            message: "Wait! Do you really want to remove entire account? You won't be able to recover later.🔴 You will be redirect to login /register screen.",
-            viewController: self
-        ) { [weak self] _ in
-            guard let self = self else { return }
-
-            LoaderManager.shared.startLoading()
-
-            Task {
-                defer {
-                    DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
-                }
-                do {
-                    try await FirebaseManager.shared.deleteEntireAccount()
-
-                    await MainActor.run {
-                        HapticHelper.success()
-                        Utility.showAlertHandler(
-                            title: "Entire account and related data deleted ✅",
-                            message: "Your account has been permanently deleted. We hope to see you again! 👋",
-                            viewController: self
-                        ) { _ in
-                            // Calling your custom UtilsProject navigation
-                            UtilsProject.logoutAndNavigateToLoginVC()
-                        }
-                    }
-                } catch {
-                    await MainActor.run {
-                        HapticHelper.error()
-                        Utility.showAlert(
-                            title: "Error",
-                            message: error.localizedDescription,
-                            viewController: self
-                        )
-                    }
-                }
-            }
-        } noAction: { _ in
-            print("Delete Account cancelled by user")
-        }
-    }
-
+ 
     private func performDeleteAllPlaces() {
         Utility.showYesNoConfirmAlert(
             title: "Delete All Places?",
@@ -256,13 +171,15 @@ class UserPlacesListVC: UIViewController {
 
                     await MainActor.run {
                         HapticHelper.success()
+                        self.dismiss(animated: true)
+                        /*
                         Utility.showAlertHandler(
                             title: "All places deleted ✅",
                             message: "All places successfully deleted.  🍵 Tap the ➕ button on the Home screen to add new places ✨",
                             viewController: self
                         ) { _ in
                             self.dismiss(animated: true)
-                        }
+                        }*/
                     }
                 } catch {
                     await MainActor.run {
