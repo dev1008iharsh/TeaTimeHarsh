@@ -5,6 +5,7 @@
 //  Created by Harsh on 31/12/25.
 //
 
+//import AuthenticationServices
 import FirebaseAuth
 import UIKit
 
@@ -270,61 +271,54 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         }
     }
 }
-// MARK: - Social Login Actions 🌍
-extension LoginRegisterVC {
-    
-    // 🍎 Apple Login (Disabled as per your request)
-    @IBAction func btnAppleTapped(_ sender: UIButton) {
-        HapticHelper.heavy()
-        // We are ignoring Apple Login for now
-        print("Apple login disabled")
-    }
 
+// MARK: - Social Login Actions 🌍
+
+extension LoginRegisterVC {
     // 🌍 Google Login
     @IBAction func btnGoogleTapped(_ sender: UIButton) {
         HapticHelper.heavy()
         performSocialLogin(provider: .google)
     }
-        
+
     // 📘 Facebook Login
     @IBAction func btnFacebookTapped(_ sender: UIButton) {
         HapticHelper.heavy()
         performSocialLogin(provider: .facebook)
     }
-        
+
     // MARK: - 🛠 Social Login Logic Helper
-    
+
     private func performSocialLogin(provider: AuthProviderType) {
         LoaderManager.shared.startLoading()
-        
+
         // 1. 🌍 Handle Google (Async/Await)
         if provider == .google {
             Task {
                 do {
                     // Start Google Login
                     let (credential, user) = try await SocialAuthManager.shared.startGoogleLogin(in: self)
-                    
+
                     // Sign In to Firebase
                     try await AuthManager.shared.signInWithSocialCredential(credential: credential, userDetails: user)
-                    
+
                     // Success! 🎉
                     self.handleAuthResponse(success: true, error: nil)
-                    
+
                 } catch {
                     self.handleSocialError(error)
                 }
             }
         }
-        
+
         // 2. 📘 Handle Facebook (Completion Handler)
         else if provider == .facebook {
-            
             SocialAuthManager.shared.startFacebookLogin(in: self) { [weak self] result in
                 guard let self = self else { return }
-                
+
                 switch result {
                 case .success(let (credential, user)):
-                    
+
                     // Facebook worked! Now we need a Task to call Firebase (because Firebase is async)
                     Task {
                         do {
@@ -334,24 +328,117 @@ extension LoginRegisterVC {
                             self.handleSocialError(error)
                         }
                     }
-                    
-                case .failure(let error):
+
+                case let .failure(error):
                     self.handleSocialError(error)
                 }
             }
         }
     }
-    
+
     // MARK: - ⚠️ Error Handling Helper
+
     private func handleSocialError(_ error: Error) {
         LoaderManager.shared.stopLoading()
         print("Social Login Error: \(error.localizedDescription)")
-        
+
         // Don't show alert if user just cancelled the popup
         if let socialError = error as? SocialAuthError, case .cancelled = socialError {
             return
         }
-        
+
         Utility.showAlert(title: "Login Failed", message: error.localizedDescription, viewController: self)
     }
+
+    @IBAction func btnAppleTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        print("🟢 Apple Sign-In Button Tapped")
+
+        Utility.showAlert(
+            title: "Server Error",
+            message: "Server is busy due to too much request please try again after some time.",
+            viewController: self
+        )
+
+        // MARK: - Code commented due to not having apple developer account.
+
+        /*
+         // 🚀 START LOGIN PROCESS
+         let appleIDProvider = ASAuthorizationAppleIDProvider()
+         let request = appleIDProvider.createRequest()
+
+         // 📝 We ask for the User's Full Name and Email
+         request.requestedScopes = [.fullName, .email]
+
+         // 🚀 Create the controller and show the popup
+         let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+
+         authorizationController.delegate = self
+         authorizationController.presentationContextProvider = self
+
+         authorizationController.performRequests()*/
+    }
 }
+
+/*
+ // MARK: - Apple Sign In Extensions
+
+ // We combine both protocols here: Delegate (for success/fail) and ContextProviding (for the window)
+ extension LoginRegisterVC: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+     // 🖥️ This tells Apple which window to show the popup on
+     // (This fixes the "method does not satisfy requirement" error)
+     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+         return view.window!
+     }
+
+     // ✅ SUCCESS: We got the data!
+     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+             print("\n----------- 🍎 APPLE DATA RECEIVED 🍎 -----------")
+
+             // 1. User Identifier (The unique ID for this user)
+             let userIdentifier = appleIDCredential.user
+             print("🆔 User ID: \(userIdentifier)")
+
+             // 2. Full Name (⚠️ Only comes the FIRST time you sign in!)
+             if let fullName = appleIDCredential.fullName {
+                 let firstName = fullName.givenName ?? "N/A"
+                 let lastName = fullName.familyName ?? "N/A"
+                 print("👤 Name: \(firstName) \(lastName)")
+             }
+
+             // 3. Email (⚠️ Only comes the FIRST time!)
+             if let email = appleIDCredential.email {
+                 print("📧 Email: \(email)")
+             }
+
+             // 4. Identity Token (For Firebase)
+             if let identityTokenData = appleIDCredential.identityToken,
+                let identityTokenString = String(data: identityTokenData, encoding: .utf8) {
+                 print("🔑 Identity Token (For Firebase): \(identityTokenString.prefix(20))...")
+             }
+
+             print("--------------------------------------------------\n")
+
+             // 👉 TODO: Here you will call your Firebase Login function
+         }
+     }
+
+     // ❌ FAILURE: Something went wrong
+     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+         print("🔴 Sign-In Failed: \(error.localizedDescription)")
+
+         // Handle user cancelling the popup
+         if let outputError = error as? ASAuthorizationError {
+             switch outputError.code {
+             case .canceled:
+                 print("User cancelled the login window.")
+             case .unknown:
+                 print("Unknown error.")
+             default:
+                 break
+             }
+         }
+     }
+ }
+ */

@@ -313,7 +313,6 @@ private func handleSocialResult(result: Result<(AuthCredential, User), Error>) {
     }
 }
 
-// MARK: - 5. Social Login Handler (New 🆕) AuthManager.swift
 
 /// Handles the Firebase sign-in using credentials from SocialAuthManager
 /// - Parameters:
