@@ -97,6 +97,42 @@
                                     <action selector="btnSubmitLoginRegister:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="zeV-aH-Uhr"/>
                                 </connections>
                             </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="Uob-rR-Vbh">
+                                <rect key="frame" x="117" y="738" width="159" height="45"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gVq-kl-6FH">
+                                        <rect key="frame" x="0.0" y="0.0" width="45" height="45"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="gVq-kl-6FH" secondAttribute="height" multiplier="1:1" id="FdL-Jn-pZ9"/>
+                                            <constraint firstAttribute="height" constant="45" id="Tlz-wc-nmD"/>
+                                        </constraints>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="facebook"/>
+                                        <connections>
+                                            <action selector="btnFacebookTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="aNS-z2-sEs"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1AM-85-c8a">
+                                        <rect key="frame" x="57" y="0.0" width="45" height="45"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="google"/>
+                                        <connections>
+                                            <action selector="btnGoogleTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="NY2-aU-KLk"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WSe-hU-tYp">
+                                        <rect key="frame" x="114" y="0.0" width="45" height="45"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="apple"/>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
@@ -106,10 +142,12 @@
                             <constraint firstItem="amj-nr-ZJr" firstAttribute="centerX" secondItem="zrv-uR-rkG" secondAttribute="centerX" id="0cF-83-hSG"/>
                             <constraint firstItem="S4I-xn-P98" firstAttribute="top" secondItem="zkC-Bx-7LH" secondAttribute="bottom" constant="5" id="8J8-Qi-lcp"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="centerX" secondItem="479-yt-StS" secondAttribute="centerX" id="8VE-fy-BXj"/>
+                            <constraint firstItem="Uob-rR-Vbh" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="ElR-Rc-sUu"/>
                             <constraint firstItem="479-yt-StS" firstAttribute="centerX" secondItem="amj-nr-ZJr" secondAttribute="centerX" id="G3Q-7i-4Fw"/>
                             <constraint firstItem="amj-nr-ZJr" firstAttribute="top" secondItem="zrv-uR-rkG" secondAttribute="bottom" constant="10" id="LTq-Lt-rsk"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="30" id="Qdu-9q-lPT"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="top" secondItem="479-yt-StS" secondAttribute="bottom" constant="20" id="Sn4-y9-xJQ"/>
+                            <constraint firstItem="Uob-rR-Vbh" firstAttribute="top" secondItem="S4I-xn-P98" secondAttribute="bottom" constant="15" id="Uek-PU-l2H"/>
                             <constraint firstItem="zkC-Bx-7LH" firstAttribute="top" secondItem="wEb-8U-tnB" secondAttribute="bottom" constant="20" id="Wyh-ap-Xvo"/>
                             <constraint firstItem="zkC-Bx-7LH" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="hlq-Tq-XOa"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="centerX" secondItem="vDu-zF-Fre" secondAttribute="centerX" id="ivU-yt-eEE"/>
@@ -118,7 +156,10 @@
                     </view>
                     <navigationItem key="navigationItem" id="OQu-yx-8GS"/>
                     <connections>
+                        <outlet property="btnApple" destination="WSe-hU-tYp" id="TQN-Dm-dUs"/>
+                        <outlet property="btnFacebook" destination="gVq-kl-6FH" id="Usm-vU-3NQ"/>
                         <outlet property="btnForgotPassword" destination="S4I-xn-P98" id="hjl-Zz-YG6"/>
+                        <outlet property="btnGoogle" destination="1AM-85-c8a" id="W8w-av-NSU"/>
                         <outlet property="btnLoginRegister" destination="zkC-Bx-7LH" id="zDj-K4-xET"/>
                         <outlet property="imgLoginRegisterVector" destination="amj-nr-ZJr" id="v1J-JJ-rsL"/>
                         <outlet property="segmentControl" destination="479-yt-StS" id="jAc-lV-Dii"/>
@@ -152,12 +193,15 @@
     </scenes>
     <resources>
         <image name="SIGNUP_VECTOR" width="612" height="408"/>
+        <image name="apple" width="512" height="512"/>
+        <image name="facebook" width="512" height="512"/>
+        <image name="google" width="512" height="512"/>
         <image name="iconAppRound" width="1024" height="1024"/>
         <systemColor name="systemIndigoColor">
-            <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

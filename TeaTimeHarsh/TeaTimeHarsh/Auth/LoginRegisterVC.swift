@@ -5,6 +5,7 @@
 //  Created by Harsh on 31/12/25.
 //
 
+import FirebaseAuth
 import UIKit
 
 class LoginRegisterVC: UIViewController, UITextFieldDelegate {
@@ -24,13 +25,18 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     @IBOutlet var txtPassword: UITextField!
     @IBOutlet var txtConfirmPassword: UITextField!
     @IBOutlet var btnForgotPassword: UIButton!
-    @IBOutlet var btnLoginRegister: UIButton!{
-        didSet{
-            btnLoginRegister.layer.cornerRadius = btnLoginRegister.bounds.height/2
+    @IBOutlet var btnLoginRegister: UIButton! {
+        didSet {
+            btnLoginRegister.layer.cornerRadius = btnLoginRegister.bounds.height / 2
             btnLoginRegister.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
         }
     }
-    @IBOutlet weak var stackView: UIStackView!
+
+    @IBOutlet var stackView: UIStackView!
+
+    @IBOutlet var btnApple: UIButton!
+    @IBOutlet var btnGoogle: UIButton!
+    @IBOutlet var btnFacebook: UIButton!
 
     // Variable to track current mode (Default is Login)
     var currentMode: AuthMode = .login
@@ -40,8 +46,8 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateUI(mode: .login)
-        //setupGradientBackground()
-        
+        // setupGradientBackground()
+
         txtEmail.applyDefaultStyle()
         txtPassword.applyDefaultStyle()
         txtConfirmPassword.applyDefaultStyle()
@@ -50,13 +56,13 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     deinit {
         print("💀 deinit LoginRegisterVC is dead. Memory Free!")
     }
-    
+
     private func setupGradientBackground() {
         let gradient = CAGradientLayer()
         gradient.colors = [
             UIColor.systemPurple.cgColor,
             UIColor.systemPink.cgColor,
-            UIColor.systemOrange.cgColor
+            UIColor.systemOrange.cgColor,
         ]
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 1, y: 1)
@@ -76,36 +82,36 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         currentMode = mode
 
         // Email is ALWAYS visible
-        self.txtEmail.isHidden = false
+        txtEmail.isHidden = false
 
         // Password is visible unless we are in Forgot Password mode
-        self.txtPassword.isHidden = (mode == .forgotPassword)
+        txtPassword.isHidden = (mode == .forgotPassword)
 
         // Confirm Password is visible ONLY in Register mode
-        self.txtConfirmPassword.isHidden = (mode != .register)
+        txtConfirmPassword.isHidden = (mode != .register)
 
         // Segment Control is hidden in Forgot Password mode
-        self.segmentControl.isHidden = (mode == .forgotPassword)
+        segmentControl.isHidden = (mode == .forgotPassword)
 
         // Forgot Button is hidden in Register mode
-        self.btnForgotPassword.isHidden = (mode == .register)
-        
+        btnForgotPassword.isHidden = (mode == .register)
+
         switch mode {
         case .login:
-            self.segmentControl.selectedSegmentIndex = 0
-            self.btnForgotPassword.setTitle("Forgot Password?", for: .normal)
-            self.btnLoginRegister.setTitle("Login", for: .normal)
-            self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
-            
+            segmentControl.selectedSegmentIndex = 0
+            btnForgotPassword.setTitle("Forgot Password?", for: .normal)
+            btnLoginRegister.setTitle("Login", for: .normal)
+            imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
+
         case .register:
-            self.segmentControl.selectedSegmentIndex = 1
-            self.btnLoginRegister.setTitle("Register", for: .normal)
-            self.imgLoginRegisterVector.image = UIImage(named: "SIGNUP_VECTOR")
-            
+            segmentControl.selectedSegmentIndex = 1
+            btnLoginRegister.setTitle("Register", for: .normal)
+            imgLoginRegisterVector.image = UIImage(named: "SIGNUP_VECTOR")
+
         case .forgotPassword:
-            self.btnForgotPassword.setTitle("Back to Login", for: .normal)
-            self.btnLoginRegister.setTitle("Send Reset Link", for: .normal)
-            self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
+            btnForgotPassword.setTitle("Back to Login", for: .normal)
+            btnLoginRegister.setTitle("Send Reset Link", for: .normal)
+            imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
         }
 
         UIView.animate(withDuration: 0.3) {
@@ -238,10 +244,10 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
         if success {
             print("Success! User is in.")
-  
+
             let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
             let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
-            
+
             // Swap Root View Controller (Best Practice)
             if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate,
                let window = sceneDelegate.window {
@@ -249,12 +255,12 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
                 // Smooth transition animation
                 UIView.transition(
-                        with: window,
-                        duration: 0.3,
-                        options: .transitionFlipFromLeft,
-                        animations: nil,
-                        completion: nil
-                    )
+                    with: window,
+                    duration: 0.3,
+                    options: .transitionFlipFromLeft,
+                    animations: nil,
+                    completion: nil
+                )
             }
 
         } else {
@@ -262,5 +268,90 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
             let errorMsg = error ?? "Something went wrong."
             Utility.showAlert(title: "Authentication Failed", message: errorMsg, viewController: self)
         }
+    }
+}
+// MARK: - Social Login Actions 🌍
+extension LoginRegisterVC {
+    
+    // 🍎 Apple Login (Disabled as per your request)
+    @IBAction func btnAppleTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        // We are ignoring Apple Login for now
+        print("Apple login disabled")
+    }
+
+    // 🌍 Google Login
+    @IBAction func btnGoogleTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        performSocialLogin(provider: .google)
+    }
+        
+    // 📘 Facebook Login
+    @IBAction func btnFacebookTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        performSocialLogin(provider: .facebook)
+    }
+        
+    // MARK: - 🛠 Social Login Logic Helper
+    
+    private func performSocialLogin(provider: AuthProviderType) {
+        LoaderManager.shared.startLoading()
+        
+        // 1. 🌍 Handle Google (Async/Await)
+        if provider == .google {
+            Task {
+                do {
+                    // Start Google Login
+                    let (credential, user) = try await SocialAuthManager.shared.startGoogleLogin(in: self)
+                    
+                    // Sign In to Firebase
+                    try await AuthManager.shared.signInWithSocialCredential(credential: credential, userDetails: user)
+                    
+                    // Success! 🎉
+                    self.handleAuthResponse(success: true, error: nil)
+                    
+                } catch {
+                    self.handleSocialError(error)
+                }
+            }
+        }
+        
+        // 2. 📘 Handle Facebook (Completion Handler)
+        else if provider == .facebook {
+            
+            SocialAuthManager.shared.startFacebookLogin(in: self) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let (credential, user)):
+                    
+                    // Facebook worked! Now we need a Task to call Firebase (because Firebase is async)
+                    Task {
+                        do {
+                            try await AuthManager.shared.signInWithSocialCredential(credential: credential, userDetails: user)
+                            self.handleAuthResponse(success: true, error: nil)
+                        } catch {
+                            self.handleSocialError(error)
+                        }
+                    }
+                    
+                case .failure(let error):
+                    self.handleSocialError(error)
+                }
+            }
+        }
+    }
+    
+    // MARK: - ⚠️ Error Handling Helper
+    private func handleSocialError(_ error: Error) {
+        LoaderManager.shared.stopLoading()
+        print("Social Login Error: \(error.localizedDescription)")
+        
+        // Don't show alert if user just cancelled the popup
+        if let socialError = error as? SocialAuthError, case .cancelled = socialError {
+            return
+        }
+        
+        Utility.showAlert(title: "Login Failed", message: error.localizedDescription, viewController: self)
     }
 }

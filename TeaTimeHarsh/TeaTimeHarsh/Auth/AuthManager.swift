@@ -2,14 +2,15 @@
 //  AuthManager.swift
 //  TeaTimeHarsh
 //
-//  Created by Harsh on 31/12/25.
+//  Created by Harsh on 09/01/26.
 //
 
-import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import Foundation
 
 class AuthManager {
+    
     static let shared = AuthManager()
     private init() {}
 
@@ -122,19 +123,20 @@ class AuthManager {
     func signOut() -> Bool {
         do {
             try Auth.auth().signOut()
-            // 🧹 CLEANUP: Clear the stored ID on logout
+            
+            // 🧹 CLEANUP: Clear the stored ID and Keychain
             Constants.Strings.currentUserID = ""
-            // 3. 🧼 WIPE: Remove all sensitive data from Keychain
             resetKeychain()
             LocalProfileImageSave.shared.deleteImage()
+            
             return true
         } catch {
+            print("Sign out error: \(error)")
             return false
         }
     }
-
+    
     private func resetKeychain() {
-        // These are the types of items we want to delete
         let secItemClasses = [
             kSecClassGenericPassword,
             kSecClassInternetPassword,
@@ -142,61 +144,84 @@ class AuthManager {
             kSecClassKey,
             kSecClassIdentity,
         ]
-
-        // Loop through every type and delete them
         for itemClass in secItemClasses {
             let spec: [String: Any] = [kSecClass as String: itemClass]
             SecItemDelete(spec as CFDictionary)
         }
     }
 
-    // MARK: - 🔒 Private Error Helper (The Translator)
- 
-    private func getFriendlyError(_ error: Error) -> String {
-        let nsError = error as NSError
+    // MARK: - 5. Social Login Handler 🌐
+    
+    func signInWithSocialCredential(credential: AuthCredential, userDetails: User) async throws {
+        
+        // 1. Sign in with Firebase
+        let authResult = try await Auth.auth().signIn(with: credential)
+        let firebaseUser = authResult.user
+        let uid = firebaseUser.uid
+        Constants.Strings.currentUserID = uid
 
-        // ✨ FIX: Removed '.Code' (Latest Firebase Syntax)
+        // 2. 🔒 Final Email Check
+        guard let email = firebaseUser.email, !email.isEmpty else {
+            try? await firebaseUser.delete()
+            throw NSError(domain: "AuthError", code: 400, userInfo: [NSLocalizedDescriptionKey: "This social account does not provide an email address."])
+        }
+
+        let userRef = Firestore.firestore().collection("users").document(uid)
+        
+        // 3. Check Firestore
+        let snapshot = try await userRef.getDocument()
+
+        if snapshot.exists {
+            // --- EXISTING USER ---
+            try await userRef.updateData(["last_login_at": Date()])
+            print("✅ Social Login: Welcome back existing user.")
+        } else {
+            // --- NEW USER ---
+            var newUser = userDetails
+            newUser.id = uid
+            newUser.email = email
+            print(
+                "signInWithSocialCredential \(uid) \(email) \(userDetails.email) \(userDetails.providerID ?? "") \(userDetails.profileImageUrl ?? "") \(userDetails.username ?? "")"
+            )
+            
+            try userRef.setData(from: newUser)
+            print("✅ Social Register: New User Created.")
+        }
+    }
+
+    // MARK: - 🛠️ Error Helper (The Translator)
+    // I made this internal (removed 'private') so your ViewControllers can use it!
+    
+    func getFriendlyError(_ error: Error) -> String {
+        let nsError = error as NSError
+        
+        // If it's a custom error we threw manually (like Banned user), use that description
+        if nsError.domain == "Auth" || nsError.domain == "AuthError" {
+            return error.localizedDescription
+        }
+
         guard let errorCode = AuthErrorCode(rawValue: nsError.code) else {
             return error.localizedDescription
         }
 
         switch errorCode {
-            
-        // --- 🟢 Basic Email/Password Errors ---
         case .userNotFound:
             return "Account does not exist! Please register first."
-
         case .wrongPassword:
             return "Incorrect Password. Please try again."
-
         case .invalidEmail:
-            return "Invalid email format. Please check your email."
-
+            return "Invalid email format."
         case .emailAlreadyInUse:
-            return "⚠️ This email is already registered. Please login instead."
-
+            return "⚠️ This email is already registered. Please login."
         case .weakPassword:
-            return "Password is too weak. Use a stronger password."
-
+            return "Password is too weak."
         case .networkError:
             return "Network connection error. Check internet."
-            
-            
-        // --- 🆕 NEW: Social Login & Account Linking Errors ---
-            
         case .accountExistsWithDifferentCredential:
-            // 🚨 THIS IS THE "CROSS THINK" ERROR!
-            // It happens when user tries Google login, but email already exists via Facebook/Password
-            return "An account already exists with the same email but different sign-in credentials. Please sign in using your original method."
-            
+            return "Account exists with a different sign-in method."
         case .credentialAlreadyInUse:
-            // This happens if you are trying to LINK a social account that belongs to someone else
             return "This social account is already linked to another user."
-            
-
-        // --- 🔴 Default ---
         default:
-            // It is good to print the raw code for debugging unexpected issues
             return "Error: \(error.localizedDescription)"
         }
     }
