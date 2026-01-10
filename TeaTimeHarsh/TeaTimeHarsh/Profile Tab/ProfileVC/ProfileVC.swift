@@ -111,8 +111,6 @@ class ProfileVC: UIViewController {
             guard let self = self else { return }
             self.handleProfileImageTap() // 👇 Keeping logic clean by calling a function
         }
-        header.configureProfileImage()
-
         return header
     }()
 
@@ -201,10 +199,11 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             cell.detailTextLabel?.text = currentTheme.title
 
         default:
+            cell.accessoryView = nil
+            cell.accessoryType = .disclosureIndicator
             break
         }
 
-        cell.accessoryType = .disclosureIndicator
         return cell
     }
 
@@ -244,7 +243,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
             guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
             editVC.onProfileUpdated = { [weak self] in
-                self?.profileHeader.configureProfileImage()
+                self?.profileHeader.setProfileImage()
             }
             navigationController?.pushViewController(editVC, animated: true)
 

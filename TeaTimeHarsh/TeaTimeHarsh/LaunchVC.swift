@@ -12,9 +12,35 @@ class LaunchVC: UIViewController {
         super.viewDidLoad()
 
         // this launchvc for preload data from internet if needed
-        
+        fetchCurrentUserData()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.goToHome()
+        }
+    }
+    func fetchCurrentUserData() {
+        LoaderManager.shared.startLoading()
+
+        Task { [weak self] in
+            guard let self = self else { return }
+
+            do {
+                let userProfileData = try await UserDataManager.shared
+                    .fetchCurrentUser()
+                UserDataManager.shared.user = userProfileData
+
+                print(
+                    "fetch current user details using api at launch vc \(String(describing: UserDataManager.shared.user))"
+                )
+            } catch {
+                Utility
+                    .showAlert(
+                        title: "Error",
+                        message: error.localizedDescription,
+                        viewController: self
+                    )
+            }
+
+            LoaderManager.shared.stopLoading()
         }
     }
 

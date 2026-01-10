@@ -127,8 +127,7 @@ class AuthManager {
             // 🧹 CLEANUP: Clear the stored ID and Keychain
             Constants.Strings.currentUserID = ""
             resetKeychain()
-            LocalProfileImageSave.shared.deleteImage()
-            
+ 
             return true
         } catch {
             print("Sign out error: \(error)")

@@ -94,6 +94,7 @@ extension UIViewController {
         // 2. Create the appearance settings
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
+        appearance.shadowColor = .clear 
 
         // 3. Create the indentation style
         let paragraphStyle = NSMutableParagraphStyle()

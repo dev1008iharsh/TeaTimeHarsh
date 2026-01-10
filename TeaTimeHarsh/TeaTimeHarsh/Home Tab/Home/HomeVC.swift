@@ -8,278 +8,163 @@
 import UIKit
 
 class HomeVC: UIViewController {
-    // MARK: - Outlets
 
+    // MARK: - Outlets
+    
     @IBOutlet var tblTeaPlaces: UITableView!
-    // ✨ NEW: Connect this to your Segment Controller in Storyboard
     @IBOutlet var segmentFilter: UISegmentedControl!
 
     // MARK: - Properties
-
-    // 1. Action Manager (For Edit/Delete/Share)
+    
     lazy var actionManager = TeaActionManager(viewController: self)
+    private let refreshControl = UIRefreshControl()
+    
+    // Search Controller
+    private let searchController = UISearchController(searchResultsController: nil)
+    private var currentSearchText: String = ""
 
-    // 2. Loading State
+    // Loading State
     var isLoading = true {
         didSet { setNeedsUpdateContentUnavailableConfiguration() }
     }
 
-    // 3. Data Source (Master List)
+    // Master Data Source
     var arrTeaPlaces = [TeaPlace]() {
         didSet {
             setNeedsUpdateContentUnavailableConfiguration()
-            // Reload table when master data changes
             tblTeaPlaces.reloadData()
         }
     }
 
-    // ✨ NEW: Computes what to show based on Segment Selection
+    // 🔥 COMPUTED PROPERTY: Handles Search + Segment Filters
     var displayedPlaces: [TeaPlace] {
-        guard let segment = segmentFilter else { return arrTeaPlaces }
-
-        switch segment.selectedSegmentIndex {
+        // 1. First, filter by Search Text (Name OR Location)
+        var filtered = arrTeaPlaces
+        
+        if !currentSearchText.isEmpty {
+            filtered = filtered.filter { place in
+                // Logic: Name check karo OR Location check karo (Safe Unwrap sathe)
+                let nameMatch = place.name.localizedCaseInsensitiveContains(currentSearchText)
+                
+                // 🔥 FIX: (place.location ?? "")
+                // Aano arth: Jo location nil che, to "" (empty) ma search kar, je false aavse. Crash nai thay.
+                let locationMatch = (place.location ?? "").localizedCaseInsensitiveContains(currentSearchText)
+                
+                return nameMatch || locationMatch
+            }
+        }
+        
+        // 2. Then, filter by Segment
+        switch segmentFilter.selectedSegmentIndex {
         case 1: // Favourites
-            return arrTeaPlaces.filter { $0.isFav }
+            return filtered.filter { $0.isFav }
         case 2: // Visited
-            return arrTeaPlaces.filter { $0.isVisited }
-        case 3: // Mine (✨ NEW FILTER ADDED)
-            return arrTeaPlaces.filter { $0.createdByUserId == Constants.Strings.currentUserID }
-        default: // 0 or others -> All
-            return arrTeaPlaces
+            return filtered.filter { $0.isVisited }
+        case 3: // Mine
+            return filtered.filter { $0.createdByUserId == Constants.Strings.currentUserID }
+        default: // All
+            return filtered
         }
     }
 
-    private let refreshControl = UIRefreshControl()
-
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupAllUI()
+        setupObservers()
         fetchDataFromFirebase()
         presentTipIfNeeded()
-
-        // 🎧 START LISTENING TO NOTIFICATIONS (Restored from your code)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleFavNotification(_:)), name: .teaPlaceDidTapFav, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleVisitNotification(_:)), name: .teaPlaceDidTapVisit, object: nil)
-        NotificationCenter.default.addObserver(self, selector:
-            #selector(handleReload), name: .teaPlacesShouldReload, object: nil)
     }
 
     deinit {
-        print("💀 deinit HomeVC is dead. Memory Free!")
-        // 🗑️ Stop Listening
         NotificationCenter.default.removeObserver(self)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
-        // Refresh list if returning from detail to ensure consistency
+        // Refresh if returning from detail
         if !arrTeaPlaces.isEmpty { tblTeaPlaces.reloadData() }
     }
-
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.prefersLargeTitles = false
     }
-
-    // MARK: - 🔔 NOTIFICATION HANDLERS (Restored)
-
-    @objc func handleFavNotification(_ notification: Notification) {
-        guard let placeID = notification.userInfo?["placeID"] as? String,
-              let isFav = notification.userInfo?["isFav"] as? Bool,
-              let index = arrTeaPlaces.firstIndex(where: { $0.id == placeID }) else { return }
-
-        print("🔔 Notification Received: Fav \(isFav) for \(arrTeaPlaces[index].name)")
-
-        // 1. UPDATE MODEL LOCALLY (Optimistic)
-        arrTeaPlaces[index].isFav = isFav
-
-        // Reload Table (Because row index might change if filtered)
-        tblTeaPlaces.reloadData()
-
-        // 2. CALL API
-        callApiToToggleStatus(place: arrTeaPlaces[index], type: "fav")
-    }
-    @objc func handleReload() {
-        DispatchQueue.main.async {
-            self.fetchDataFromFirebase()
-        }
-    }
-    @objc func handleVisitNotification(_ notification: Notification) {
-        guard let placeID = notification.userInfo?["placeID"] as? String,
-              let isVisited = notification.userInfo?["isVisited"] as? Bool,
-              let index = arrTeaPlaces.firstIndex(where: { $0.id == placeID }) else { return }
-
-        print("🔔 Notification Received: Visited \(isVisited) for \(arrTeaPlaces[index].name)")
-
-        // 1. UPDATE MODEL LOCALLY
-        arrTeaPlaces[index].isVisited = isVisited
-
-        // Reload Table
-        tblTeaPlaces.reloadData()
-
-        // 2. CALL API
-        callApiToToggleStatus(place: arrTeaPlaces[index], type: "visit")
-    }
-
-    // MARK: - 🌍 Central API Logic with REVERT (Restored)
-
-    // Used by both Notifications AND Swipe Actions
-    private func callApiToToggleStatus(place: TeaPlace, type: String) {
-        Task {
-            do {
-                try await FirebaseManager.shared.updateUserAction(
-                    placeId: place.id,
-                    isFav: place.isFav,
-                    isVisited: place.isVisited
-                )
-                print("✅ API Success for \(type)")
-            } catch {
-                // ⚠️ API FAILED - REVERT LOGIC ⚠️
-                print("❌ API Failed: \(error.localizedDescription)")
-
-                await MainActor.run {
-                    // 1. Revert Local Model in Home List
-                    if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
-                        if type == "fav" { self.arrTeaPlaces[index].isFav.toggle() }
-                        if type == "visit" { self.arrTeaPlaces[index].isVisited.toggle() }
-
-                        // Reload Table
-                        self.tblTeaPlaces.reloadData()
-                    }
-
-                    // 2. Notify DetailHeader to Revert (Visually fix the button if Detail is open)
-                    NotificationCenter.default.post(
-                        name: .teaPlaceUpdateFailed,
-                        object: nil,
-                        userInfo: ["placeID": place.id, "actionType": type]
-                    )
-
-                    // 3. Show Alert
-                    HapticHelper.error()
-                    Utility.showAlert(title: "Connection Error", message: "Could not update status. Reverting changes.", viewController: self)
-                }
-            }
-        }
-    }
-
-    // MARK: - Empty State (iOS 17+)
-
-    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
-        if isLoading {
-            contentUnavailableConfiguration = nil
-            return
-        }
-
-        // ✨ UPDATED: Check displayedPlaces instead of arrTeaPlaces so empty state shows on empty filter
-        guard displayedPlaces.isEmpty else {
-            contentUnavailableConfiguration = nil
-            return
-        }
-
-        // ✅ SHOW EMPTY STATE: Exact configuration restored
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = UIImage(systemName: "cup.and.heat.waves.fill")
-
-        // Customize text based on filter(YOUR EXACT MESSAGES KEPT SAFE 🔒)
-        if segmentFilter.selectedSegmentIndex == 1 {
-            config.text = "No favourite spots? Playing hard to get? 😉"
-            config.secondaryText = "Don't be shy! Swipe right on any tea place to mark it as your favourite place."
-
-        } else if segmentFilter.selectedSegmentIndex == 2 {
-            config.text = "Zero Visits? Are you on a diet? 😜"
-            config.secondaryText = "Go have a cup! Then swipe right on the list to mark it as visited place."
-
-        } else if segmentFilter.selectedSegmentIndex == 3 {
-            config.text = "No places added by you 🧑‍💻"
-            config.secondaryText = "You haven't uploaded any tea spots yet. Tap the + button to add one!"
-
-        } else {
-            // 🏠 Default All
-            config.text = "It’s Tea-rribly Empty Here!"
-            config.secondaryText = "No tea spots found yet. Be the first to spill the tea and add your favorite place!"
-        }
-
-        config.imageProperties.tintColor = .systemIndigo
-
-        // ✨ BUTTON LOGIC: Handle both 'Add' (for All) and 'Show All' (for Filters)
-        var buttonConfig = UIButton.Configuration.filled()
-        buttonConfig.cornerStyle = .capsule
-        buttonConfig.imagePadding = 8
-        buttonConfig.baseBackgroundColor = .systemIndigo
-
-        if segmentFilter.selectedSegmentIndex == 0 {
-            // Case 1: "All" Tab is empty -> Show "Add" Button
-            buttonConfig.title = "Add First Tea Place"
-            buttonConfig.image = UIImage(systemName: "plus")
-
-            config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-                self?.didTapAddNavBar()
-            }
-        } else {
-            // Case 2: "Fav", "Visited" OR "Mine" is empty -> Show "Back to All" Button 🔙
-            buttonConfig.title = "Show All Places"
-            buttonConfig.image = UIImage(systemName: "list.bullet")
-
-            config.buttonProperties.primaryAction = UIAction { [weak self] _ in
-                guard let self = self else { return }
-                // 1. Switch Segment back to 'All'
-                self.segmentFilter.selectedSegmentIndex = 0
-                // 2. Refresh the list immediately
-                self.didChangeSegmentFilter(self.segmentFilter)
-            }
-        }
-
-        config.button = buttonConfig
-        contentUnavailableConfiguration = config
-    }
-
-    // MARK: - Setup Methods
-
+    
+    // MARK: - Setup UI
+    
     private func setupAllUI() {
         setupTableView()
         setupNavBar()
+        setupSearchController() // New Search Setup
         configureSegmentController()
         setupRefreshControl()
     }
-
+    
     private func setupTableView() {
         tblTeaPlaces.register(UINib(nibName: "TeaListCell", bundle: nil), forCellReuseIdentifier: "TeaListCell")
         tblTeaPlaces.delegate = self
         tblTeaPlaces.dataSource = self
+        // Adjust insets for aesthetic spacing
         tblTeaPlaces.contentInset = UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0)
-        tblTeaPlaces.verticalScrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         tblTeaPlaces.tableFooterView = UIView()
     }
-
-    private func configureSegmentController() {
-        let selectedAttributes = [NSAttributedString.Key.foregroundColor: UIColor.systemBackground]
-        let normalAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
-
-        segmentFilter.setTitleTextAttributes(selectedAttributes, for: .selected)
-        segmentFilter.setTitleTextAttributes(normalAttributes, for: .normal)
+    
+    private func setupSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search by Name or Location"
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
     }
-
+    
+    private func setupNavBar() {
+        let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(didTapAddNavBar))
+        navigationItem.rightBarButtonItem = addButton
+        setLargeTitleSpacingNavBar(20)
+        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+    }
+    
+    private func configureSegmentController() {
+        segmentFilter.setTitleTextAttributes([.foregroundColor: UIColor.systemBackground], for: .selected)
+        segmentFilter.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .normal)
+    }
+    
     private func setupRefreshControl() {
         refreshControl.addTarget(self, action: #selector(fetchDataFromFirebase), for: .valueChanged)
         refreshControl.tintColor = .systemIndigo
         tblTeaPlaces.refreshControl = refreshControl
     }
-
-    private func setupNavBar() {
-        let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(didTapAddNavBar))
- 
-        navigationItem.rightBarButtonItem = addButton
- 
-        // hideBackButtonNavBar(hidden: true, swipeEnabled: true)
-        setLargeTitleSpacingNavBar(20)
-        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+    
+    private func setupObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleFavNotification(_:)), name: .teaPlaceDidTapFav, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleVisitNotification(_:)), name: .teaPlaceDidTapVisit, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleReload), name: .teaPlacesShouldReload, object: nil)
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func didChangeSegmentFilter(_ sender: UISegmentedControl) {
+        tblTeaPlaces.reloadData()
+        // Scroll to top if items exist
+        if !displayedPlaces.isEmpty {
+            tblTeaPlaces.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
+        setNeedsUpdateContentUnavailableConfiguration()
+    }
+    
+    @objc private func didTapAddNavBar() {
+        HapticHelper.success()
+        let addVC = storyboard?.instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
+        addVC.screenMode = .add
+        addVC.onPlaceAdded = { [weak self] _ in self?.fetchDataFromFirebase() }
+        navigationController?.pushViewController(addVC, animated: true)
     }
 
-    // MARK: - Fetch Data
-
+    // MARK: - API & Data Handling
+    
     @objc private func fetchDataFromFirebase() {
         if !refreshControl.isRefreshing {
             isLoading = true
@@ -290,17 +175,13 @@ class HomeVC: UIViewController {
             defer {
                 Task { @MainActor in
                     self.isLoading = false
-                    self.stopLoaders()
+                    LoaderManager.shared.stopLoading()
+                    self.refreshControl.endRefreshing()
                 }
             }
-
             do {
                 let places = try await FirebaseManager.shared.fetchAllPlaces()
-                await MainActor.run {
-                    print("*fetchDataFromFirebase", places)
-                    self.arrTeaPlaces = places
-                    // Reload is handled by didSet of arrTeaPlaces
-                }
+                await MainActor.run { self.arrTeaPlaces = places }
             } catch {
                 await MainActor.run {
                     Utility.showAlert(title: "Error", message: error.localizedDescription, viewController: self)
@@ -308,38 +189,7 @@ class HomeVC: UIViewController {
             }
         }
     }
-
-    private func stopLoaders() {
-        LoaderManager.shared.stopLoading()
-        refreshControl.endRefreshing()
-    }
-
-    // MARK: - Actions & Navigation
-
-    // ✨ NEW: Segment Control Action (Connect in Storyboard: Value Changed)
-    @IBAction func didChangeSegmentFilter(_ sender: UISegmentedControl) {
-        // 1. Reload Table to show filtered data
-        tblTeaPlaces.reloadData()
-
-        // 2. Scroll to top if data exists
-        if !displayedPlaces.isEmpty {
-            tblTeaPlaces.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
-        }
-
-        // 3. Update Empty State text
-        setNeedsUpdateContentUnavailableConfiguration()
-    }
-
-    @objc private func didTapAddNavBar() {
-        HapticHelper.success()
-        let addVC = storyboard?.instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
-        addVC.screenMode = .add
-        addVC.onPlaceAdded = { [weak self] _ in self?.fetchDataFromFirebase() }
-        navigationController?.pushViewController(addVC, animated: true)
-    }
- 
     
-
     private func presentTipIfNeeded() {
         guard HomeListingTipManager.shouldShowTip() else { return }
         let tipVC = storyboard?.instantiateViewController(withIdentifier: "HomeListingTipVC") as! HomeListingTipVC
@@ -349,18 +199,30 @@ class HomeVC: UIViewController {
     }
 }
 
-// MARK: - UITableView Delegate & DataSource
+// MARK: - Search Delegate
+extension HomeVC: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        // Update variable and reload table
+        currentSearchText = searchController.searchBar.text ?? ""
+        tblTeaPlaces.reloadData()
+        setNeedsUpdateContentUnavailableConfiguration()
+    }
+}
 
+// MARK: - TableView Delegate & DataSource
 extension HomeVC: UITableViewDelegate, UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // ✨ UPDATED: Use displayedPlaces
         return displayedPlaces.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TeaListCell", for: indexPath) as! TeaListCell
-        // ✨ UPDATED: Use displayedPlaces
         cell.configure(teaPlace: displayedPlaces[indexPath.row])
+        
+        cell.onFavTapped = { [weak self] in
+            self?.performSwipeToggle(at: indexPath, type: "fav")
+        }
         return cell
     }
 
@@ -369,191 +231,194 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        navigateToDetail(for: indexPath)
-    }
-
-    private func navigateToDetail(for indexPath: IndexPath) {
         let detailVC = storyboard?.instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
-        // ✨ UPDATED: Use displayedPlaces
-        let selectedPlace = displayedPlaces[indexPath.row]
-        detailVC.place = selectedPlace
-
-        // Closure for when we come back (Updates if Edit/Delete happened)
-        detailVC.onBackToHome = { [weak self] in
-            self?.fetchDataFromFirebase()
-        }
-
+        detailVC.place = displayedPlaces[indexPath.row]
+        detailVC.onBackToHome = { [weak self] in self?.fetchDataFromFirebase() }
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 
-// MARK: - 🎨 Swipe Actions & Context Menu (Restored + Synced with API Logic)
-
+// MARK: - Notifications & Toggle Logic
 extension HomeVC {
-    // 1. Trailing Swipe (Right -> Left): Delete, Share, Edit
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let delete = makeDeleteAction(indexPath: indexPath)
-        let share = makeShareAction(indexPath: indexPath)
-        let edit = makeEditAction(indexPath: indexPath)
-
-        var config = UISwipeActionsConfiguration(actions: [share])
-        // Check Owner Permissions (✨ UPDATED: Use displayedPlaces)
-        let isOwner = TeaActionManager.canModify(place: displayedPlaces[indexPath.row])
-
-        config = isOwner ? UISwipeActionsConfiguration(actions: [delete, share, edit]) : UISwipeActionsConfiguration(actions: [share])
-
-        config.performsFirstActionWithFullSwipe = false
-        return config
+    
+    @objc func handleFavNotification(_ notification: Notification) {
+        updateLocalState(from: notification, type: "fav")
     }
-
-    // 2. Leading Swipe (Left -> Right): Visited, Favorite
-    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let visited = makeVisitAction(indexPath: indexPath)
-        let favorite = makeFavAction(indexPath: indexPath)
-
-        let config = UISwipeActionsConfiguration(actions: [visited, favorite])
-        config.performsFirstActionWithFullSwipe = false
-        return config
+    
+    @objc func handleVisitNotification(_ notification: Notification) {
+        updateLocalState(from: notification, type: "visit")
     }
-
-    // 3. Context Menu (Long Press)
-    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        // ✨ UPDATED: Use displayedPlaces
-        let place = displayedPlaces[indexPath.row]
-
-        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { _ in
-
-            let callAction = UIAction(title: "Call", image: UIImage(systemName: "phone")) { _ in
-                if let phone = place.phone, let url = URL(string: "tel://\(phone)"), UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.open(url)
-                }
-            }
-
-            let favTitle = place.isFav ? "Remove Favourite" : "Add Favourite"
-            let favImage = UIImage(systemName: place.isFav ? "heart.slash" : "heart")
-            let favAction = UIAction(title: favTitle, image: favImage) { [weak self] _ in
-                self?.performSwipeToggle(at: indexPath, type: "fav")
-            }
-
-            let visitTitle = place.isVisited ? "Remove Visited" : "Mark Visited"
-            let visitImage = UIImage(systemName: place.isVisited ? "checkmark.app" : "checkmark.app.fill")
-            let visitAction = UIAction(title: visitTitle, image: visitImage) { [weak self] _ in
-                self?.performSwipeToggle(at: indexPath, type: "visit")
-            }
-
-            return UIMenu(title: "", children: [callAction, favAction, visitAction])
-        }
+    
+    @objc func handleReload() {
+        DispatchQueue.main.async { self.fetchDataFromFirebase() }
     }
+    
+    private func updateLocalState(from notification: Notification, type: String) {
+        guard let placeID = notification.userInfo?["placeID"] as? String,
+              let status = notification.userInfo?[type == "fav" ? "isFav" : "isVisited"] as? Bool,
+              let index = arrTeaPlaces.firstIndex(where: { $0.id == placeID }) else { return }
 
-    // 🔥 HELPER: Triggers the same logic as Notifications, but for Swipes/Menu
-    // ✨ NOW WITH BOUNCE ANIMATION! 🏀
+        // Update Master Array
+        if type == "fav" { arrTeaPlaces[index].isFav = status }
+        else { arrTeaPlaces[index].isVisited = status }
+        
+        tblTeaPlaces.reloadData()
+        callApiToToggleStatus(place: arrTeaPlaces[index], type: type)
+    }
+    
+    // Centralized Swipe/Context/Notification Helper
     private func performSwipeToggle(at indexPath: IndexPath, type: String) {
-        // 1. Get the correct item from the currently DISPLAYED list
         let selectedPlace = displayedPlaces[indexPath.row]
-
-        // 2. Find the actual index in the MASTER list (arrTeaPlaces) to ensure data consistency
         guard let originalIndex = arrTeaPlaces.firstIndex(where: { $0.id == selectedPlace.id }) else { return }
 
-        // 3. Update Model Locally (Toggle Data)
+        // 1. Toggle Local
         if type == "fav" { arrTeaPlaces[originalIndex].isFav.toggle() }
         if type == "visit" { arrTeaPlaces[originalIndex].isVisited.toggle() }
 
-        // 4. ✨ ANIMATION MAGIC ✨
+        // 2. Animation
         if let cell = tblTeaPlaces.cellForRow(at: indexPath) as? TeaListCell {
-            // A. Update the UI immediately without reloading the row
-            // We use 'displayedPlaces' because the computed property picks up the change from 'arrTeaPlaces'
             cell.configure(teaPlace: displayedPlaces[indexPath.row])
-
-            // B. The "Pop" Animation (Bounce Effect)
-            UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn, animations: {
-                // Shrink the cell slightly (Press down effect)
-                cell.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
-            }) { _ in
-                // Spring back to original size (Bounce/Spring effect)
-                UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 6, options: .curveEaseOut, animations: {
-                    cell.transform = .identity
-                }, completion: nil)
+            UIView.animate(withDuration: 0.1, animations: { cell.transform = CGAffineTransform(scaleX: 1.1, y: 1.1) }) { _ in
+                UIView.animate(withDuration: 0.3) { cell.transform = .identity }
             }
         }
-
-        // 5. Call API (Backend logic)
+        
+        // 3. API
         callApiToToggleStatus(place: arrTeaPlaces[originalIndex], type: type)
-
-        // Note: We do NOT call reloadRows() here to keep the animation smooth.
-        // The cell.configure() call above handles the visual update.
     }
-
+    
+    private func callApiToToggleStatus(place: TeaPlace, type: String) {
+        Task {
+            do {
+                try await FirebaseManager.shared.updateUserAction(placeId: place.id, isFav: place.isFav, isVisited: place.isVisited)
+            } catch {
+                await MainActor.run {
+                    // Revert Logic on Failure
+                    if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
+                        if type == "fav" { self.arrTeaPlaces[index].isFav.toggle() }
+                        if type == "visit" { self.arrTeaPlaces[index].isVisited.toggle() }
+                        self.tblTeaPlaces.reloadData()
+                        Utility.showAlert(title: "Connection Error", message: "Changes reverted.", viewController: self)
+                    }
+                }
+            }
+        }
+    }
 }
 
-// MARK: - Contextual Action Creators
-
+// MARK: - Swipe Actions & Context Menu
 extension HomeVC {
-    private func makeDeleteAction(indexPath: IndexPath) -> UIContextualAction {
-        return UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
-            guard let self = self else { return }
-            // ✨ UPDATED: Use displayedPlaces
-            let place = self.displayedPlaces[indexPath.row]
-
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let place = displayedPlaces[indexPath.row]
+        let share = makeAction(title: "Share", color: .systemBlue, icon: "square.and.arrow.up") { self.actionManager.performShare(place: place, sourceView: $0) }
+        
+        guard TeaActionManager.canModify(place: place) else { return UISwipeActionsConfiguration(actions: [share]) }
+        
+        let delete = makeAction(title: "Delete", color: .systemRed, icon: "trash") { cell in
             self.actionManager.performDelete(place: place) {
-                // Remove from MAIN array
-                if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
-                    self.arrTeaPlaces.remove(at: index)
+                if let idx = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
+                    self.arrTeaPlaces.remove(at: idx)
+                    self.tblTeaPlaces.reloadData() // Simple reload is safer with filters
                 }
-                // Reload to update filtered view
-                self.tblTeaPlaces.reloadData()
-                completion(true)
             }
         }
+        
+        let edit = makeAction(title: "Edit", color: .systemOrange, icon: "pencil") { _ in
+            self.actionManager.performEdit(place: place) { self.fetchDataFromFirebase() }
+        }
+        
+        return UISwipeActionsConfiguration(actions: [delete, share, edit])
     }
 
-    private func makeShareAction(indexPath: IndexPath) -> UIContextualAction {
-        return UIContextualAction(style: .normal, title: "Share") { [weak self] _, _, completion in
-            guard let self = self else { return }
-            let cell = self.tblTeaPlaces.cellForRow(at: indexPath)
-            // ✨ UPDATED: Use displayedPlaces
-            self.actionManager.performShare(place: self.displayedPlaces[indexPath.row], sourceView: cell ?? self.view)
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let place = displayedPlaces[indexPath.row]
+        
+        let visit = makeAction(title: place.isVisited ? "Unvisit" : "Visit", color: place.isVisited ? .systemGray4 : .systemGreen, icon: "checkmark.circle") { _ in
+            self.performSwipeToggle(at: indexPath, type: "visit")
+        }
+        
+        let fav = makeAction(title: place.isFav ? "Unfav" : "Fav", color: place.isFav ? .systemGray : .systemPink, icon: "heart.fill") { _ in
+            self.performSwipeToggle(at: indexPath, type: "fav")
+        }
+        
+        return UISwipeActionsConfiguration(actions: [visit, fav])
+    }
+    
+    // Helper to create swipe actions cleanly
+    private func makeAction(title: String, color: UIColor, icon: String, handler: @escaping (UIView) -> Void) -> UIContextualAction {
+        let action = UIContextualAction(style: .normal, title: title) { [weak self] _, view, completion in
+            handler(self?.tblTeaPlaces.cellForRow(at: self?.tblTeaPlaces.indexPath(for: view as! UITableViewCell) ?? IndexPath()) ?? view)
             completion(true)
         }
+        action.backgroundColor = color
+        action.image = UIImage(systemName: icon)
+        return action
     }
-
-    private func makeEditAction(indexPath: IndexPath) -> UIContextualAction {
-        let action = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
-            guard let self = self else { return }
-            // ✨ UPDATED: Use displayedPlaces
-            let place = self.displayedPlaces[indexPath.row]
-            self.actionManager.performEdit(place: place) {
-                self.fetchDataFromFirebase()
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let place = displayedPlaces[indexPath.row]
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let call = UIAction(title: "Call", image: UIImage(systemName: "phone")) { _ in
+                if let url = URL(string: "tel://\(place.phone ?? "")"), UIApplication.shared.canOpenURL(url) { UIApplication.shared.open(url) }
             }
-            completion(true)
+            return UIMenu(children: [call])
         }
-        action.backgroundColor = .systemOrange
-        action.image = UIImage(systemName: "pencil")
-        return action
     }
+}
 
-    private func makeFavAction(indexPath: IndexPath) -> UIContextualAction {
-        // ✨ UPDATED: Use displayedPlaces
-        let place = displayedPlaces[indexPath.row]
-        let action = UIContextualAction(style: .normal, title: place.isFav ? "Unfav" : "Fav") { [weak self] _, _, completion in
-            // Use helper to trigger same logic as Notification
-            self?.performSwipeToggle(at: indexPath, type: "fav")
-            completion(true)
+// MARK: - Empty State (iOS 17+)
+extension HomeVC {
+    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+        if isLoading {
+            contentUnavailableConfiguration = nil
+            return
         }
-        action.backgroundColor = place.isFav ? .systemGray : .systemPink
-        action.image = UIImage(systemName: place.isFav ? "heart.slash" : "heart.fill")
-        return action
-    }
+        
+        // Show empty state only if filter/search yields no results
+        guard displayedPlaces.isEmpty else {
+            contentUnavailableConfiguration = nil
+            return
+        }
 
-    private func makeVisitAction(indexPath: IndexPath) -> UIContextualAction {
-        // ✨ UPDATED: Use displayedPlaces
-        let place = displayedPlaces[indexPath.row]
-        let action = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisit" : "Visit") { [weak self] _, _, completion in
-            // Use helper to trigger same logic as Notification
-            self?.performSwipeToggle(at: indexPath, type: "visit")
-            completion(true)
+        var config = UIContentUnavailableConfiguration.empty()
+        config.image = UIImage(systemName: "cup.and.heat.waves.fill")
+        config.imageProperties.tintColor = .systemIndigo
+        
+        // Customized Text based on Context
+        if !currentSearchText.isEmpty {
+            config.text = "No Matches Found"
+            config.secondaryText = "Try searching for a different name or location."
+        } else {
+            switch segmentFilter.selectedSegmentIndex {
+            case 1: config.text = "No Favourites Yet"; config.secondaryText = "Swipe right to heart a place!"
+            case 2: config.text = "No Visits Yet"; config.secondaryText = "Go drink some tea!"
+            case 3: config.text = "No Uploads"; config.secondaryText = "Add your own discoveries."
+            default: config.text = "It’s Tea-rribly Empty"; config.secondaryText = "Add the first tea spot!"
+            }
         }
-        action.backgroundColor = place.isVisited ? .systemGray4 : .systemGreen
-        action.image = UIImage(systemName: place.isVisited ? "checkmark.circle" : "checkmark.circle.fill")
-        return action
+        
+        // Button Logic
+        var btnConfig = UIButton.Configuration.filled()
+        btnConfig.cornerStyle = .capsule
+        btnConfig.baseBackgroundColor = .systemIndigo
+        
+        if segmentFilter.selectedSegmentIndex == 0 && currentSearchText.isEmpty {
+            btnConfig.title = "Add First Place"
+            btnConfig.image = UIImage(systemName: "plus")
+            config.buttonProperties.primaryAction = UIAction { [weak self] _ in self?.didTapAddNavBar() }
+        } else {
+            btnConfig.title = "Clear Filters"
+            btnConfig.image = UIImage(systemName: "xmark.circle")
+            config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+                self?.segmentFilter.selectedSegmentIndex = 0
+                self?.searchController.searchBar.text = ""
+                self?.searchController.isActive = false // Close search
+                self?.currentSearchText = ""
+                self?.didChangeSegmentFilter(self!.segmentFilter)
+            }
+        }
+        config.button = btnConfig
+        contentUnavailableConfiguration = config
     }
 }

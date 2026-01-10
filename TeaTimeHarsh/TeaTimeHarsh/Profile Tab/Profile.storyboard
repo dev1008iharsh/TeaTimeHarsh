@@ -145,7 +145,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zg4-xv-Ymz">
-                                <rect key="frame" x="5" y="123" width="50" height="50"/>
+                                <rect key="frame" x="338" y="123" width="50" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="zg4-xv-Ymz" secondAttribute="height" multiplier="1:1" id="5nU-U5-yeS"/>
                                     <constraint firstAttribute="height" constant="50" id="7jq-GJ-blr"/>
@@ -156,7 +156,7 @@
                                     <imageReference key="image" image="xmark.circle.fill" catalog="system" symbolScale="large"/>
                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large" weight="thin"/>
                                 </state>
-                                <buttonConfiguration key="configuration" style="tinted" cornerStyle="large">
+                                <buttonConfiguration key="configuration" style="gray" cornerStyle="large">
                                     <imageReference key="image" image="xmark.circle.fill" catalog="system" symbolScale="large"/>
                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="27" scale="large" weight="medium"/>
                                 </buttonConfiguration>
@@ -168,6 +168,7 @@
                         <viewLayoutGuide key="safeArea" id="dAW-4h-FSi"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="dAW-4h-FSi" firstAttribute="trailing" secondItem="zg4-xv-Ymz" secondAttribute="trailing" constant="5" id="Au8-QJ-ezE"/>
                             <constraint firstItem="R8d-Nf-WeT" firstAttribute="centerX" secondItem="VqR-E9-9Tw" secondAttribute="centerX" id="B7c-2i-U4v"/>
                             <constraint firstItem="VqR-E9-9Tw" firstAttribute="centerX" secondItem="pde-Pj-aKV" secondAttribute="centerX" id="ORW-Fm-eva"/>
                             <constraint firstItem="VqR-E9-9Tw" firstAttribute="leading" secondItem="dAW-4h-FSi" secondAttribute="leading" constant="20" id="On7-g6-hcH"/>
@@ -176,7 +177,6 @@
                             <constraint firstItem="pde-Pj-aKV" firstAttribute="top" secondItem="dAW-4h-FSi" secondAttribute="top" constant="20" id="e9z-XF-9cz"/>
                             <constraint firstItem="pde-Pj-aKV" firstAttribute="centerX" secondItem="dAW-4h-FSi" secondAttribute="centerX" id="i1Y-Tx-HBL"/>
                             <constraint firstItem="R8d-Nf-WeT" firstAttribute="leading" secondItem="VqR-E9-9Tw" secondAttribute="leading" id="kND-f3-hzE"/>
-                            <constraint firstItem="zg4-xv-Ymz" firstAttribute="leading" secondItem="dAW-4h-FSi" secondAttribute="leading" constant="5" id="liF-ja-rH1"/>
                             <constraint firstItem="xnQ-gw-xhA" firstAttribute="top" secondItem="R8d-Nf-WeT" secondAttribute="bottom" constant="25" id="mcg-SU-TPM"/>
                             <constraint firstItem="zg4-xv-Ymz" firstAttribute="top" secondItem="dAW-4h-FSi" secondAttribute="top" constant="5" id="uFg-SW-46B"/>
                             <constraint firstItem="VqR-E9-9Tw" firstAttribute="top" secondItem="pde-Pj-aKV" secondAttribute="bottom" constant="30" id="v6K-b3-nXf"/>
@@ -250,7 +250,7 @@
                                                         <rect key="frame" x="0.0" y="165" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" keyboardType="phonePad" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
                                                         <connections>
                                                             <outlet property="delegate" destination="YA2-VT-OR2" id="Fyi-go-TQr"/>
                                                         </connections>
@@ -259,7 +259,7 @@
                                                         <rect key="frame" x="0.0" y="220" width="333" height="45"/>
                                                         <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" keyboardType="phonePad" returnKeyType="done" enablesReturnKeyAutomatically="YES" textContentType="address-level2"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" returnKeyType="done" enablesReturnKeyAutomatically="YES" textContentType="address-level2"/>
                                                         <connections>
                                                             <outlet property="delegate" destination="YA2-VT-OR2" id="0Km-Pb-AV7"/>
                                                         </connections>

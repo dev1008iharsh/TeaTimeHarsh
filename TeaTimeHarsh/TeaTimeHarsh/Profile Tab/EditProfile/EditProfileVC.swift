@@ -34,19 +34,22 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     var currentUser: User?
     var selectedBirthDate: Date?
     
+    let datePicker = UIDatePicker()
+    
     var onProfileUpdated: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "Edit Profile"
-        
+        currentUser = UserDataManager.shared.user
         txtEmail.isUserInteractionEnabled = false
         setupDatePicker()
         setupNavBar()
         setupImageCofiguration()
         setupTextViewAndFields()
-        fetchData()
+        setupProfileData()
+        //fetchData()
     }
 
     private func setupTextViewAndFields() {
@@ -69,38 +72,64 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     }
 
     func validateInput() -> String? {
+
+        // 0. Profile Image Check
+        guard hasSelectedNewImage else {
+            return "Please select your profile picture."
+        }
+
         // 1. Full Name Check
-        guard let name = txtFullName.text?.trimmingCharacters(in: .whitespaces), !name.isEmpty else {
+        guard let name = txtFullName.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+              !name.isEmpty else {
             return "Please enter your full name."
         }
 
         // 2. Username Check
-        guard let username = txtUserName.text?.trimmingCharacters(in: .whitespaces), !username.isEmpty else {
+        guard let username = txtUserName.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+              !username.isEmpty else {
             return "Please enter a username."
         }
 
-        // 3. Email Check (Basic Regex)
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPred = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
-        guard let email = txtEmail.text?.trimmingCharacters(in: .whitespaces), emailPred.evaluate(with: email) else {
+        // 3. Email Check
+        guard let email = txtEmail.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+              Utility.isValidEmail(email) else {
             return "Please enter a valid email address."
         }
 
-        // 4. Phone Check (Example: Must be 10 digits)
-        if let phone = txtPhone.text, !phone.isEmpty {
-            if phone.count < 10 {
-                return "Phone number must be at least 10 digits."
-            }
+        // 4. Phone Number Check (10 digits)
+        guard let phone = txtPhone.text?
+                .removeAllSpaces,
+              phone.count == 10 else {
+            return "Please enter a valid 10-digit phone number."
         }
 
-        // 5. Bio Check (Optional, but maybe limit length)
-        if let bio = txtViewBio.text, bio.count > 150 {
-            return "Bio is too long (max 150 characters)."
+        // 5. City Check
+        guard let city = txtCity.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+              !city.isEmpty else {
+            return "Please enter a city."
         }
 
-        return nil // nil means NO errors, everything is good! ✅
+        // 6. Bio Check
+        let bioPlaceholder = "Enter short description about yourself"
+
+        guard let bio = txtViewBio.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+              !bio.isEmpty,
+              bio != bioPlaceholder else {
+            return "Please enter a short bio about yourself."
+        }
+
+        guard bio.count <= 200 else {
+            return "Bio must be 200 characters or less."
+        }
+        return nil // ✅ All validations passed
     }
 
+    /*
     func fetchData() {
         LoaderManager.shared.startLoading()
 
@@ -110,9 +139,8 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
             do {
                 let userProfileData = try await UserDataManager.shared
                     .fetchCurrentUser()
-
                 self.currentUser = userProfileData
-                await self.setupProfileData()
+                self.setupProfileData()
 
             } catch {
                 Utility
@@ -125,7 +153,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
             LoaderManager.shared.stopLoading()
         }
-    }
+    }*/
 
     private func setupImageCofiguration() {
         imgProfile.layer.cornerRadius = imgProfile.bounds.height / 2
@@ -144,7 +172,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
         // 1. 🛡️ Run Validation
         if let errorMessage = validateInput() {
-            Utility.showAlert(title: "Input Error", message: errorMessage, viewController: self)
+            Utility.showAlert(title: "Data validation Error", message: errorMessage, viewController: self)
             return // Stop here! Do not proceed.
         }
 
@@ -178,7 +206,8 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                 try await UserDataManager.shared.updateUserProfile(user: userToUpdate)
                 LoaderManager.shared.stopLoading()
                 // C. Success!
-                LocalProfileImageSave.shared.saveImage(image: profileImage)
+                UserDataManager.shared.user = userToUpdate
+
                 Utility
                     .showAlertHandler(
                         title: "Success✅",
@@ -203,15 +232,20 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     }
 
     func setupDatePicker() {
-        let datePicker = UIDatePicker()
-        datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .inline // or .inline for modern look
-        datePicker.maximumDate = Date() // cannot be born in the future! 👶
+        let today = Date()
+        let calendar = Calendar.current
 
-        // 1. Assign the picker as the input view for the textfield
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .inline
+
+        datePicker.minimumDate = calendar.date(byAdding: .year, value: -120, to: today)
+        datePicker.maximumDate = calendar.date(byAdding: .year, value: -12, to: today)
+
+        // Ensure selected date stays within range
+        datePicker.date = min(datePicker.date, datePicker.maximumDate ?? today)
+        
         txtBirthDate.inputView = datePicker
 
-        // 2. Add a Toolbar with a "Done" button
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         let doneBtn = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneDateTapped))
@@ -241,7 +275,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         return formatter.string(from: date)
     }
 
-    private func setupProfileData() async {
+    private func setupProfileData() {
         // 1. Fill Texts
         txtFullName.text = currentUser?.fullName
         txtUserName.text = currentUser?.username
@@ -251,8 +285,12 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         txtPhone.text = currentUser?.phoneNumber
         txtCity.text = currentUser?.city
         txtBirthDate.text = currentUser?.birthDateString
+        datePicker.date = currentUser?.birthDate ?? Date()
         existingImageURL = currentUser?.profileImageUrl
-
+        setProfilePicure()
+    }
+    
+    private func setProfilePicure(){
         if let validUrl = existingImageURL, !validUrl.isEmpty {
             ImageManagerKF.setImage(
                 from: validUrl,
@@ -271,8 +309,6 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         case txtFullName:
             txtUserName.becomeFirstResponder()
         case txtUserName:
-            txtEmail.becomeFirstResponder()
-        case txtEmail:
             txtPhone.becomeFirstResponder()
         case txtPhone:
             txtCity.becomeFirstResponder()

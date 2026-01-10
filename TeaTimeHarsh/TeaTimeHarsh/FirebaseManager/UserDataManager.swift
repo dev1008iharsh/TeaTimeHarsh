@@ -15,6 +15,7 @@ class UserDataManager {
 
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
+    var user : User?
    
     // Returns a User object or throws an error if something fails
     // MARK: - Fetch Current User 📥
