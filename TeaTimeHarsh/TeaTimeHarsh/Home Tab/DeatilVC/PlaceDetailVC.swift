@@ -15,6 +15,7 @@ class PlaceDetailVC: UIViewController {
     // MARK: - Properties
 
     var place: TeaPlace?
+    var placeOwnerUser : User?
     lazy var actionManager = TeaActionManager(viewController: self)
 
     // 🔒 Closures for EDIT / DELETE (As requested)
@@ -31,6 +32,7 @@ class PlaceDetailVC: UIViewController {
         super.viewDidLoad()
         setupTableView()
         setupTableHeader()
+        setupFetchPlaceOwnerPersonalDetails()
     }
 
     deinit {
@@ -58,6 +60,23 @@ class PlaceDetailVC: UIViewController {
             UINib(nibName: "DetailStaticCell", bundle: nil),
             forCellReuseIdentifier: "DetailStaticCell"
         )
+    }
+    func setupFetchPlaceOwnerPersonalDetails(){
+        guard let idPlaceOwner = place?.createdByUserId else { return }
+        
+        Task {
+            LoaderManager.shared.startLoading()
+            do {
+                LoaderManager.shared.stopLoading()
+                self.placeOwnerUser = try await FirebaseManager.shared.fetchUserPersonalDetails(userID: idPlaceOwner)
+                print("setupFetchPlaceOwnerPersonalDetails",placeOwnerUser as Any)
+                self.tblPlaceDetail.reloadData()
+            
+            } catch {
+                LoaderManager.shared.stopLoading()
+                print("Error fetching user: \(error.localizedDescription)")
+            }
+        }
     }
 }
 
@@ -108,6 +127,9 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DetailStaticCell", for: indexPath) as! DetailStaticCell
+        if let owner = self.placeOwnerUser{
+            cell.placeOwnerUser = owner
+        }
         if let place = place {
             cell.teaPlace = place
 
@@ -148,8 +170,35 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
                     // popToRootViewController done in actionManager Method
                 }
             }
+
+            // 4. Show place owner popup
+            cell.onPlaceOwnerTapped = { [weak self] in
+                guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    showOfflineAlertAtDetail()
+                    return
+                }
+                if let owner = self.placeOwnerUser {
+                    presentBottomSheetOwnerDetails(owner: owner)
+                }
+            }
         }
         return cell
+    }
+
+    func presentBottomSheetOwnerDetails(owner: User?) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let ownerVC = storyboard.instantiateViewController(withIdentifier: "PlaceOwnerDetailsVC") as? PlaceOwnerDetailsVC else {
+            return
+        }
+        ownerVC.placeOwnerUser = owner
+        if let sheet = ownerVC.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 24
+        }
+
+        present(ownerVC, animated: true)
     }
 
     private func showOfflineAlertAtDetail() {

@@ -25,11 +25,8 @@ class ProfileHeaderCell: UIView {
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         imgProfile.addGestureRecognizer(tap)
 
-        imgProfile.clipsToBounds = true
+        imgProfile.applyCircularProfileStyle()
         imgProfile.layer.cornerRadius = 65
-        imgProfile.layer.borderColor = UIColor.systemIndigo.cgColor
-        imgProfile.layer.borderWidth = 0.5
-
         setProfileImage()
     }
 

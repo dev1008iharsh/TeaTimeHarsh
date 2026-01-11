@@ -52,7 +52,7 @@ class DetailHeader: UIView {
         ImageManagerKF.setImage(
             from: place.imageURL,
             into: imgPlace,
-            placeholderName: "photo"
+            placeholderName: ""
         )
 
         // Set Initial Button States

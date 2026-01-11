@@ -470,6 +470,97 @@
             </objects>
             <point key="canvasLocation" x="1847" y="823"/>
         </scene>
+        <!--Place Owner DetailsVC-->
+        <scene sceneID="L92-XW-7da">
+            <objects>
+                <viewController storyboardIdentifier="PlaceOwnerDetailsVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="l1s-h5-ggv" customClass="PlaceOwnerDetailsVC" customModule="TeaTimeHarsh" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="rFn-Xp-Pgv">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="92G-cf-vTX">
+                                <rect key="frame" x="136.66666666666666" y="184.33333333333334" width="119.99999999999997" height="120.00000000000003"/>
+                                <color key="tintColor" systemColor="systemIndigoColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="92G-cf-vTX" secondAttribute="height" multiplier="1:1" id="HVy-IE-5Fu"/>
+                                    <constraint firstAttribute="height" constant="120" id="PUC-Re-4zD"/>
+                                </constraints>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="gTN-w7-1u5">
+                                <rect key="frame" x="30" y="324.33333333333331" width="333" height="180"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="email" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hap-g1-fWf">
+                                        <rect key="frame" x="0.0" y="0.0" width="333" height="21.666666666666668"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="full name" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jzs-mR-ASb">
+                                        <rect key="frame" x="0.0" y="31.666666666666686" width="333" height="21.666666666666671"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="username" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sMY-XZ-PWy">
+                                        <rect key="frame" x="0.0" y="63.333333333333364" width="333" height="21.66666666666665"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="contact numebr" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xjq-Zi-vOm">
+                                        <rect key="frame" x="0.0" y="95" width="333" height="21.666666666666671"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="birthdate" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xxx-sR-wuC">
+                                        <rect key="frame" x="0.0" y="126.6666666666667" width="333" height="21.666666666666671"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="bio" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zfr-B9-vCW">
+                                        <rect key="frame" x="0.0" y="158.33333333333337" width="333" height="21.666666666666657"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Place Owner's Personal Details " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1hx-Ve-k54">
+                                <rect key="frame" x="35.333333333333343" y="138" width="322.33333333333326" height="26.333333333333343"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
+                                <color key="textColor" systemColor="systemIndigoColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="4i4-Ok-qPg"/>
+                        <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="1hx-Ve-k54" firstAttribute="centerX" secondItem="92G-cf-vTX" secondAttribute="centerX" id="6Qu-ME-PrZ"/>
+                            <constraint firstItem="gTN-w7-1u5" firstAttribute="centerX" secondItem="92G-cf-vTX" secondAttribute="centerX" id="KUQ-g9-61C"/>
+                            <constraint firstItem="92G-cf-vTX" firstAttribute="top" secondItem="1hx-Ve-k54" secondAttribute="bottom" constant="20" id="UzY-Od-aof"/>
+                            <constraint firstItem="gTN-w7-1u5" firstAttribute="top" secondItem="92G-cf-vTX" secondAttribute="bottom" constant="20" id="VxM-bA-WJq"/>
+                            <constraint firstItem="gTN-w7-1u5" firstAttribute="leading" secondItem="4i4-Ok-qPg" secondAttribute="leading" constant="30" id="Wh2-4l-1WF"/>
+                            <constraint firstItem="1hx-Ve-k54" firstAttribute="top" secondItem="4i4-Ok-qPg" secondAttribute="top" constant="20" id="Xme-Pk-XYb"/>
+                            <constraint firstItem="92G-cf-vTX" firstAttribute="centerX" secondItem="4i4-Ok-qPg" secondAttribute="centerX" id="e7U-om-TqP"/>
+                            <constraint firstItem="4i4-Ok-qPg" firstAttribute="trailing" secondItem="gTN-w7-1u5" secondAttribute="trailing" constant="30" id="g4J-Gm-oOh"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="imgOwner" destination="92G-cf-vTX" id="XrI-G6-wmc"/>
+                        <outlet property="lblBio" destination="Zfr-B9-vCW" id="pYi-75-blf"/>
+                        <outlet property="lblBirthDate" destination="xxx-sR-wuC" id="fXd-0q-nsi"/>
+                        <outlet property="lblContactNumber" destination="xjq-Zi-vOm" id="Wpz-Pw-9HK"/>
+                        <outlet property="lblEmail" destination="hap-g1-fWf" id="8EE-QN-rCz"/>
+                        <outlet property="lblFullName" destination="Jzs-mR-ASb" id="yaE-rp-RCb"/>
+                        <outlet property="lblUserName" destination="sMY-XZ-PWy" id="11d-5z-bnb"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="uiK-60-0sH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3346" y="151"/>
+        </scene>
         <!--Home-->
         <scene sceneID="OWM-sn-Fyn">
             <objects>
@@ -568,16 +659,16 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray4Color">
-            <color red="0.81960784313725488" green="0.81960784313725488" blue="0.83921568627450982" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGroupedBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemIndigoColor">
-            <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

@@ -90,7 +90,7 @@ class TeaListCell: UITableViewCell {
         ImageManagerKF.setImage(
             from: teaPlace.imageURL,
             into: imgTeaPlace,
-            placeholderName: "photo"
+            placeholderName: ""
         )
 
         // 2. Set Text Data

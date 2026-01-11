@@ -148,7 +148,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         // 4. Set Image (Using our NEW Manager) 🖼️
         existingImageURL = place.imageURL
-        ImageManagerKF.setImage(from: place.imageURL, into: imgPlace, placeholderName: "photo")
+        ImageManagerKF.setImage(from: place.imageURL, into: imgPlace, placeholderName: "")
     }
 
     func setupTextFields() {

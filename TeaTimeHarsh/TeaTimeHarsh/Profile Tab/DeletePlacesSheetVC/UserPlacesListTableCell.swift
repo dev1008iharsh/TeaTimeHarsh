@@ -94,6 +94,6 @@ class UserPlacesListTableCell: UITableViewCell {
         ImageManagerKF.setImage(
             from: place.imageURL,
             into: iconImageView,
-            placeholderName: "photo")
+            placeholderName: "")
     }
 }

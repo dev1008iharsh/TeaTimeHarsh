@@ -282,4 +282,14 @@ class FirebaseManager {
         // Since we just re-authenticated, this will succeed 100%
         try await user.delete()
     }
+
+    func fetchUserPersonalDetails(userID: String) async throws -> User {
+        // We use 'getDocument(as: User.self)' which automatically converts
+        // the Firestore JSON into your 'User' struct.
+        let user = try await db.collection("users")
+            .document(userID)
+            .getDocument(as: User.self)
+
+        return user
+    }
 }

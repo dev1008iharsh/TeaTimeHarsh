@@ -129,13 +129,9 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     }
 
     private func setupImageCofiguration() {
-        imgProfile.layer.cornerRadius = imgProfile.bounds.height / 2
-        imgProfile.clipsToBounds = true
-        imgProfile.contentMode = .scaleAspectFill
-        imgProfile.backgroundColor = .secondarySystemBackground
-        imgProfile.tintColor = .secondaryLabel
-        imgProfile.isUserInteractionEnabled = true
+        imgProfile.applyCircularProfileStyle()
         imgProfile.tintColor = .systemIndigo
+        imgProfile.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
         imgProfile.addGestureRecognizer(tap)
     }

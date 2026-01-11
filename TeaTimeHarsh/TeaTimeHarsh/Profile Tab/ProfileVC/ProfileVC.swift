@@ -104,7 +104,7 @@ class ProfileVC: UIViewController {
 
         // B. Set the Frame
         // Note: We use a default height, but we can update it later
-        header.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 100)
+        header.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 120)
 
         // C. Configure the Tap Action immediately
         header.didTapProfileImage = { [weak self] in

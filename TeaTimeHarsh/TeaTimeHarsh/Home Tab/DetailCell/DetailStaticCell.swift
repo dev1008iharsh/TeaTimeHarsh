@@ -12,6 +12,7 @@ class DetailStaticCell: UITableViewCell {
     // MARK: - IBOutlets
 
     // Basic Information
+    @IBOutlet var btnPlaceOwner: UIButton!
     @IBOutlet var btnPhone: UIButton! {
         didSet {
             btnPhone.layer.cornerRadius = btnPhone.bounds.height / 2
@@ -46,6 +47,7 @@ class DetailStaticCell: UITableViewCell {
     var onEditTapped: (() -> Void)?
     var onDeleteTapped: (() -> Void)?
     var onShareTapped: (() -> Void)?
+    var onPlaceOwnerTapped: (() -> Void)?
 
     // MARK: - Properties
 
@@ -53,6 +55,8 @@ class DetailStaticCell: UITableViewCell {
     private var targetLat = 37.331705
     private var targetLong = 122.030237
     private var googleMapView: GMSMapView?
+    
+    var placeOwnerUser : User?
 
     // Property Observer: Automatically configures the cell when data is assigned
     var teaPlace: TeaPlace? {
@@ -128,10 +132,37 @@ class DetailStaticCell: UITableViewCell {
         // Share button remains visible for everyone.
         btnEdit.isHidden = !isOwner
         btnDelete.isHidden = !isOwner
+        setOwnerName()
+    }
+
+    private func setOwnerName() {
+        if let owner = placeOwnerUser {
+            if let ownerName = owner.fullName {
+                btnPlaceOwner.setTitle("Place Created by : " + ownerName, for: .normal)
+            } else {
+                if let email = placeOwnerUser?.email, !email.isEmpty {
+                    let username = usernameFromEmail(email)
+
+                    btnPlaceOwner.setTitle("Place Created by : \(username)", for: .normal)
+                }
+            }
+        }
+    }
+
+    private func usernameFromEmail(_ email: String) -> String {
+        // Split email by "@"
+        let components = email.split(separator: "@")
+
+        // Return part before "@"
+        return String(components.first ?? "")
     }
 
     // MARK: - 🆕 IBActions (Triggers)
 
+    @IBAction func btnPlaceOwnerTapped(_ sender: UIButton) {
+        onPlaceOwnerTapped?()
+    }
+    
     @IBAction func btnEditTappedDetail(_ sender: UIButton) {
         // Trigger the closure to notify the ViewController
         onEditTapped?()
