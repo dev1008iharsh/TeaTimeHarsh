@@ -27,7 +27,7 @@ enum ProfileSection: Int, CaseIterable {
     var items: [ProfileRow] {
         switch self {
         case .personal: return [.editProfile, .favourites, .visited, .myPlaces]
-        case .preferences: return [.language, .notification, .appearance]
+        case .preferences: return [.language, .notification, .appearance, .appIcon]
         case .support: return [.help, .share, .rate, .bug, .privacy, .terms]
         case .account: return [.deleteAllPlaces, .deleteAccount, .logout]
         }
@@ -38,7 +38,7 @@ enum ProfileRow {
     // Personal
     case editProfile, favourites, visited, myPlaces
     // Preferences
-    case language, notification, appearance
+    case language, notification, appearance, appIcon
     // Support
     case help, share, rate, bug, privacy, terms
     // Account
@@ -53,6 +53,7 @@ enum ProfileRow {
         case .language: return "Language"
         case .notification: return "Notification"
         case .appearance: return "Appearance"
+        case .appIcon: return "Change app icon"
         case .help: return "Help & Support / FAQ"
         case .share: return "Share app"
         case .rate: return "Rate Us on App store"
@@ -74,6 +75,7 @@ enum ProfileRow {
         case .language: return "globe"
         case .notification: return "bell.badge"
         case .appearance: return "moon.stars"
+        case .appIcon: return "app.gift"
         case .help: return "questionmark.circle"
         case .share: return "square.and.arrow.up"
         case .rate: return "star"
@@ -273,6 +275,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         case .appearance:
             print("🌗 Appearance Settings")
             showAppearanceOptions()
+            
+        case .appIcon:
+            print("📱 Change app icon")
+            navigateToChangeAppIcon()
 
         // Support
         case .help:
@@ -395,6 +401,12 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 homeVC.tblTeaPlaces.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
             }
         }
+    }
+
+    private func navigateToChangeAppIcon() {
+        let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
+        guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "ChangeAppIconVC") as? ChangeAppIconVC else { return }
+        navigationController?.pushViewController(editVC, animated: true)
     }
 
     private func presentReportBugVC() {
