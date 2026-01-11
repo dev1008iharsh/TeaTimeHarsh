@@ -21,7 +21,7 @@ class ProfileHeaderCell: UIView {
 
     func setupView() {
         imgProfile.isUserInteractionEnabled = true
- 
+
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         imgProfile.addGestureRecognizer(tap)
 
@@ -29,12 +29,11 @@ class ProfileHeaderCell: UIView {
         imgProfile.layer.cornerRadius = 65
         imgProfile.layer.borderColor = UIColor.systemIndigo.cgColor
         imgProfile.layer.borderWidth = 0.5
-        
+
         setProfileImage()
     }
 
     func setProfileImage() {
-        
         if let profileUrl = UserDataManager.shared.user?.profileImageUrl {
             ImageManagerKF
                 .setImage(

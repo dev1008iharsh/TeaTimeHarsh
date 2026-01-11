@@ -8,46 +8,49 @@
 import UIKit
 
 class LaunchVC: UIViewController {
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // this launchvc for preload data from internet if needed
-        fetchCurrentUserData()
+        if AppNetworkManager.shared.isConnected {
+            print("🌍 Online Launch: Starting background sync...")
+            UserDataManager.shared.fetchUserProfileIfNeeded()
+
+        } else {
+            print("🔌 Offline Launch")
+            UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
+            Utility
+                .showAlertHandler(
+                    title: "🔌 You’re Offline.Please enable internet connection to get latest data🔴",
+                    message: """
+                    You are currently using the offline version of the app.
+                    You cannot perform any actions right now, but you can read data saved from your last available internet connection.
+
+                    🌐 Connect to the internet to enable all features.
+                    """,
+                    viewController: self) { _ in
+                }
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.goToHome()
         }
     }
-    func fetchCurrentUserData() {
-        LoaderManager.shared.startLoading()
 
-        Task { [weak self] in
-            guard let self = self else { return }
+    // MARK: - Navigation
 
-            do {
-                let userProfileData = try await UserDataManager.shared
-                    .fetchCurrentUser()
-                UserDataManager.shared.user = userProfileData
+    private func goToHome() {
+        DispatchQueue.main.async {
+            // Safety Check
+            if self.navigationController?.topViewController is HomeVC { return }
 
-                print(
-                    "fetch current user details using api at launch vc \(String(describing: UserDataManager.shared.user))"
-                )
-            } catch {
-                Utility
-                    .showAlert(
-                        title: "Error",
-                        message: error.localizedDescription,
-                        viewController: self
-                    )
-            }
-
-            LoaderManager.shared.stopLoading()
+            let homeVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HomeVC")
+            self.navigationController?.setViewControllers([homeVC], animated: true)
         }
     }
 
-    deinit {
-        print("💀 deinit LaunchVC is dead. Memory Free!")
-    }
-    
+    // MARK: - View Setup
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
@@ -58,7 +61,7 @@ class LaunchVC: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
-    private func goToHome() {
-        let homeVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HomeVC")
-        navigationController?.setViewControllers([homeVC], animated: true)    }
+    deinit {
+        print("💀 LaunchVC removed from memory")
+    }
 }

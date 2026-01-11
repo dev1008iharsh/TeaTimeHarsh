@@ -8,23 +8,25 @@
 import UIKit
 
 class PlaceDetailVC: UIViewController {
-    
     // MARK: - IBOutlet
+
     @IBOutlet private var tblPlaceDetail: UITableView!
 
     // MARK: - Properties
+
     var place: TeaPlace?
     lazy var actionManager = TeaActionManager(viewController: self)
 
     // 🔒 Closures for EDIT / DELETE (As requested)
     var onBackToHome: (() -> Void)?
-    
+
     // Header Properties
     private var headerContainerView: UIView?
     private var headerView: DetailHeader?
     private let headerHeight: CGFloat = 300
 
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
@@ -47,6 +49,7 @@ class PlaceDetailVC: UIViewController {
     }
 
     // MARK: - Setup Helpers
+
     private func setupTableView() {
         tblPlaceDetail.delegate = self
         tblPlaceDetail.dataSource = self
@@ -59,6 +62,7 @@ class PlaceDetailVC: UIViewController {
 }
 
 // MARK: - Header Setup 🖼️
+
 private extension PlaceDetailVC {
     func setupTableHeader() {
         guard let place = place,
@@ -67,7 +71,7 @@ private extension PlaceDetailVC {
 
         // Configure with data (Header now handles its own NotificationsCenter post Notification)
         header.configure(place: place)
-        
+
         // Setup Container for Stretchy Effect
         let container = UIView(frame: CGRect(x: 0, y: 0, width: tblPlaceDetail.bounds.width, height: headerHeight))
         header.frame = container.bounds
@@ -92,6 +96,7 @@ private extension PlaceDetailVC {
 }
 
 // MARK: - UITableView Delegate & DataSource
+
 extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         stretchHeaderIfNeeded(scrollView)
@@ -110,12 +115,21 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
 
             // 1. Share
             cell.onShareTapped = { [weak self] in
-                self?.actionManager.performShare(place: place, sourceView: cell.btnShare)
+                guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this action because image is downloading from internet to share this place.", viewController: self)
+                    return
+                }
+                self.actionManager.performShare(place: place, sourceView: cell.btnShare)
             }
 
             // 2. Delete
             cell.onDeleteTapped = { [weak self] in
                 guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    showOfflineAlertAtDetail()
+                    return
+                }
                 self.actionManager.performDelete(place: place) {
                     self.onBackToHome?()
                     // popToRootViewController done in actionManager Method
@@ -125,6 +139,10 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
             // 3. Edit
             cell.onEditTapped = { [weak self] in
                 guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    showOfflineAlertAtDetail()
+                    return
+                }
                 self.actionManager.performEdit(place: place) {
                     self.onBackToHome?() // Ask Home to refresh
                     // popToRootViewController done in actionManager Method
@@ -132,6 +150,10 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
             }
         }
         return cell
+    }
+
+    private func showOfflineAlertAtDetail() {
+        Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this place details screen action.", viewController: self)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

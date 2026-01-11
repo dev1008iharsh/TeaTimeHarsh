@@ -165,5 +165,4 @@ final class Utility {
         // By default, TextView text touches the edges. This pushes it inside.
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     }
- 
 }

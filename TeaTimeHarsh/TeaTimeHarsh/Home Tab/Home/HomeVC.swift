@@ -8,17 +8,16 @@
 import UIKit
 
 class HomeVC: UIViewController {
-
     // MARK: - Outlets
-    
+
     @IBOutlet var tblTeaPlaces: UITableView!
     @IBOutlet var segmentFilter: UISegmentedControl!
 
     // MARK: - Properties
-    
+
     lazy var actionManager = TeaActionManager(viewController: self)
     private let refreshControl = UIRefreshControl()
-    
+
     // Search Controller
     private let searchController = UISearchController(searchResultsController: nil)
     private var currentSearchText: String = ""
@@ -40,20 +39,15 @@ class HomeVC: UIViewController {
     var displayedPlaces: [TeaPlace] {
         // 1. First, filter by Search Text (Name OR Location)
         var filtered = arrTeaPlaces
-        
+
         if !currentSearchText.isEmpty {
             filtered = filtered.filter { place in
-                // Logic: Name check karo OR Location check karo (Safe Unwrap sathe)
                 let nameMatch = place.name.localizedCaseInsensitiveContains(currentSearchText)
-                
-                // 🔥 FIX: (place.location ?? "")
-                // Aano arth: Jo location nil che, to "" (empty) ma search kar, je false aavse. Crash nai thay.
                 let locationMatch = (place.location ?? "").localizedCaseInsensitiveContains(currentSearchText)
-                
                 return nameMatch || locationMatch
             }
         }
-        
+
         // 2. Then, filter by Segment
         switch segmentFilter.selectedSegmentIndex {
         case 1: // Favourites
@@ -68,12 +62,12 @@ class HomeVC: UIViewController {
     }
 
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupAllUI()
-        setupObservers()
-        fetchDataFromFirebase()
+        setupObservers() // 🔥 આ ફંક્શન કોલ થવું જરૂરી છે
+        loadData()
         presentTipIfNeeded()
     }
 
@@ -84,34 +78,33 @@ class HomeVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
-        // Refresh if returning from detail
+        // Refresh if returning from detail (Local update check)
         if !arrTeaPlaces.isEmpty { tblTeaPlaces.reloadData() }
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.prefersLargeTitles = false
     }
-    
+
     // MARK: - Setup UI
-    
+
     private func setupAllUI() {
         setupTableView()
         setupNavBar()
-        setupSearchController() // New Search Setup
+        setupSearchController()
         configureSegmentController()
         setupRefreshControl()
     }
-    
+
     private func setupTableView() {
         tblTeaPlaces.register(UINib(nibName: "TeaListCell", bundle: nil), forCellReuseIdentifier: "TeaListCell")
         tblTeaPlaces.delegate = self
         tblTeaPlaces.dataSource = self
-        // Adjust insets for aesthetic spacing
         tblTeaPlaces.contentInset = UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0)
         tblTeaPlaces.tableFooterView = UIView()
     }
-    
+
     private func setupSearchController() {
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
@@ -119,77 +112,132 @@ class HomeVC: UIViewController {
         navigationItem.searchController = searchController
         definesPresentationContext = true
     }
-    
+
     private func setupNavBar() {
         let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(didTapAddNavBar))
         navigationItem.rightBarButtonItem = addButton
         setLargeTitleSpacingNavBar(20)
         setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
     }
-    
+
     private func configureSegmentController() {
         segmentFilter.setTitleTextAttributes([.foregroundColor: UIColor.systemBackground], for: .selected)
         segmentFilter.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .normal)
     }
-    
+
     private func setupRefreshControl() {
-        refreshControl.addTarget(self, action: #selector(fetchDataFromFirebase), for: .valueChanged)
+        // 🔥 Update Selector to loadData
+        refreshControl.addTarget(self, action: #selector(loadData), for: .valueChanged)
         refreshControl.tintColor = .systemIndigo
         tblTeaPlaces.refreshControl = refreshControl
     }
-    
+
     private func setupObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(handleFavNotification(_:)), name: .teaPlaceDidTapFav, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleVisitNotification(_:)), name: .teaPlaceDidTapVisit, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleReload), name: .teaPlacesShouldReload, object: nil)
+        // 🔥 Connection Restored Observer
+        NotificationCenter.default.addObserver(self, selector: #selector(handleConnectionRestored), name: .connectionRestored, object: nil)
     }
-    
+
     // MARK: - Actions
-    
+
     @IBAction func didChangeSegmentFilter(_ sender: UISegmentedControl) {
         tblTeaPlaces.reloadData()
-        // Scroll to top if items exist
         if !displayedPlaces.isEmpty {
             tblTeaPlaces.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
         }
+
         setNeedsUpdateContentUnavailableConfiguration()
     }
-    
+
+    @objc func handleConnectionRestored() {
+        print("🚀 Internet Restored! Auto-refreshing Home & User Data...")
+
+        // ૧. Tea Places રિફ્રેશ કરો (થોડા Delay સાથે જેથી Connection stable થાય)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.loadData()
+        }
+
+        // ૨. Global User Profile ચેક કરો (Missing હોય તો લઈ આવે)
+        UserDataManager.shared.fetchUserProfileIfNeeded()
+    }
+
     @objc private func didTapAddNavBar() {
+        // 🔥 GUARD: Internet Check
+        guard AppNetworkManager.shared.isConnected else {
+            showOfflineAlertAtHome()
+            return
+        }
+
         HapticHelper.success()
         let addVC = storyboard?.instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
         addVC.screenMode = .add
-        addVC.onPlaceAdded = { [weak self] _ in self?.fetchDataFromFirebase() }
+        addVC.onPlaceAdded = { [weak self] _ in self?.loadData() }
         navigationController?.pushViewController(addVC, animated: true)
     }
 
-    // MARK: - API & Data Handling
-    
-    @objc private func fetchDataFromFirebase() {
+    // MARK: - 🔥 API & Data Handling (The Brain)
+
+    @objc private func loadData() {
+        // 1. UI Loading State
         if !refreshControl.isRefreshing {
             isLoading = true
             LoaderManager.shared.startLoading()
         }
 
+        // 2. Check Connection using your AppNetworkManager
+        if AppNetworkManager.shared.isConnected {
+            print("🌍 Internet Available - Fetching from Firebase")
+            fetchFromFirebaseAndSync()
+        } else {
+            print("🔌 No Internet - Fetching from CoreData")
+            fetchFromCoreData()
+        }
+    }
+
+    // Scenario A: Online
+    private func fetchFromFirebaseAndSync() {
         Task {
-            defer {
-                Task { @MainActor in
-                    self.isLoading = false
-                    LoaderManager.shared.stopLoading()
-                    self.refreshControl.endRefreshing()
-                }
-            }
+            defer { stopLoadingUI() }
             do {
                 let places = try await FirebaseManager.shared.fetchAllPlaces()
                 await MainActor.run { self.arrTeaPlaces = places }
+
+                // Sync in background
+                CoreDataManager.shared.syncPlacesToLocalDB(places: places)
+
             } catch {
                 await MainActor.run {
-                    Utility.showAlert(title: "Error", message: error.localizedDescription, viewController: self)
+                    // Fallback to local if API fails
+                    print("⚠️ Firebase Error: \(error), trying local...")
+                    self.fetchFromCoreData()
+                    Utility.showAlert(title: "Error", message: "Could not connect to server. Showing offline data.", viewController: self)
                 }
             }
         }
     }
-    
+
+    // Scenario B: Offline
+    private func fetchFromCoreData() {
+        let localPlaces = CoreDataManager.shared.fetchLocalPlaces()
+        arrTeaPlaces = localPlaces
+        stopLoadingUI()
+
+        if localPlaces.isEmpty {
+            // Only show alert if screen is totally empty
+            Utility.showAlert(title: "Offline", message: "No internet and no saved data found.", viewController: self)
+        }
+    }
+
+    private func stopLoadingUI() {
+        Task { @MainActor in
+            self.isLoading = false
+            LoaderManager.shared.stopLoading()
+            self.refreshControl.endRefreshing()
+        }
+    }
+
     private func presentTipIfNeeded() {
         guard HomeListingTipManager.shouldShowTip() else { return }
         let tipVC = storyboard?.instantiateViewController(withIdentifier: "HomeListingTipVC") as! HomeListingTipVC
@@ -197,12 +245,17 @@ class HomeVC: UIViewController {
         tipVC.modalTransitionStyle = .crossDissolve
         present(tipVC, animated: true)
     }
+
+    // Helper for repetitive alerts
+    private func showOfflineAlertAtHome() {
+        Utility.showAlert(title: "No Internet", message: "Please connect to the internet to perform this action.", viewController: self)
+    }
 }
 
 // MARK: - Search Delegate
+
 extension HomeVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        // Update variable and reload table
         currentSearchText = searchController.searchBar.text ?? ""
         tblTeaPlaces.reloadData()
         setNeedsUpdateContentUnavailableConfiguration()
@@ -210,8 +263,8 @@ extension HomeVC: UISearchResultsUpdating {
 }
 
 // MARK: - TableView Delegate & DataSource
+
 extension HomeVC: UITableViewDelegate, UITableViewDataSource {
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return displayedPlaces.count
     }
@@ -219,7 +272,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TeaListCell", for: indexPath) as! TeaListCell
         cell.configure(teaPlace: displayedPlaces[indexPath.row])
-        
+
         cell.onFavTapped = { [weak self] in
             self?.performSwipeToggle(at: indexPath, type: "fav")
         }
@@ -233,41 +286,53 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let detailVC = storyboard?.instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
         detailVC.place = displayedPlaces[indexPath.row]
-        detailVC.onBackToHome = { [weak self] in self?.fetchDataFromFirebase() }
+        // Reload when coming back to ensure data consistency
+        detailVC.onBackToHome = { [weak self] in self?.loadData() }
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 
 // MARK: - Notifications & Toggle Logic
+
 extension HomeVC {
-    
     @objc func handleFavNotification(_ notification: Notification) {
         updateLocalState(from: notification, type: "fav")
     }
-    
+
     @objc func handleVisitNotification(_ notification: Notification) {
         updateLocalState(from: notification, type: "visit")
     }
-    
+
     @objc func handleReload() {
-        DispatchQueue.main.async { self.fetchDataFromFirebase() }
+        DispatchQueue.main.async { self.loadData() }
     }
-    
+
     private func updateLocalState(from notification: Notification, type: String) {
+        // 🔥 GUARD: Internet Check
+        guard AppNetworkManager.shared.isConnected else {
+            // Notification might come from detail, so we don't necessarily show alert here, but logic stops
+            return
+        }
+
         guard let placeID = notification.userInfo?["placeID"] as? String,
               let status = notification.userInfo?[type == "fav" ? "isFav" : "isVisited"] as? Bool,
               let index = arrTeaPlaces.firstIndex(where: { $0.id == placeID }) else { return }
 
-        // Update Master Array
         if type == "fav" { arrTeaPlaces[index].isFav = status }
         else { arrTeaPlaces[index].isVisited = status }
-        
+
         tblTeaPlaces.reloadData()
         callApiToToggleStatus(place: arrTeaPlaces[index], type: type)
     }
-    
+
     // Centralized Swipe/Context/Notification Helper
     private func performSwipeToggle(at indexPath: IndexPath, type: String) {
+        // 🔥 GUARD: Internet Check
+        guard AppNetworkManager.shared.isConnected else {
+            showOfflineAlertAtHome()
+            return
+        }
+
         let selectedPlace = displayedPlaces[indexPath.row]
         guard let originalIndex = arrTeaPlaces.firstIndex(where: { $0.id == selectedPlace.id }) else { return }
 
@@ -282,11 +347,11 @@ extension HomeVC {
                 UIView.animate(withDuration: 0.3) { cell.transform = .identity }
             }
         }
-        
+
         // 3. API
         callApiToToggleStatus(place: arrTeaPlaces[originalIndex], type: type)
     }
-    
+
     private func callApiToToggleStatus(place: TeaPlace, type: String) {
         Task {
             do {
@@ -307,45 +372,58 @@ extension HomeVC {
 }
 
 // MARK: - Swipe Actions & Context Menu
+
 extension HomeVC {
-    
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let place = displayedPlaces[indexPath.row]
         let share = makeAction(title: "Share", color: .systemBlue, icon: "square.and.arrow.up") { self.actionManager.performShare(place: place, sourceView: $0) }
-        
+
         guard TeaActionManager.canModify(place: place) else { return UISwipeActionsConfiguration(actions: [share]) }
-        
-        let delete = makeAction(title: "Delete", color: .systemRed, icon: "trash") { cell in
+
+        let delete = makeAction(title: "Delete", color: .systemRed, icon: "trash") { _ in
+
+            // 🔥 GUARD: Internet Check
+            guard AppNetworkManager.shared.isConnected else {
+                self.showOfflineAlertAtHome()
+                return
+            }
+
             self.actionManager.performDelete(place: place) {
                 if let idx = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
                     self.arrTeaPlaces.remove(at: idx)
-                    self.tblTeaPlaces.reloadData() // Simple reload is safer with filters
+                    self.tblTeaPlaces.reloadData()
                 }
             }
         }
-        
+
         let edit = makeAction(title: "Edit", color: .systemOrange, icon: "pencil") { _ in
-            self.actionManager.performEdit(place: place) { self.fetchDataFromFirebase() }
+
+            // 🔥 GUARD: Internet Check
+            guard AppNetworkManager.shared.isConnected else {
+                self.showOfflineAlertAtHome()
+                return
+            }
+
+            self.actionManager.performEdit(place: place) { self.loadData() }
         }
-        
+
         return UISwipeActionsConfiguration(actions: [delete, share, edit])
     }
 
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let place = displayedPlaces[indexPath.row]
-        
+
         let visit = makeAction(title: place.isVisited ? "Unvisit" : "Visit", color: place.isVisited ? .systemGray4 : .systemGreen, icon: "checkmark.circle") { _ in
             self.performSwipeToggle(at: indexPath, type: "visit")
         }
-        
+
         let fav = makeAction(title: place.isFav ? "Unfav" : "Fav", color: place.isFav ? .systemGray : .systemPink, icon: "heart.fill") { _ in
             self.performSwipeToggle(at: indexPath, type: "fav")
         }
-        
+
         return UISwipeActionsConfiguration(actions: [visit, fav])
     }
-    
-    // Helper to create swipe actions cleanly
+
     private func makeAction(title: String, color: UIColor, icon: String, handler: @escaping (UIView) -> Void) -> UIContextualAction {
         let action = UIContextualAction(style: .normal, title: title) { [weak self] _, view, completion in
             handler(self?.tblTeaPlaces.cellForRow(at: self?.tblTeaPlaces.indexPath(for: view as! UITableViewCell) ?? IndexPath()) ?? view)
@@ -355,7 +433,7 @@ extension HomeVC {
         action.image = UIImage(systemName: icon)
         return action
     }
-    
+
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let place = displayedPlaces[indexPath.row]
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
@@ -368,14 +446,14 @@ extension HomeVC {
 }
 
 // MARK: - Empty State (iOS 17+)
+
 extension HomeVC {
     override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
         if isLoading {
             contentUnavailableConfiguration = nil
             return
         }
-        
-        // Show empty state only if filter/search yields no results
+
         guard displayedPlaces.isEmpty else {
             contentUnavailableConfiguration = nil
             return
@@ -384,12 +462,12 @@ extension HomeVC {
         var config = UIContentUnavailableConfiguration.empty()
         config.image = UIImage(systemName: "cup.and.heat.waves.fill")
         config.imageProperties.tintColor = .systemIndigo
-        
-        // Customized Text based on Context
+
         if !currentSearchText.isEmpty {
             config.text = "No Matches Found"
             config.secondaryText = "Try searching for a different name or location."
         } else {
+            // Customize based on filter (same as before)
             switch segmentFilter.selectedSegmentIndex {
             case 1: config.text = "No Favourites Yet"; config.secondaryText = "Swipe right to heart a place!"
             case 2: config.text = "No Visits Yet"; config.secondaryText = "Go drink some tea!"
@@ -397,12 +475,12 @@ extension HomeVC {
             default: config.text = "It’s Tea-rribly Empty"; config.secondaryText = "Add the first tea spot!"
             }
         }
-        
+
         // Button Logic
         var btnConfig = UIButton.Configuration.filled()
         btnConfig.cornerStyle = .capsule
         btnConfig.baseBackgroundColor = .systemIndigo
-        
+
         if segmentFilter.selectedSegmentIndex == 0 && currentSearchText.isEmpty {
             btnConfig.title = "Add First Place"
             btnConfig.image = UIImage(systemName: "plus")
@@ -413,7 +491,7 @@ extension HomeVC {
             config.buttonProperties.primaryAction = UIAction { [weak self] _ in
                 self?.segmentFilter.selectedSegmentIndex = 0
                 self?.searchController.searchBar.text = ""
-                self?.searchController.isActive = false // Close search
+                self?.searchController.isActive = false
                 self?.currentSearchText = ""
                 self?.didChangeSegmentFilter(self!.segmentFilter)
             }

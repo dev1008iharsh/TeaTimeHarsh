@@ -252,7 +252,7 @@ class FirebaseManager {
         // Queue Places & their images
         for doc in placesSnapshot.documents {
             batch.deleteDocument(doc.reference)
-            
+
             // 1. Get String
             if let imageUrl = doc.data()["imageURL"] as? String {
                 // 2. Create Reference (No 'try?' needed here)

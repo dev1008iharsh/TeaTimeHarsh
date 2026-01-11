@@ -13,15 +13,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+
         AppNetworkManager.shared.startMonitoring()
-        
+
         let window = UIWindow(windowScene: windowScene)
-        
+
         if let user = Auth.auth().currentUser {
             print("*** ✅ User is Logged In. Going to Home. Current Firebase USER ID: \(user.uid)")
             Constants.Strings.currentUserID = user.uid
-            
+
             let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
             let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
             window.rootViewController = tabBarVC
@@ -32,10 +32,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let navVC = UINavigationController(rootViewController: loginVC)
             window.rootViewController = navVC
         }
-        
+
         let savedTheme = ThemeManager.shared.getCurrentTheme()
         ThemeManager.shared.apply(theme: savedTheme)
-        
+
         self.window = window
         window.makeKeyAndVisible()
     }
@@ -71,6 +71,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
 
         // Save changes in the application's managed object context when the application transitions to the background.
-        (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        // (UIApplication.shared.delegate as? AppDelegate)?.saveContext() - because coredata methods remove from appdelegate
+        CoreDataManager.shared.saveContext() // made custom class
     }
 }

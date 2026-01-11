@@ -5,8 +5,8 @@
 //  Created by Harsh on 27/12/25.
 //
 
-import UIKit
 import SafariServices
+import UIKit
 
 extension UIViewController {
     func hideBackButtonNavBar(hidden: Bool, swipeEnabled: Bool) {
@@ -94,7 +94,7 @@ extension UIViewController {
         // 2. Create the appearance settings
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.shadowColor = .clear 
+        appearance.shadowColor = .clear
 
         // 3. Create the indentation style
         let paragraphStyle = NSMutableParagraphStyle()

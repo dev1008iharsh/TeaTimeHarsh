@@ -4,13 +4,11 @@
 //
 //  Created by Harsh on 31/12/25.
 //
- 
 
 import GoogleMaps
 import UIKit
 
 class DetailStaticCell: UITableViewCell {
-    
     // MARK: - IBOutlets
 
     // Basic Information
@@ -43,7 +41,7 @@ class DetailStaticCell: UITableViewCell {
     @IBOutlet var btnShare: UIButton!
 
     // MARK: - 🆕 Closures (Actions for Controller)
-    
+
     // These closures will tell the ViewController when a button is tapped.
     var onEditTapped: (() -> Void)?
     var onDeleteTapped: (() -> Void)?
@@ -65,8 +63,13 @@ class DetailStaticCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        configureGoogleMap()
-        addTapGestureToMap()
+        if AppNetworkManager.shared.isConnected {
+            mapContainerView.isHidden = false
+            configureGoogleMap()
+            addTapGestureToMap()
+        } else {
+            mapContainerView.isHidden = true
+        }
     }
 
     // MARK: - Map Configuration
@@ -115,11 +118,11 @@ class DetailStaticCell: UITableViewCell {
         targetLat = place.latitude ?? 0.0
         targetLong = place.longitude ?? 0.0
         GoogleMapHelper.updateLocation(mapView: googleMapView, lat: targetLat, long: targetLong, showMarker: true)
-        
+
         // 5. Check Owner Permissions
         // We use the TeaActionManager helper to check if the current user created this place.
         let isOwner = TeaActionManager.canModify(place: place)
-        
+
         // 6. Manage Button Visibility
         // Hide Edit & Delete buttons if the user is not the owner.
         // Share button remains visible for everyone.
@@ -153,6 +156,9 @@ class DetailStaticCell: UITableViewCell {
 
     @objc private func mapTapped() {
         print("📍 Map Tapped! Redirecting...")
+        guard AppNetworkManager.shared.isConnected else {
+            return
+        }
         HapticHelper.heavy()
         openGoogleMaps(lat: targetLat, long: targetLong)
     }

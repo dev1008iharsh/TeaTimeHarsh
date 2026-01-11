@@ -5,46 +5,44 @@
 //  Created by Harsh on 31/12/25.
 //
 
-
-import UIKit
 import CoreLocation
+import UIKit
 
 @MainActor
 class LocationManager: NSObject, CLLocationManagerDelegate {
-    
     static let shared = LocationManager()
-    
+
     private let locationManager = CLLocationManager()
-    
+
     // 🛠️ FIX 1: Expose the authorization status publicly
     var authorizationStatus: CLAuthorizationStatus {
         return locationManager.authorizationStatus
     }
-    
+
     // 🛠️ FIX 2: Expose the last known location
     // This allows us to get the location INSTANTLY if the GPS is already warm.
     var lastKnownLocation: CLLocation? {
         return locationManager.location
     }
-    
+
     private weak var viewControllerName: UIViewController?
-    
+
     var onLocationUpdate: ((CLLocation) -> Void)?
     var onLocationFailure: ((Error) -> Void)?
-    
+
     override init() {
         super.init()
-        self.locationManager.delegate = self
-        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         // We don't start updating here to save battery until requested
     }
-    
+
     func checkAuthorizationStatus(from viewController: UIViewController) {
-        self.viewControllerName = viewController
+        viewControllerName = viewController
         let status = locationManager.authorizationStatus
         handleAuthorizationStatus(status)
     }
-   
+
     private func handleAuthorizationStatus(_ status: CLAuthorizationStatus) {
         switch status {
         case .notDetermined:
@@ -59,8 +57,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             print("Unknown status")
         }
     }
-    
+
     // MARK: - Alerts
+
     private func showPermissionDeniedAlert() {
         guard let vcName = viewControllerName else { return }
         Utility.showCustomConfirmAlert(
@@ -73,7 +72,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             leftAction: { _ in }
         )
     }
-    
+
     private func showPermissionRestrictedAlert() {
         guard let vcName = viewControllerName else { return }
         HapticHelper.warning()
@@ -84,15 +83,16 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 viewController: vcName
             )
     }
-    
+
     func openSettings() {
         guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
         if UIApplication.shared.canOpenURL(settingsURL) {
             UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
         }
     }
-    
+
     // MARK: - Delegate
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         onLocationUpdate?(location)
@@ -102,7 +102,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         if let clError = error as? CLError, clError.code == .locationUnknown { return }
         onLocationFailure?(error)
     }
-    
+
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         handleAuthorizationStatus(manager.authorizationStatus)
     }

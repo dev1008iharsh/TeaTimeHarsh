@@ -11,7 +11,7 @@ class UserPlacesListVC: UIViewController {
     // MARK: - Properties
 
     var places: [TeaPlace] = []
- 
+
     // MARK: - UI Components
 
     private let titleLabel: UILabel = {
@@ -94,8 +94,6 @@ class UserPlacesListVC: UIViewController {
             sheet.prefersScrollingExpandsWhenScrolledToEdge = false
         }
 
-         
-
         // Setup TableView
         tableView.delegate = self
         tableView.dataSource = self
@@ -145,14 +143,12 @@ class UserPlacesListVC: UIViewController {
 
     @objc private func didTapDeleteAction() {
         // Refactored: Now handles both cases correctly
-     
-            performDeleteAllPlaces()
-        
+
+        performDeleteAllPlaces()
     }
 
     // MARK: - Network Logic
 
- 
     private func performDeleteAllPlaces() {
         Utility.showYesNoConfirmAlert(
             title: "Delete All Places?",
@@ -174,13 +170,13 @@ class UserPlacesListVC: UIViewController {
                         self.dismiss(animated: true)
                         NotificationCenter.default.post(name: .teaPlacesShouldReload, object: nil)
                         /*
-                        Utility.showAlertHandler(
-                            title: "All places deleted ✅",
-                            message: "All places successfully deleted.  🍵 Tap the ➕ button on the Home screen to add new places ✨",
-                            viewController: self
-                        ) { _ in
-                            self.dismiss(animated: true)
-                        }*/
+                         Utility.showAlertHandler(
+                             title: "All places deleted ✅",
+                             message: "All places successfully deleted.  🍵 Tap the ➕ button on the Home screen to add new places ✨",
+                             viewController: self
+                         ) { _ in
+                             self.dismiss(animated: true)
+                         }*/
                     }
                 } catch {
                     await MainActor.run {

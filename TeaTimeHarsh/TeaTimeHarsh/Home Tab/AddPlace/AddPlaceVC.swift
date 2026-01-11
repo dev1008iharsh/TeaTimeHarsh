@@ -151,7 +151,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         ImageManagerKF.setImage(from: place.imageURL, into: imgPlace, placeholderName: "photo")
     }
 
-    func setupTextFields(){
+    func setupTextFields() {
         txtName.applyDefaultStyle()
         txtDesc.applyDefaultStyle()
         txtPhone.applyDefaultStyle()
@@ -162,7 +162,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         txtClosingTime.applyDefaultStyle()
         txtHoliday.applyDefaultStyle()
     }
-    
+
     // MARK: - Save / Update Logic 🚀
 
     func savePlaceToFirebase() {
@@ -315,17 +315,21 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             Utility.showAlert(title: "Invalid Data", message: errorMsg, viewController: self)
             return
         }
+        guard AppNetworkManager.shared.isConnected else {
+            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform action on add place screen.", viewController: self)
+            return
+        }
         savePlaceToFirebase()
     }
 
     @objc private func didTapCancelBarButton() {
         showDiscardAlert()
     }
-    
+
     @objc private func didTapDone() {
-        self.view.endEditing(true)
+        view.endEditing(true)
     }
-     
+
     @objc private func didTapPlaceImage() {
         HapticHelper.light()
         ImagePickerManager.shared.pickSingleImage(from: self) { [weak self] selectedImage in
@@ -339,6 +343,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSelectLocationMap(_ sender: UIButton) {
         HapticHelper.medium()
+        guard AppNetworkManager.shared.isConnected else {
+            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to open map screen and select location from map 📍.", viewController: self)
+            return
+        }
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let mapVC = storyboard.instantiateViewController(withIdentifier: "SelectPlaceOnMapVC") as? SelectPlaceOnMapVC else { return }
 
@@ -372,8 +380,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // Setup Methods
     private func setupNavBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(didTapCancelBarButton))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done",style: .plain,
-            target: self, action: #selector(didTapDone))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain,
+                                                            target: self, action: #selector(didTapDone))
     }
 
     private func setupMiniMap() {

@@ -22,7 +22,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     @IBOutlet var txtBirthDate: UITextField!
     @IBOutlet var txtViewBio: UITextView!
     @IBOutlet var btnUpdate: UIButton!
- 
+
     let placeholderText = "Enter short description about yourself"
     let placeholderColor = UIColor.lightGray
     let textColor = UIColor.label
@@ -33,9 +33,9 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
     var currentUser: User?
     var selectedBirthDate: Date?
-    
+
     let datePicker = UIDatePicker()
-    
+
     var onProfileUpdated: (() -> Void)?
 
     override func viewDidLoad() {
@@ -49,7 +49,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         setupImageCofiguration()
         setupTextViewAndFields()
         setupProfileData()
-        //fetchData()
+        // fetchData()
     }
 
     private func setupTextViewAndFields() {
@@ -59,7 +59,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         txtPhone.applyDefaultStyle()
         txtCity.applyDefaultStyle()
         txtBirthDate.applyDefaultStyle()
-      
+
         // 2. Assign the delegate so this class can listen to events
         txtViewBio.delegate = self
         txtViewBio.backgroundColor = .systemBackground
@@ -72,7 +72,6 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     }
 
     func validateInput() -> String? {
-
         // 0. Profile Image Check
         guard hasSelectedNewImage else {
             return "Please select your profile picture."
@@ -80,36 +79,36 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
         // 1. Full Name Check
         guard let name = txtFullName.text?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              !name.isEmpty else {
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+            !name.isEmpty else {
             return "Please enter your full name."
         }
 
         // 2. Username Check
         guard let username = txtUserName.text?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              !username.isEmpty else {
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+            !username.isEmpty else {
             return "Please enter a username."
         }
 
         // 3. Email Check
         guard let email = txtEmail.text?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              Utility.isValidEmail(email) else {
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+            Utility.isValidEmail(email) else {
             return "Please enter a valid email address."
         }
 
         // 4. Phone Number Check (10 digits)
         guard let phone = txtPhone.text?
-                .removeAllSpaces,
-              phone.count == 10 else {
+            .removeAllSpaces,
+            phone.count == 10 else {
             return "Please enter a valid 10-digit phone number."
         }
 
         // 5. City Check
         guard let city = txtCity.text?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              !city.isEmpty else {
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+            !city.isEmpty else {
             return "Please enter a city."
         }
 
@@ -117,9 +116,9 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         let bioPlaceholder = "Enter short description about yourself"
 
         guard let bio = txtViewBio.text?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              !bio.isEmpty,
-              bio != bioPlaceholder else {
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+            !bio.isEmpty,
+            bio != bioPlaceholder else {
             return "Please enter a short bio about yourself."
         }
 
@@ -128,32 +127,6 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         }
         return nil // ✅ All validations passed
     }
-
-    /*
-    func fetchData() {
-        LoaderManager.shared.startLoading()
-
-        Task { [weak self] in
-            guard let self = self else { return }
-
-            do {
-                let userProfileData = try await UserDataManager.shared
-                    .fetchCurrentUser()
-                self.currentUser = userProfileData
-                self.setupProfileData()
-
-            } catch {
-                Utility
-                    .showAlert(
-                        title: "Error",
-                        message: error.localizedDescription,
-                        viewController: self
-                    )
-            }
-
-            LoaderManager.shared.stopLoading()
-        }
-    }*/
 
     private func setupImageCofiguration() {
         imgProfile.layer.cornerRadius = imgProfile.bounds.height / 2
@@ -174,6 +147,10 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         if let errorMessage = validateInput() {
             Utility.showAlert(title: "Data validation Error", message: errorMessage, viewController: self)
             return // Stop here! Do not proceed.
+        }
+        guard AppNetworkManager.shared.isConnected else {
+            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to edit profile.", viewController: self)
+            return
         }
 
         guard var userToUpdate = currentUser else { return }
@@ -218,8 +195,6 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                                 .popViewController(animated: true)
                     }
 
-              
-
             } catch {
                 LoaderManager.shared.stopLoading()
                 Utility.showAlert(
@@ -243,7 +218,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
         // Ensure selected date stays within range
         datePicker.date = min(datePicker.date, datePicker.maximumDate ?? today)
-        
+
         txtBirthDate.inputView = datePicker
 
         let toolbar = UIToolbar()
@@ -280,8 +255,8 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         txtFullName.text = currentUser?.fullName
         txtUserName.text = currentUser?.username
         txtEmail.text = currentUser?.email
-        //txtViewBio.text = currentUser?.bio
-        self.configureBio(with: currentUser?.bio)
+        // txtViewBio.text = currentUser?.bio
+        configureBio(with: currentUser?.bio)
         txtPhone.text = currentUser?.phoneNumber
         txtCity.text = currentUser?.city
         txtBirthDate.text = currentUser?.birthDateString
@@ -289,8 +264,8 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         existingImageURL = currentUser?.profileImageUrl
         setProfilePicure()
     }
-    
-    private func setProfilePicure(){
+
+    private func setProfilePicure() {
         if let validUrl = existingImageURL, !validUrl.isEmpty {
             ImageManagerKF.setImage(
                 from: validUrl,
@@ -317,21 +292,21 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         }
         return true
     }
+
     func configureBio(with text: String?) {
         // 1. Check if the API gave us actual text (and it's not just empty spaces)
         if let bio = text, !bio.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            
             // 🟢 Case A: We have real data!
             txtViewBio.text = bio
             txtViewBio.textColor = textColor // Normal Black Color
-            
+
         } else {
-            
             // ⚪️ Case B: Data is empty/nil -> Show Placeholder
             txtViewBio.text = placeholderText
             txtViewBio.textColor = placeholderColor // Gray Color
         }
     }
+
     // 🟢 1. When User Starts Typing (Focus)
     func textViewDidBeginEditing(_ textView: UITextView) {
         // If the text is currently our "placeholder", clear it!
@@ -349,6 +324,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
             textView.textColor = placeholderColor
         }
     }
+
     @objc private func didTapProfileImage() {
         HapticHelper.light()
         ImagePickerManager.shared.pickSingleImage(from: self) { [weak self] selectedImage in
@@ -379,8 +355,6 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                     self.navigationController?.popViewController(animated: true)
 
             } leftAction: { _ in
-                
             }
     }
 }
-

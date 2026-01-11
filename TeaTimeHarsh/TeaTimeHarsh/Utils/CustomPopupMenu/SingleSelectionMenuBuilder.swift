@@ -8,14 +8,12 @@
 import UIKit
 
 struct SingleSelectionMenuBuilder {
-
     static func makeMenu(
         title: String,
         items: [String],
         selectedItem: String?,
         onSelect: @escaping (String) -> Void
     ) -> UIMenu {
-
         let actions = items.map { item in
             UIAction(
                 title: item,

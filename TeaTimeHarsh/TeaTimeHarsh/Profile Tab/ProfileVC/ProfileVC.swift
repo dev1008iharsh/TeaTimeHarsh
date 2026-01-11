@@ -259,9 +259,17 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
         // Preferences
         case .language:
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             print("🌍 Change Language")
         case .notification:
             print("🔔 Notification Settings")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
         case .appearance:
             print("🌗 Appearance Settings")
             showAppearanceOptions()
@@ -269,30 +277,58 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         // Support
         case .help:
             print("❓ Help Tapped")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
         case .share:
             print("📤 Share App")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openShareSheetShareApp()
         case .rate:
             print("⭐️ Rate App")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/")
         case .bug:
             print("🐜 Report Bug")
             presentReportBugVC()
         case .privacy:
             print("🔒 Privacy Policy")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
         case .terms:
             print("📄 Terms & Conditions")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
             // Account
 
         case .deleteAllPlaces:
             print("🗑️ Delete All Places ")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             loadUserData()
 
         case .deleteAccount:
             print("🗑️ Delete Account Logic")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             performDeleteAccount()
 
         case .logout:
@@ -328,6 +364,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 print("Error fetching user places: \(error.localizedDescription)")
             }
         }
+    }
+
+    func showOfflineAlertAtProfile() {
+        Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this profile screen action.", viewController: self)
     }
 
     // Helper function to switch tab and filter
