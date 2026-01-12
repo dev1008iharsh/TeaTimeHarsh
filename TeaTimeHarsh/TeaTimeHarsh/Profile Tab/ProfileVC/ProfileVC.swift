@@ -119,7 +119,7 @@ class ProfileVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tblProfile.tableHeaderView = profileHeader
-        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+        setCustomNavigationBarStyle()
         if #available(iOS 17.0, *) {
             registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
                 self.tblProfile.reloadData()
@@ -168,42 +168,45 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ProfileItemCell", for: indexPath)
 
-        // 🎯 Get the specific row data safely
-        guard let sectionType = ProfileSection(rawValue: indexPath.section) else { return UITableViewCell() }
+        // 🔥 RESET reused cell FIRST (MOST IMPORTANT)
+        cell.textLabel?.text = nil
+        cell.detailTextLabel?.text = nil
+        cell.imageView?.image = nil
+        cell.accessoryView = nil
+        cell.accessoryType = .none
+
+        guard let sectionType = ProfileSection(rawValue: indexPath.section) else { return cell }
         let item = sectionType.items[indexPath.row]
 
-        // Setup Basic Data
+        // Basic Data
         cell.textLabel?.text = item.title
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        cell.textLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         cell.imageView?.image = UIImage(systemName: item.iconName)
-
-        // Reset Text Color
-        cell.detailTextLabel?.text = nil
         cell.textLabel?.textColor = .label
         cell.imageView?.tintColor = .systemIndigo
 
-        // 🎨 Specific Visual Logic
+        // Destructive style
         if item.isDestructive {
             cell.textLabel?.textColor = .red
             cell.imageView?.tintColor = .red
         }
 
-        // Handle Detail Text (Right side text)
+        // Accessory handling
         switch item {
         case .notification:
             setupNotificationSwitch(for: cell)
 
         case .language:
             cell.detailTextLabel?.text = "English"
+            cell.accessoryType = .disclosureIndicator
 
         case .appearance:
             let currentTheme = ThemeManager.shared.getCurrentTheme()
             cell.detailTextLabel?.text = currentTheme.title
+            cell.accessoryType = .disclosureIndicator
 
         default:
-            cell.accessoryView = nil
             cell.accessoryType = .disclosureIndicator
-            break
         }
 
         return cell

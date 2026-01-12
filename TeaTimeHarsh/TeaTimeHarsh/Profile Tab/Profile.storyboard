@@ -110,7 +110,7 @@
                                 </constraints>
                                 <imageReference key="image" image="plus" catalog="system" symbolScale="default"/>
                             </imageView>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter your email address" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="VqR-E9-9Tw">
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter your email address" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="VqR-E9-9Tw">
                                 <rect key="frame" x="20" y="418" width="353" height="45"/>
                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                 <constraints>
@@ -145,12 +145,12 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zg4-xv-Ymz">
-                                <rect key="frame" x="338" y="123" width="50" height="50"/>
+                                <rect key="frame" x="328" y="133" width="50" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="zg4-xv-Ymz" secondAttribute="height" multiplier="1:1" id="5nU-U5-yeS"/>
                                     <constraint firstAttribute="height" constant="50" id="7jq-GJ-blr"/>
                                 </constraints>
-                                <color key="tintColor" systemColor="systemPinkColor"/>
+                                <color key="tintColor" systemColor="labelColor"/>
                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                 <state key="normal">
                                     <imageReference key="image" image="xmark.circle.fill" catalog="system" symbolScale="large"/>
@@ -168,7 +168,7 @@
                         <viewLayoutGuide key="safeArea" id="dAW-4h-FSi"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="dAW-4h-FSi" firstAttribute="trailing" secondItem="zg4-xv-Ymz" secondAttribute="trailing" constant="5" id="Au8-QJ-ezE"/>
+                            <constraint firstItem="dAW-4h-FSi" firstAttribute="trailing" secondItem="zg4-xv-Ymz" secondAttribute="trailing" constant="15" id="Au8-QJ-ezE"/>
                             <constraint firstItem="R8d-Nf-WeT" firstAttribute="centerX" secondItem="VqR-E9-9Tw" secondAttribute="centerX" id="B7c-2i-U4v"/>
                             <constraint firstItem="VqR-E9-9Tw" firstAttribute="centerX" secondItem="pde-Pj-aKV" secondAttribute="centerX" id="ORW-Fm-eva"/>
                             <constraint firstItem="VqR-E9-9Tw" firstAttribute="leading" secondItem="dAW-4h-FSi" secondAttribute="leading" constant="20" id="On7-g6-hcH"/>
@@ -178,7 +178,7 @@
                             <constraint firstItem="pde-Pj-aKV" firstAttribute="centerX" secondItem="dAW-4h-FSi" secondAttribute="centerX" id="i1Y-Tx-HBL"/>
                             <constraint firstItem="R8d-Nf-WeT" firstAttribute="leading" secondItem="VqR-E9-9Tw" secondAttribute="leading" id="kND-f3-hzE"/>
                             <constraint firstItem="xnQ-gw-xhA" firstAttribute="top" secondItem="R8d-Nf-WeT" secondAttribute="bottom" constant="25" id="mcg-SU-TPM"/>
-                            <constraint firstItem="zg4-xv-Ymz" firstAttribute="top" secondItem="dAW-4h-FSi" secondAttribute="top" constant="5" id="uFg-SW-46B"/>
+                            <constraint firstItem="zg4-xv-Ymz" firstAttribute="top" secondItem="dAW-4h-FSi" secondAttribute="top" constant="15" id="uFg-SW-46B"/>
                             <constraint firstItem="VqR-E9-9Tw" firstAttribute="top" secondItem="pde-Pj-aKV" secondAttribute="bottom" constant="30" id="v6K-b3-nXf"/>
                         </constraints>
                     </view>
@@ -592,9 +592,6 @@
         </systemColor>
         <systemColor name="systemIndigoColor">
             <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemPinkColor">
-            <color red="1" green="0.1764705882" blue="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
             <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

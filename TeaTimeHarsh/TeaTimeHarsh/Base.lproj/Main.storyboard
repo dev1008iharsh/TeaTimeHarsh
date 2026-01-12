@@ -708,7 +708,7 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="chF-bU-1Ir">
-                                <rect key="frame" x="0.0" y="512" width="393" height="340"/>
+                                <rect key="frame" x="0.0" y="482" width="393" height="370"/>
                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="PlaceReviewTableCell" rowHeight="244" id="L35-IE-p0V" customClass="PlaceReviewTableCell" customModule="TeaTimeHarsh" customModuleProvider="target">
@@ -806,7 +806,7 @@
                                 </connections>
                             </tableView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title Place Reviews" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pop-6L-HWM">
-                                <rect key="frame" x="16" y="480.66666666666669" width="196" height="26.333333333333314"/>
+                                <rect key="frame" x="16" y="450.66666666666669" width="196" height="26.333333333333314"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -815,7 +815,7 @@
                         <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="DIv-1e-owT" firstAttribute="leading" secondItem="Dnb-PW-wgE" secondAttribute="leading" constant="16" id="6S5-W9-QDm"/>
-                            <constraint firstItem="pop-6L-HWM" firstAttribute="top" secondItem="DIv-1e-owT" secondAttribute="bottom" constant="60" id="6Uu-Zx-t5b"/>
+                            <constraint firstItem="pop-6L-HWM" firstAttribute="top" secondItem="DIv-1e-owT" secondAttribute="bottom" constant="30" id="6Uu-Zx-t5b"/>
                             <constraint firstItem="zNq-nv-cKG" firstAttribute="top" secondItem="Dnb-PW-wgE" secondAttribute="top" constant="30" id="9wM-0H-u6d"/>
                             <constraint firstAttribute="bottom" secondItem="chF-bU-1Ir" secondAttribute="bottom" id="BEB-f3-gCo"/>
                             <constraint firstItem="chF-bU-1Ir" firstAttribute="leading" secondItem="Dnb-PW-wgE" secondAttribute="leading" id="Fkz-nM-UAq"/>

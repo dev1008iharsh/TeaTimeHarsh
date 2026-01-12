@@ -16,7 +16,9 @@ class LaunchVC: UIViewController {
         if AppNetworkManager.shared.isConnected {
             print("🌍 Online Launch: Starting background sync...")
             UserDataManager.shared.fetchUserProfileIfNeeded()
-
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                self.goToHome()
+            }
         } else {
             print("🔌 Offline Launch")
             UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
@@ -30,10 +32,11 @@ class LaunchVC: UIViewController {
                     🌐 Connect to the internet to enable all features.
                     """,
                     viewController: self) { _ in
+                        print("Offline alert ok tapped")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            self.goToHome()
+                        }
                 }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.goToHome()
         }
     }
 

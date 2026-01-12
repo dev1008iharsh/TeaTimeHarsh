@@ -150,7 +150,8 @@ private extension PlaceDetailVC {
         reviewVC.arrReviews = arrReviews
         reviewVC.reloadRating = { [weak self] in
             guard let self else { return }
-            fetchPlaceReviews()
+            NotificationCenter.default.post(name: .teaPlacesShouldReload, object: nil)
+            self.navigationController?.popViewController(animated: true)
         }
         if let sheet = reviewVC.sheetPresentationController {
             sheet.detents = [.large()]

@@ -96,6 +96,30 @@ class HomeVC: UIViewController {
         configureSegmentController()
         setupRefreshControl()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if UserDataManager.shared.user?.fullName == nil{
+            askUserToUpdateProfile()
+        }
+    }
+   
+    func askUserToUpdateProfile() {
+        let alert = UIAlertController(
+            title: "👋 Hey Buddy!",
+            message: "Your profile looks incomplete.\n✨ Update it now so friends can recognize you easily! 😊 ",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "✏️ Update Profile", style: .default) { [weak self] _ in
+            let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+            guard let editVC = storyboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
+            self?.navigationController?.pushViewController(editVC, animated: true)
+        })
+        alert.addAction(UIAlertAction(title: "❌ Cancel", style: .destructive))
+        
+        present(alert, animated: true)
+    }
 
     private func setupTableView() {
         tblTeaPlaces.register(UINib(nibName: "TeaListCell", bundle: nil), forCellReuseIdentifier: "TeaListCell")
@@ -116,8 +140,7 @@ class HomeVC: UIViewController {
     private func setupNavBar() {
         let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(didTapAddNavBar))
         navigationItem.rightBarButtonItem = addButton
-        setLargeTitleSpacingNavBar(20)
-        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+        setCustomNavigationBarStyle()
     }
 
     private func configureSegmentController() {
@@ -469,10 +492,11 @@ extension HomeVC {
         } else {
             // Customize based on filter (same as before)
             switch segmentFilter.selectedSegmentIndex {
-            case 1: config.text = "No Favourites Yet"; config.secondaryText = "Swipe right to heart a place!"
-            case 2: config.text = "No Visits Yet"; config.secondaryText = "Go drink some tea!"
-            case 3: config.text = "No Uploads"; config.secondaryText = "Add your own discoveries."
-            default: config.text = "It’s Tea-rribly Empty"; config.secondaryText = "Add the first tea spot!"
+            case 1: config.text = "No favourite spots? Playing hard to get? 😉"; config.secondaryText = "Don't be shy! Swipe right on any tea place to mark it as your favourite place.❤️"
+            case 2: config.text = "Zero Visits? Are you on a diet? 😜"; config.secondaryText = "Go have a cup! Then swipe right on the list to mark it as visited place.✈️"
+            case 3: config.text =  "No places added by you 🧑‍💻";
+                config.secondaryText = "You haven't uploaded any tea spots yet. Tap the + button to add one!🏦"
+            default: config.text = "It’s Tea-rribly Empty Here! 😱"; config.secondaryText = "No tea spots found yet. Be the first to spill the tea and add your favourite place! 🥳"
             }
         }
 

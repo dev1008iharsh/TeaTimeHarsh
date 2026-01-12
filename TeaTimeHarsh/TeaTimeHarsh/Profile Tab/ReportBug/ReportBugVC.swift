@@ -81,6 +81,7 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
     }
 
     private func setupTextView() {
+        txtEmail.applyDefaultStyle()
         // 2. Assign the delegate so this class can listen to events
         txtViewDesc.delegate = self
 
