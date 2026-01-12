@@ -96,28 +96,28 @@ class HomeVC: UIViewController {
         configureSegmentController()
         setupRefreshControl()
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if UserDataManager.shared.user?.fullName == nil{
+        if UserDataManager.shared.user?.fullName == nil {
             askUserToUpdateProfile()
         }
     }
-   
+
     func askUserToUpdateProfile() {
         let alert = UIAlertController(
             title: "👋 Hey Buddy!",
             message: "Your profile looks incomplete.\n✨ Update it now so friends can recognize you easily! 😊 ",
             preferredStyle: .alert
         )
-        
+
         alert.addAction(UIAlertAction(title: "✏️ Update Profile", style: .default) { [weak self] _ in
             let storyboard = UIStoryboard(name: "Profile", bundle: nil)
             guard let editVC = storyboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
             self?.navigationController?.pushViewController(editVC, animated: true)
         })
         alert.addAction(UIAlertAction(title: "❌ Cancel", style: .destructive))
-        
+
         present(alert, animated: true)
     }
 
@@ -397,64 +397,30 @@ extension HomeVC {
 // MARK: - Swipe Actions & Context Menu
 
 extension HomeVC {
+    // 1. Trailing Swipe (Right -> Left): Delete, Share, Edit
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let place = displayedPlaces[indexPath.row]
-        let share = makeAction(title: "Share", color: .systemBlue, icon: "square.and.arrow.up") { self.actionManager.performShare(place: place, sourceView: $0) }
+        let delete = makeDeleteAction(indexPath: indexPath)
+        let share = makeShareAction(indexPath: indexPath)
+        let edit = makeEditAction(indexPath: indexPath)
 
-        guard TeaActionManager.canModify(place: place) else { return UISwipeActionsConfiguration(actions: [share]) }
+        var config = UISwipeActionsConfiguration(actions: [share])
+        // Check Owner Permissions (✨ UPDATED: Use displayedPlaces)
+        let isOwner = TeaActionManager.canModify(place: displayedPlaces[indexPath.row])
 
-        let delete = makeAction(title: "Delete", color: .systemRed, icon: "trash") { _ in
+        config = isOwner ? UISwipeActionsConfiguration(actions: [delete, share, edit]) : UISwipeActionsConfiguration(actions: [share])
 
-            // 🔥 GUARD: Internet Check
-            guard AppNetworkManager.shared.isConnected else {
-                self.showOfflineAlertAtHome()
-                return
-            }
-
-            self.actionManager.performDelete(place: place) {
-                if let idx = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
-                    self.arrTeaPlaces.remove(at: idx)
-                    self.tblTeaPlaces.reloadData()
-                }
-            }
-        }
-
-        let edit = makeAction(title: "Edit", color: .systemOrange, icon: "pencil") { _ in
-
-            // 🔥 GUARD: Internet Check
-            guard AppNetworkManager.shared.isConnected else {
-                self.showOfflineAlertAtHome()
-                return
-            }
-
-            self.actionManager.performEdit(place: place) { self.loadData() }
-        }
-
-        return UISwipeActionsConfiguration(actions: [delete, share, edit])
+        config.performsFirstActionWithFullSwipe = false
+        return config
     }
 
+    // 2. Leading Swipe (Left -> Right): Visited, Favorite
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let place = displayedPlaces[indexPath.row]
+        let visited = makeVisitAction(indexPath: indexPath)
+        let favorite = makeFavAction(indexPath: indexPath)
 
-        let visit = makeAction(title: place.isVisited ? "Unvisit" : "Visit", color: place.isVisited ? .systemGray4 : .systemGreen, icon: "checkmark.circle") { _ in
-            self.performSwipeToggle(at: indexPath, type: "visit")
-        }
-
-        let fav = makeAction(title: place.isFav ? "Unfav" : "Fav", color: place.isFav ? .systemGray : .systemPink, icon: "heart.fill") { _ in
-            self.performSwipeToggle(at: indexPath, type: "fav")
-        }
-
-        return UISwipeActionsConfiguration(actions: [visit, fav])
-    }
-
-    private func makeAction(title: String, color: UIColor, icon: String, handler: @escaping (UIView) -> Void) -> UIContextualAction {
-        let action = UIContextualAction(style: .normal, title: title) { [weak self] _, view, completion in
-            handler(self?.tblTeaPlaces.cellForRow(at: self?.tblTeaPlaces.indexPath(for: view as! UITableViewCell) ?? IndexPath()) ?? view)
-            completion(true)
-        }
-        action.backgroundColor = color
-        action.image = UIImage(systemName: icon)
-        return action
+        let config = UISwipeActionsConfiguration(actions: [visited, favorite])
+        config.performsFirstActionWithFullSwipe = false
+        return config
     }
 
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
@@ -494,7 +460,7 @@ extension HomeVC {
             switch segmentFilter.selectedSegmentIndex {
             case 1: config.text = "No favourite spots? Playing hard to get? 😉"; config.secondaryText = "Don't be shy! Swipe right on any tea place to mark it as your favourite place.❤️"
             case 2: config.text = "Zero Visits? Are you on a diet? 😜"; config.secondaryText = "Go have a cup! Then swipe right on the list to mark it as visited place.✈️"
-            case 3: config.text =  "No places added by you 🧑‍💻";
+            case 3: config.text = "No places added by you 🧑‍💻"
                 config.secondaryText = "You haven't uploaded any tea spots yet. Tap the + button to add one!🏦"
             default: config.text = "It’s Tea-rribly Empty Here! 😱"; config.secondaryText = "No tea spots found yet. Be the first to spill the tea and add your favourite place! 🥳"
             }
@@ -522,5 +488,79 @@ extension HomeVC {
         }
         config.button = btnConfig
         contentUnavailableConfiguration = config
+    }
+}
+
+// MARK: - Contextual Action Creators
+
+extension HomeVC {
+    private func makeDeleteAction(indexPath: IndexPath) -> UIContextualAction {
+        return UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
+            guard let self = self else { return }
+            // ✨ UPDATED: Use displayedPlaces
+            let place = self.displayedPlaces[indexPath.row]
+
+            self.actionManager.performDelete(place: place) {
+                // Remove from MAIN array
+                if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
+                    self.arrTeaPlaces.remove(at: index)
+                }
+                // Reload to update filtered view
+                self.tblTeaPlaces.reloadData()
+                completion(true)
+            }
+        }
+    }
+
+    private func makeShareAction(indexPath: IndexPath) -> UIContextualAction {
+        return UIContextualAction(style: .normal, title: "Share") { [weak self] _, _, completion in
+            guard let self = self else { return }
+            let cell = self.tblTeaPlaces.cellForRow(at: indexPath)
+            // ✨ UPDATED: Use displayedPlaces
+            self.actionManager.performShare(place: self.displayedPlaces[indexPath.row], sourceView: cell ?? self.view)
+            completion(true)
+        }
+    }
+
+    private func makeEditAction(indexPath: IndexPath) -> UIContextualAction {
+        let action = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
+            guard let self = self else { return }
+            // ✨ UPDATED: Use displayedPlaces
+            let place = self.displayedPlaces[indexPath.row]
+            self.actionManager.performEdit(place: place) {
+                self.fetchFromFirebaseAndSync()
+            }
+
+            completion(true)
+        }
+        action.backgroundColor = .systemOrange
+        action.image = UIImage(systemName: "pencil")
+        return action
+    }
+
+    private func makeFavAction(indexPath: IndexPath) -> UIContextualAction {
+        // ✨ UPDATED: Use displayedPlaces
+        let place = displayedPlaces[indexPath.row]
+        let action = UIContextualAction(style: .normal, title: place.isFav ? "Unfav" : "Fav") { [weak self] _, _, completion in
+            // Use helper to trigger same logic as Notification
+            self?.performSwipeToggle(at: indexPath, type: "fav")
+            completion(true)
+        }
+        action.backgroundColor = place.isFav ? .systemGray : .systemPink
+        action.image = UIImage(systemName: place.isFav ? "heart.slash" : "heart.fill")
+        return action
+    }
+
+    private func makeVisitAction(indexPath: IndexPath) -> UIContextualAction {
+        // ✨ UPDATED: Use displayedPlaces
+        let place = displayedPlaces[indexPath.row]
+        let action = UIContextualAction(style: .normal, title: place.isVisited ? "Unvisit" : "Visit") { [weak self] _, _, completion in
+            // Use helper to trigger same logic as Notification
+            self?.performSwipeToggle(at: indexPath, type: "visit")
+            completion(true)
+        }
+        action.backgroundColor = place.isVisited ? .systemGray4 : .systemGreen
+        action.image = UIImage(systemName: place.isVisited ? "checkmark.circle" : "checkmark.circle.fill")
+        return action
     }
 }

@@ -169,7 +169,7 @@ class TeaActionManager {
 
         🌏 Map View: \(mapLink)
 
-        _Shared via TeaTimeHarsh App_
+        _Shared via TeaTimeHarsh App (dev.iharsh1008)_
         """
     }
 }
