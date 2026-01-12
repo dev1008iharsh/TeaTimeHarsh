@@ -28,6 +28,7 @@ extension CDTeaPlace {
             longitude: longitude,
             imageURL: imageURL,
             rating: rating,
+            totalReviewCount: Int(totalReviewCount),
             priceRange: priceRange,
             openingTime: openingTime,
             closingTime: closingTime,

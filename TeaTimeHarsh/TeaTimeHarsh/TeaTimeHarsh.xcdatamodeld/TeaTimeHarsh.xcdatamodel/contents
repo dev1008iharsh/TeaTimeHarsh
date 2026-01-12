@@ -19,5 +19,6 @@
         <attribute name="phone" optional="YES" attributeType="String"/>
         <attribute name="priceRange" optional="YES" attributeType="String"/>
         <attribute name="rating" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="totalReviewCount" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
 </model>

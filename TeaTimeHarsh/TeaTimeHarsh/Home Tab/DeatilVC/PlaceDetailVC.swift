@@ -15,8 +15,9 @@ class PlaceDetailVC: UIViewController {
     // MARK: - Properties
 
     var place: TeaPlace?
-    var placeOwnerUser : User?
+    var placeOwnerUser: User?
     lazy var actionManager = TeaActionManager(viewController: self)
+    var arrReviews: [PlaceReview]?
 
     // 🔒 Closures for EDIT / DELETE (As requested)
     var onBackToHome: (() -> Void)?
@@ -32,7 +33,8 @@ class PlaceDetailVC: UIViewController {
         super.viewDidLoad()
         setupTableView()
         setupTableHeader()
-        setupFetchPlaceOwnerPersonalDetails()
+        fetchPlaceOwnerPersonalDetails()
+        fetchPlaceReviews()
     }
 
     deinit {
@@ -61,20 +63,39 @@ class PlaceDetailVC: UIViewController {
             forCellReuseIdentifier: "DetailStaticCell"
         )
     }
-    func setupFetchPlaceOwnerPersonalDetails(){
+
+    private func fetchPlaceOwnerPersonalDetails() {
         guard let idPlaceOwner = place?.createdByUserId else { return }
-        
+
         Task {
             LoaderManager.shared.startLoading()
             do {
                 LoaderManager.shared.stopLoading()
                 self.placeOwnerUser = try await FirebaseManager.shared.fetchUserPersonalDetails(userID: idPlaceOwner)
-                print("setupFetchPlaceOwnerPersonalDetails",placeOwnerUser as Any)
+                print("setupFetchPlaceOwnerPersonalDetails", placeOwnerUser as Any)
                 self.tblPlaceDetail.reloadData()
-            
+
             } catch {
                 LoaderManager.shared.stopLoading()
                 print("Error fetching user: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func fetchPlaceReviews() {
+        guard let placeId = place?.id else { return }
+        Task {
+            LoaderManager.shared.startLoading()
+            do {
+                LoaderManager.shared.stopLoading()
+                let fetchedReviews = try await FirebaseManager.shared.fetchPlaceReviews(for: placeId)
+                self.arrReviews = fetchedReviews
+                print("✅ Got \(fetchedReviews.count) reviews!")
+            } catch {
+                LoaderManager.shared.stopLoading()
+                print("❌ Failed to fetch reviews: \(error.localizedDescription)")
+                Utility
+                    .showAlert(title: "Failed to fetch reviews", message: error.localizedDescription, viewController: self)
             }
         }
     }
@@ -90,6 +111,15 @@ private extension PlaceDetailVC {
 
         // Configure with data (Header now handles its own NotificationsCenter post Notification)
         header.configure(place: place)
+
+        header.onReviewTapped = { [weak self] in
+            guard let self = self else { return }
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtDetail()
+                return
+            }
+            presentBottomSheetPlaceReviews()
+        }
 
         // Setup Container for Stretchy Effect
         let container = UIView(frame: CGRect(x: 0, y: 0, width: tblPlaceDetail.bounds.width, height: headerHeight))
@@ -112,6 +142,23 @@ private extension PlaceDetailVC {
             header.frame = container.bounds
         }
     }
+
+    private func presentBottomSheetPlaceReviews() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let reviewVC = storyboard.instantiateViewController(withIdentifier: "PlaceReviewVC") as? PlaceReviewVC else { return }
+        reviewVC.place = place
+        reviewVC.arrReviews = arrReviews
+        reviewVC.reloadRating = { [weak self] in
+            guard let self else { return }
+            fetchPlaceReviews()
+        }
+        if let sheet = reviewVC.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 24
+        }
+        present(reviewVC, animated: true)
+    }
 }
 
 // MARK: - UITableView Delegate & DataSource
@@ -127,7 +174,7 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DetailStaticCell", for: indexPath) as! DetailStaticCell
-        if let owner = self.placeOwnerUser{
+        if let owner = placeOwnerUser {
             cell.placeOwnerUser = owner
         }
         if let place = place {
@@ -178,20 +225,19 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
                     showOfflineAlertAtDetail()
                     return
                 }
-                if let owner = self.placeOwnerUser {
-                    presentBottomSheetOwnerDetails(owner: owner)
-                }
+                guard let placeOwnerUser else { return }
+                presentBottomSheetOwnerDetails()
             }
         }
         return cell
     }
 
-    func presentBottomSheetOwnerDetails(owner: User?) {
+    func presentBottomSheetOwnerDetails() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let ownerVC = storyboard.instantiateViewController(withIdentifier: "PlaceOwnerDetailsVC") as? PlaceOwnerDetailsVC else {
             return
         }
-        ownerVC.placeOwnerUser = owner
+        ownerVC.placeOwnerUser = placeOwnerUser
         if let sheet = ownerVC.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.prefersGrabberVisible = true

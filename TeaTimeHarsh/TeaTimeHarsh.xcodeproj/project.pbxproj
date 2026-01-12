@@ -16,6 +16,7 @@
 		04B6C0BA2F10C48F00FC3FCF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 04B6C0B92F10C48F00FC3FCF /* GoogleSignIn */; };
 		04B6C0BC2F10C48F00FC3FCF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 04B6C0BB2F10C48F00FC3FCF /* GoogleSignInSwift */; };
 		04B6C0BF2F10C64C00FC3FCF /* FacebookLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 04B6C0BE2F10C64C00FC3FCF /* FacebookLogin */; };
+		04E589FD2F14DA1600F58AED /* Cosmos in Frameworks */ = {isa = PBXBuildFile; productRef = 04E589FC2F14DA1600F58AED /* Cosmos */; };
 		04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 04E5B6FA2F026542005AAB46 /* GoogleMaps */; };
 		04EE9A032F065E48001DB805 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 04EE9A022F065E48001DB805 /* Kingfisher */; };
 /* End PBXBuildFile section */
@@ -56,6 +57,7 @@
 				04A6A8A22F051ED0006FB7FE /* FirebaseCore in Frameworks */,
 				04EE9A032F065E48001DB805 /* Kingfisher in Frameworks */,
 				04B6C0BF2F10C64C00FC3FCF /* FacebookLogin in Frameworks */,
+				04E589FD2F14DA1600F58AED /* Cosmos in Frameworks */,
 				04B6C0BC2F10C48F00FC3FCF /* GoogleSignInSwift in Frameworks */,
 				04A6A8A82F051ED0006FB7FE /* FirebaseStorage in Frameworks */,
 				043671EF2F0449E000A791F8 /* IQKeyboardManagerSwift in Frameworks */,
@@ -114,6 +116,7 @@
 				04B6C0B92F10C48F00FC3FCF /* GoogleSignIn */,
 				04B6C0BB2F10C48F00FC3FCF /* GoogleSignInSwift */,
 				04B6C0BE2F10C64C00FC3FCF /* FacebookLogin */,
+				04E589FC2F14DA1600F58AED /* Cosmos */,
 			);
 			productName = TeaTimeHarsh;
 			productReference = 042105152EFE74D30078B30A /* TeaTimeHarsh.app */;
@@ -150,6 +153,7 @@
 				04EE9A012F065E48001DB805 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				04B6C0B82F10C48F00FC3FCF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				04B6C0BD2F10C64C00FC3FCF /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
+				04E589FB2F14DA1600F58AED /* XCRemoteSwiftPackageReference "Cosmos" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 042105162EFE74D30078B30A /* Products */;
@@ -437,6 +441,14 @@
 				minimumVersion = 14.1.0;
 			};
 		};
+		04E589FB2F14DA1600F58AED /* XCRemoteSwiftPackageReference "Cosmos" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/Cosmos";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 25.0.1;
+			};
+		};
 		04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
@@ -500,6 +512,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 04B6C0BD2F10C64C00FC3FCF /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
 			productName = FacebookLogin;
+		};
+		04E589FC2F14DA1600F58AED /* Cosmos */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04E589FB2F14DA1600F58AED /* XCRemoteSwiftPackageReference "Cosmos" */;
+			productName = Cosmos;
 		};
 		04E5B6FA2F026542005AAB46 /* GoogleMaps */ = {
 			isa = XCSwiftPackageProductDependency;

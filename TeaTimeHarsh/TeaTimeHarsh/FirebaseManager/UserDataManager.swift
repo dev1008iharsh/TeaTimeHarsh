@@ -105,7 +105,7 @@ class UserDataManager {
 
     func uploadProfileImage(_ image: UIImage) async throws -> String {
         let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("profile_images/\(filename)")
+        let storageRef = storage.reference().child("user_profile_images/\(filename)")
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])

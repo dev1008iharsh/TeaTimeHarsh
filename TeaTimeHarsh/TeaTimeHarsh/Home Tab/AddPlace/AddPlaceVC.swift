@@ -27,7 +27,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     @IBOutlet var txtPhone: UITextField!
 
     // Dropdown Fields
-    @IBOutlet var txtRating: UITextField!
     @IBOutlet var txtLocation: UITextField!
     @IBOutlet var txtPriceRange: UITextField!
     @IBOutlet var txtOpeningTime: UITextField!
@@ -57,7 +56,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     private var existingImageURL: String? // Holds the old URL in Edit mode
 
     // Dropdown Selections
-    private var selectedRating: String?
     private var selectedLocation: String?
     private var selectedPriceRange: String?
     private var selectedOpeningTime: String?
@@ -120,10 +118,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         txtPhone.text = place.phone
         lblAddress.text = place.address
 
-        // 2. Fill Dropdowns
-        selectedRating = "\(place.rating ?? 0.0)"
-        txtRating.text = selectedRating
-
         selectedLocation = place.location
         txtLocation.text = selectedLocation
 
@@ -155,7 +149,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         txtName.applyDefaultStyle()
         txtDesc.applyDefaultStyle()
         txtPhone.applyDefaultStyle()
-        txtRating.applyDefaultStyle()
         txtLocation.applyDefaultStyle()
         txtPriceRange.applyDefaultStyle()
         txtOpeningTime.applyDefaultStyle()
@@ -237,8 +230,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         let phone = txtPhone.text ?? ""
         let location = selectedLocation
         let address = lblAddress.text
-        let ratingDouble = Double(selectedRating ?? "0.0")
-
+        
         switch screenMode {
         case .add:
             var newPlace = TeaPlace(
@@ -251,7 +243,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 latitude: selectedLatitude,
                 longitude: selectedLongitude,
                 imageURL: imageURL,
-                rating: ratingDouble,
+                rating: 0.0,
+                totalReviewCount: 0,
                 priceRange: selectedPriceRange,
                 openingTime: selectedOpeningTime,
                 closingTime: selectedClosingTime,
@@ -276,7 +269,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 latitude: selectedLatitude,
                 longitude: selectedLongitude,
                 imageURL: imageURL,
-                rating: ratingDouble,
+                rating: 0.0,
+                totalReviewCount: 0,
                 priceRange: selectedPriceRange,
                 openingTime: selectedOpeningTime,
                 closingTime: selectedClosingTime,
@@ -367,7 +361,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             return "Enter valid 10-digit contact number"
         }
         guard selectedLocation != nil else { return "Please select city location" }
-        guard selectedRating != nil else { return "Please select rating" }
         guard selectedPriceRange != nil else { return "Please select price range" }
         guard selectedOpeningTime != nil else { return "Please select opening time" }
         guard selectedClosingTime != nil else { return "Please select closing time" }
@@ -418,12 +411,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         // Setup Bindings
         // City/Location
-        // Rating
-        txtRating.applySingleSelectionMenu(title: "Select Rating", items: ratingOptions, selectedItem: selectedRating) { [weak self] sel in
-            guard let self else { return }
-            self.view.endEditing(true) // ⌨️ Dismiss Keyboard
-            self.selectedRating = sel
-        }
+       
 
         txtLocation.applySingleSelectionMenu(title: "Select City", items: locationOptions, selectedItem: selectedLocation) { [weak self] sel in
             guard let self else { return }

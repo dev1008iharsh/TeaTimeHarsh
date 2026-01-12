@@ -85,7 +85,7 @@ class FirebaseManager {
 
     func uploadImage(_ image: UIImage) async throws -> String {
         let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("place_images/\(filename)")
+        let storageRef = storage.reference().child("review_place_images/\(filename)")
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
@@ -152,7 +152,7 @@ class FirebaseManager {
         var imageUrlString = ""
 
         // 1️⃣ Jo Image hoy, to pehla Storage ma upload karo
-        if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
+        if let image = image, let imageData = image.jpegData(compressionQuality: 0.9) {
             // Unique name apiye image ne
             let filename = UUID().uuidString
             let storageRef = storage.reference().child("bug_images/\(filename).jpg")
@@ -245,6 +245,9 @@ class FirebaseManager {
         let placesSnapshot = try await db.collection("places").whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
         let bugsSnapshot = try await db.collection("bugs").whereField("userId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
         let userActionsSnapshot = try await db.collection("users").document(Constants.Strings.currentUserID).collection("user_actions").getDocuments()
+        let reviewsSnapshot = try await db.collectionGroup("reviews")
+            .whereField("userId", isEqualTo: Constants.Strings.currentUserID)
+            .getDocuments()
 
         // --- STEP B: Queue Database Deletions ---
         var imageRefsToDelete: [StorageReference] = []
@@ -255,7 +258,7 @@ class FirebaseManager {
 
             // 1. Get String
             if let imageUrl = doc.data()["imageURL"] as? String {
-                // 2. Create Reference (No 'try?' needed here)
+                // 2. Create Reference
                 // Note: This assumes the URL is valid. If your DB has bad URLs, this could crash.
                 let storageRef = storage.reference(forURL: imageUrl)
                 imageRefsToDelete.append(storageRef)
@@ -263,7 +266,16 @@ class FirebaseManager {
         }
 
         for doc in bugsSnapshot.documents { batch.deleteDocument(doc.reference) }
+
         for doc in userActionsSnapshot.documents { batch.deleteDocument(doc.reference) }
+
+        for doc in reviewsSnapshot.documents {
+            batch.deleteDocument(doc.reference)
+            if let reviewImgUrl = doc.data()["reviewImageURL"] as? String {
+                let storageRef = storage.reference(forURL: reviewImgUrl)
+                imageRefsToDelete.append(storageRef)
+            }
+        }
 
         // Delete User Profile Document
         batch.deleteDocument(db.collection("users").document(Constants.Strings.currentUserID))
@@ -291,5 +303,110 @@ class FirebaseManager {
             .getDocument(as: User.self)
 
         return user
+    }
+
+    // MARK: - 🌟 Review & Rating System 🌟
+
+    // 1. Upload Review Image
+    func uploadReviewImage(_ image: UIImage) async throws -> String {
+        let filename = UUID().uuidString + ".jpg"
+        let storageRef = storage.reference().child("review_images/\(filename)") // Separate folder for reviews
+
+        // Compress image to save bandwidth
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
+        }
+
+        let _ = try await storageRef.putDataAsync(imageData)
+        let url = try await storageRef.downloadURL()
+        return url.absoluteString
+    }
+
+    // 2. Submit Review (Main Function)
+    /// Logic: Upload Image -> Save Review -> Recalculate Average
+
+    func submitReview(placeId: String, user: User, rating: Double, reviewText: String, reviewImage: UIImage) async throws {
+        // A. Validation
+        guard let userId = user.id else { return }
+
+        // B. Upload Image First 📸
+        let imageUrl = try await uploadReviewImage(reviewImage)
+
+        // C. Prepare Review Object
+        let review = PlaceReview(
+            userId: userId,
+            userName: user.fullName ?? "Tea Lover",
+            userImage: user.profileImageUrl,
+            rating: rating,
+            reviewText: reviewText,
+            reviewImageURL: imageUrl, // Mandatory Image
+            createdAt: Date()
+        )
+
+        let placeRef = db.collection("places").document(placeId)
+        let reviewRef = placeRef.collection("reviews").document(userId)
+
+        // D. Transaction for Safe Write 🛡️
+        // 👇 FIX: Added '_ =' to silence the 'unused result' warning
+        _ = try await db.runTransaction({ transaction, errorPointer -> Any? in
+            do {
+                // Save/Overwrite the review document
+                try transaction.setData(from: review, forDocument: reviewRef)
+            } catch let nsError as NSError {
+                errorPointer?.pointee = nsError
+                return nil
+            }
+            return nil
+        })
+
+        // E. Recalculate Average Rating 🧮
+        try await recalculatePlaceAverage(placeId: placeId)
+    }
+
+    // 3. Helper to Recalculate & Update Average
+    private func recalculatePlaceAverage(placeId: String) async throws {
+        let reviewsRef = db.collection("places").document(placeId).collection("reviews")
+        let snapshot = try await reviewsRef.getDocuments()
+
+        let documents = snapshot.documents
+
+        // Handle case with no reviews
+        if documents.isEmpty {
+            try await db.collection("places").document(placeId).updateData([
+                "rating": 0,
+                "total_review_count": 0,
+            ])
+            return
+        }
+
+        // Calculate Average
+        var totalRating = 0.0
+        for doc in documents {
+            if let r = doc.data()["rating"] as? Double {
+                totalRating += r
+            }
+        }
+
+        let average = totalRating / Double(documents.count)
+        let count = documents.count
+
+        // Update Main Place Document
+        try await db.collection("places").document(placeId).updateData([
+            "rating": average,
+            "total_review_count": count,
+        ])
+    }
+
+    // Fetch all reviews for a specific place (Sorted by Newest)
+    func fetchPlaceReviews(for placeId: String) async throws -> [PlaceReview] {
+        // Path: places/{placeId}/reviews
+        let snapshot = try await db.collection("places")
+            .document(placeId)
+            .collection("reviews")
+            .order(by: "created_at", descending: true) // Sort: Newest First
+            .getDocuments()
+
+        // Convert documents to PlaceReview array
+        return try snapshot.documents.compactMap { try $0.data(as: PlaceReview.self) }
     }
 }

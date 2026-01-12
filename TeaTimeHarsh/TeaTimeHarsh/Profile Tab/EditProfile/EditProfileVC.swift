@@ -113,12 +113,11 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         }
 
         // 6. Bio Check
-        let bioPlaceholder = "Enter short description about yourself"
 
         guard let bio = txtViewBio.text?
             .trimmingCharacters(in: .whitespacesAndNewlines),
             !bio.isEmpty,
-            bio != bioPlaceholder else {
+            bio != placeholderText else {
             return "Please enter a short bio about yourself."
         }
 

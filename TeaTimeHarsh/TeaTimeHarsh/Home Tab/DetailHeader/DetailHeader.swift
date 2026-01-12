@@ -11,7 +11,7 @@ class DetailHeader: UIView {
     // MARK: - IBOutlets
 
     @IBOutlet var lblOpenCloseNow: UILabel!
-    @IBOutlet var lblRating: UILabel!
+    @IBOutlet var lblReview: UILabel!
     @IBOutlet var lblName: UILabel!
     @IBOutlet var lblCityLocaton: UILabel!
 
@@ -37,6 +37,32 @@ class DetailHeader: UIView {
     private var isFavState: Bool = false
     private var isVisitState: Bool = false
 
+    var onReviewTapped: (() -> Void)?
+
+    // MARK: - Init
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        // Do nothing here
+    }
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupView()
+    }
+
+    // MARK: - Setup
+
+    private func setupView() {
+        lblReview.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapReviewLabel))
+        lblReview.addGestureRecognizer(tap)
+    }
+
+    @objc private func didTapReviewLabel() {
+        onReviewTapped?()
+    }
+
     // MARK: - Configuration Method
 
     func configure(place: TeaPlace) {
@@ -46,7 +72,10 @@ class DetailHeader: UIView {
 
         lblName.text = place.name
         lblOpenCloseNow.text = place.isOpenNow ? "🟢 Open Now" : "🔴 Closed Now"
-        lblRating.text = "⭐️ " + (place.rating?.description ?? "5")
+        if let rating = place.rating, let totalReviews = place.totalReviewCount {
+            lblReview.text = "Average " + rating.description + " ⭐️ " + "(\(totalReviews.description))"
+        }
+
         lblCityLocaton.text = "\(place.location ?? "Default Location")"
 
         ImageManagerKF.setImage(

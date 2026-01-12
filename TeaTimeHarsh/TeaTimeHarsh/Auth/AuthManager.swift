@@ -10,12 +10,11 @@ import FirebaseFirestore
 import Foundation
 
 class AuthManager {
-    
     static let shared = AuthManager()
     private init() {}
 
     // MARK: - 1. Sign Up (Register) Function
- 
+
     func registerUser(email: String, pass: String, completion: @escaping (Bool, String?) -> Void) {
         Auth.auth().createUser(withEmail: email, password: pass) { authResult, error in
 
@@ -32,7 +31,7 @@ class AuthManager {
                 completion(false, "No User ID found")
                 return
             }
-            print("*uid",uid)
+            print("*uid", uid)
 
             Constants.Strings.currentUserID = uid
 
@@ -53,7 +52,7 @@ class AuthManager {
     }
 
     // MARK: - 2. Login (Sign In) Function
- 
+
     func loginUser(email: String, pass: String, completion: @escaping (Bool, String?) -> Void) {
         Auth.auth().signIn(withEmail: email, password: pass) { authResult, error in
 
@@ -67,25 +66,24 @@ class AuthManager {
 
             // 2. Get UID
             guard let uid = authResult?.user.uid else { completion(false, "User ID not found"); return }
-            print("*uid",uid)
+            print("*uid", uid)
             Constants.Strings.currentUserID = uid
 
             // 3. Fetch User Profile
             let userRef = Firestore.firestore().collection("users").document(uid)
-            
+
             // ⚠️ FIX: Firebase replies on a background thread.
-            userRef.getDocument { snapshot, error in
-                
+            userRef.getDocument { snapshot, _ in
+
                 // 🚀 JUMP TO MAIN THREAD IMMEDIATELY
                 // This satisfies the "Main actor-isolated" requirement and prevents the warning.
                 DispatchQueue.main.async {
-                    
                     // Check snapshot and Decode User (Now safe on Main Thread)
                     guard let snapshot = snapshot, snapshot.exists, let user = try? snapshot.data(as: User.self) else {
                         completion(false, "User profile missing in database")
                         return
                     }
-                    
+
                     // 4. Security Check
                     if !user.isActive {
                         try? Auth.auth().signOut()
@@ -123,18 +121,18 @@ class AuthManager {
     func signOut() -> Bool {
         do {
             try Auth.auth().signOut()
-            
+
             // 🧹 CLEANUP: Clear the stored ID and Keychain
             Constants.Strings.currentUserID = ""
             resetKeychain()
- 
+
             return true
         } catch {
             print("Sign out error: \(error)")
             return false
         }
     }
-    
+
     private func resetKeychain() {
         let secItemClasses = [
             kSecClassGenericPassword,
@@ -150,9 +148,8 @@ class AuthManager {
     }
 
     // MARK: - 5. Social Login Handler 🌐
-    
+
     func signInWithSocialCredential(credential: AuthCredential, userDetails: User) async throws {
-        
         // 1. Sign in with Firebase
         let authResult = try await Auth.auth().signIn(with: credential)
         let firebaseUser = authResult.user
@@ -166,7 +163,7 @@ class AuthManager {
         }
 
         let userRef = Firestore.firestore().collection("users").document(uid)
-        
+
         // 3. Check Firestore
         let snapshot = try await userRef.getDocument()
 
@@ -182,18 +179,17 @@ class AuthManager {
             print(
                 "signInWithSocialCredential \(uid) \(email) \(userDetails.email) \(userDetails.providerID ?? "") \(userDetails.profileImageUrl ?? "") \(userDetails.username ?? "")"
             )
-            
+
             try userRef.setData(from: newUser)
             print("✅ Social Register: New User Created.")
         }
     }
 
     // MARK: - 🛠️ Error Helper (The Translator)
-    // I made this internal (removed 'private') so your ViewControllers can use it!
-    
-    func getFriendlyError(_ error: Error) -> String {
+
+    private func getFriendlyError(_ error: Error) -> String {
         let nsError = error as NSError
-        
+
         // If it's a custom error we threw manually (like Banned user), use that description
         if nsError.domain == "Auth" || nsError.domain == "AuthError" {
             return error.localizedDescription
