@@ -159,7 +159,7 @@ final class Utility {
         textView.layer.borderWidth = 1.0
 
         // 3. Rounded Corners
-        textView.layer.cornerRadius = 8.0
+        textView.layer.cornerRadius = 10.0
 
         // 4. Padding (Crucial!)
         // By default, TextView text touches the edges. This pushes it inside.

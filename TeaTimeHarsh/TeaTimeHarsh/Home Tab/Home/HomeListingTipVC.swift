@@ -9,7 +9,7 @@ import UIKit
 
 enum AppLaunchTracker {
     static let homeListingTipLaunchCount = "homeListingTipLaunchCount"
-    //tool tip screen show only 3 times
+    // tool tip screen show only 3 times
 }
 
 struct HomeListingTipManager {
@@ -34,7 +34,7 @@ class HomeListingTipVC: UIViewController {
         addDismissGesture()
         // Do any additional setup after loading the view.
     }
-    
+
     deinit {
         print("💀 deinit HomeListingTipVC is dead. Memory Free!")
     }

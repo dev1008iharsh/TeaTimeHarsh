@@ -5,7 +5,6 @@
 //  Created by Harsh on 31/12/25.
 //
 
-
 import CoreLocation
 import GoogleMaps
 import UIKit
@@ -15,13 +14,14 @@ protocol SelectPlaceOnMapVCDelegate: AnyObject {
 }
 
 class SelectPlaceOnMapVC: UIViewController {
-    
     // MARK: - IBOutlets
+
     @IBOutlet var lblAddress: UILabel!
     @IBOutlet var mapContainerView: UIView!
     @IBOutlet var centerPinImageView: UIImageView!
 
     // MARK: - Properties
+
     var alreadySelectedLatitude: Double?
     var alreadySelectedLongitude: Double?
 
@@ -30,21 +30,26 @@ class SelectPlaceOnMapVC: UIViewController {
     private var currentAddress: String?
 
     private var hasCenteredOnUser = false
-    
+
     weak var delegateMap: SelectPlaceOnMapVCDelegate?
     var googleMapView: GMSMapView?
 
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard AppNetworkManager.shared.isConnected else {
+            self.navigationController?.popViewController(animated: true)
+            return
+        }
         setupMap()
         determineInitialState()
     }
-    
+
     deinit {
         print("💀 SelectPlaceOnMapVC is dead. Memory Free!")
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = false
@@ -56,6 +61,7 @@ class SelectPlaceOnMapVC: UIViewController {
     }
 
     // MARK: - Setup
+
     func setupMap() {
         googleMapView = GoogleMapHelper.initializeMap(
             in: mapContainerView,
@@ -96,7 +102,7 @@ class SelectPlaceOnMapVC: UIViewController {
                 self.moveCamera(lat: location.coordinate.latitude, long: location.coordinate.longitude)
             }
         }
-        
+
         LocationManager.shared.onLocationFailure = { [weak self] error in
             if let clError = error as? CLError, clError.code == .locationUnknown { return }
             print("❌ Failed: \(error.localizedDescription)")
@@ -104,7 +110,7 @@ class SelectPlaceOnMapVC: UIViewController {
             HapticHelper.warning()
             Utility.showAlert(title: "Location Error", message: "Could not find location.", viewController: self)
         }
-        
+
         // 🛠️ FIX: Check IMMEDIATE Location
         // If the GPS is already warm (running), get the location NOW.
         // Don't wait for the next update cycle.
@@ -113,7 +119,7 @@ class SelectPlaceOnMapVC: UIViewController {
             hasCenteredOnUser = true
             moveCamera(lat: lastLocation.coordinate.latitude, long: lastLocation.coordinate.longitude)
         }
-        
+
         // 3. Keep Listening (in case we didn't have a cached location)
         LocationManager.shared.checkAuthorizationStatus(from: self)
     }
@@ -126,13 +132,14 @@ class SelectPlaceOnMapVC: UIViewController {
             getAddressFromLatLong(lat: lat, long: long)
         }
     }
-    
+
     func showPermissionAlert() {
         let alert = UIAlertController(title: "Permission Denied", message: "Please enable Location Services in Settings.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Settings", style: .default) { _ in
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 HapticHelper.medium()
-                UIApplication.shared.open(url) }
+                UIApplication.shared.open(url)
+            }
         })
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
             HapticHelper.error()
@@ -142,8 +149,13 @@ class SelectPlaceOnMapVC: UIViewController {
     }
 
     // MARK: - Actions
+
     @IBAction func btnSubmitMapTapped(_ sender: UIButton) {
         HapticHelper.success()
+        guard AppNetworkManager.shared.isConnected else {
+            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this action.", viewController: self)
+            return
+        }
         guard let lat = currentLatitude, let long = currentLongitude, let address = currentAddress
         else {
             Utility
@@ -159,6 +171,7 @@ class SelectPlaceOnMapVC: UIViewController {
     }
 
     // MARK: - Animations
+
     func animatePinLift() {
         UIView.animate(withDuration: 0.2) { self.centerPinImageView.transform = CGAffineTransform(translationX: 0, y: -10) }
     }
@@ -169,6 +182,7 @@ class SelectPlaceOnMapVC: UIViewController {
 }
 
 // MARK: - Map Delegate
+
 extension SelectPlaceOnMapVC: GMSMapViewDelegate {
     func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
         if gesture {
@@ -181,10 +195,10 @@ extension SelectPlaceOnMapVC: GMSMapViewDelegate {
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
         animatePinDrop()
         HapticHelper.light()
-        
+
         let lat = position.target.latitude
         let long = position.target.longitude
-        
+
         // 🛑 Ignore Null Island (0,0)
         if lat == 0.0 && long == 0.0 { return }
 
@@ -195,13 +209,14 @@ extension SelectPlaceOnMapVC: GMSMapViewDelegate {
 }
 
 // MARK: - Geocoding
+
 extension SelectPlaceOnMapVC {
     func getAddressFromLatLong(lat: Double, long: Double) {
         let location = CLLocation(latitude: lat, longitude: long)
         let geocoder = CLGeocoder()
-        
+
         print("🔄 Geocoding: \(lat), \(long)")
-        
+
         geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -211,13 +226,13 @@ extension SelectPlaceOnMapVC {
                     return
                 }
                 guard let place = placemarks?.first else { return }
-                
+
                 let components = [place.name, place.subThoroughfare, place.thoroughfare, place.subLocality, place.locality, place.administrativeArea, place.postalCode, place.country]
                 let fullAddress = components.compactMap { $0 }.reduce([]) { result, component -> [String] in
                     if let last = result.last, last.contains(component) { return result }
                     return result + [component]
                 }.joined(separator: ", ")
-                
+
                 self.lblAddress.text = fullAddress
                 self.currentAddress = fullAddress
                 self.currentLatitude = lat

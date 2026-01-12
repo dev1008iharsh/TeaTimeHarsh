@@ -11,4 +11,6 @@ extension Notification.Name {
     static let teaPlaceDidTapVisit = Notification.Name("teaPlaceDidTapVisit")
     // We need this to tell DetailVC to revert if API fails
     static let teaPlaceUpdateFailed = Notification.Name("teaPlaceUpdateFailed")
+    static let teaPlacesShouldReload = Notification.Name("teaPlacesShouldReload")
+    //added one user related notification in UserDataManager
 }

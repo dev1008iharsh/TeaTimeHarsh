@@ -16,7 +16,6 @@ class FirebaseManager {
 
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
-    private let currentUserId = Constants.Strings.currentUserID
 
     // MARK: - Fetch Data (Merge Global + User) 📥
 
@@ -27,7 +26,7 @@ class FirebaseManager {
 
         // 2. Fetch User Specific Actions (Fav/Visited)
         let userSnapshot = try await db.collection("users")
-            .document(currentUserId)
+            .document(Constants.Strings.currentUserID)
             .collection("user_actions")
             .getDocuments()
 
@@ -57,7 +56,7 @@ class FirebaseManager {
 
     func updateUserAction(placeId: String, isFav: Bool, isVisited: Bool) async throws {
         let userActionRef = db.collection("users")
-            .document(currentUserId)
+            .document(Constants.Strings.currentUserID)
             .collection("user_actions")
             .document(placeId)
 
@@ -78,7 +77,7 @@ class FirebaseManager {
         // Delete from Global
         try await db.collection("places").document(placeId).delete()
         // Delete from User Actions (Optional, but good for cleanup)
-        try await db.collection("users").document(currentUserId)
+        try await db.collection("users").document(Constants.Strings.currentUserID)
             .collection("user_actions").document(placeId).delete()
     }
 
@@ -86,7 +85,7 @@ class FirebaseManager {
 
     func uploadImage(_ image: UIImage) async throws -> String {
         let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("place_images/\(filename)")
+        let storageRef = storage.reference().child("review_place_images/\(filename)")
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
@@ -106,7 +105,7 @@ class FirebaseManager {
         let batch = db.batch()
 
         let placesRef = db.collection("places").document(place.id)
-        let userActionRef = db.collection("users").document(currentUserId)
+        let userActionRef = db.collection("users").document(Constants.Strings.currentUserID)
             .collection("user_actions").document(place.id)
 
         let userActionData: [String: Any] = [
@@ -153,7 +152,7 @@ class FirebaseManager {
         var imageUrlString = ""
 
         // 1️⃣ Jo Image hoy, to pehla Storage ma upload karo
-        if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
+        if let image = image, let imageData = image.jpegData(compressionQuality: 0.9) {
             // Unique name apiye image ne
             let filename = UUID().uuidString
             let storageRef = storage.reference().child("bug_images/\(filename).jpg")
@@ -168,7 +167,7 @@ class FirebaseManager {
 
         // 2️⃣ Have badho data Firestore ma 'bugs' collection ma save karo
         let bugData: [String: Any] = [
-            "userId": currentUserId, // Tamo pass karelu ID
+            "userId": Constants.Strings.currentUserID, // Tamo pass karelu ID
             "email": email,
             "description": desc,
             "imageUrl": imageUrlString, // Image URL (kholi hoy to empty)
@@ -180,130 +179,35 @@ class FirebaseManager {
         try await db.collection("bugs").addDocument(data: bugData)
     }
 
-    /*
-     // 2️⃣ Step 2: Delete Logic (Data + Auth)
-     func deleteFullAccount() async throws {
-         guard let user = Auth.auth().currentUser else { return }
-
-         // Batch Write: Ek sathe ghana badha delete karva mate (Fast & Safe)
-         let batch = db.batch()
-
-         // A. User na banavela badha Places delete list ma nakho
-         let placesSnapshot = try await db.collection("places")
-             .whereField("userId", isEqualTo: currentUserId)
-             .getDocuments()
-
-         for doc in placesSnapshot.documents {
-             batch.deleteDocument(doc.reference)
-         }
-
-         // B. User ni Profile details delete list ma nakho
-         let userDocRef = db.collection("users").document(currentUserId)
-         batch.deleteDocument(userDocRef)
-
-         // C. User Actions (Reviews/Favs) delete list ma nakho (Optional)
-         // Jo tamare user_actions pan delete karva hoy to ahitya loop feravjo same rite
-
-         // 🚀 D. Firestore Delete Commit karo (Execute)
-         try await batch.commit()
-
-         // 🗑️ E. Chele Firebase Auth mathi user ne udado (Login nikal jashe)
-         try await user.delete()
-     }*/
-    func deleteEntireAccount() async throws {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-
-        // 1. Create a Batch (To ensure all database deletions happen together)
-        let batch = db.batch()
-
-        // --- STEP A: Gather Data to Delete ---
-
-        // A1. Find all Places created by this user
-        let placesSnapshot = try await db.collection("places")
-            .whereField("userId", isEqualTo: currentUserId)
-            .getDocuments()
-
-        // A2. Find all Bugs reported by this user
-        let bugsSnapshot = try await db.collection("bugs")
-            .whereField("userId", isEqualTo: currentUserId)
-            .getDocuments()
-
-        // A3. Find User Actions (Favorites/Visited history)
-        // Note: Firestore does not automatically delete subcollections! We must do it manually.
-        let userActionsSnapshot = try await db.collection("users")
-            .document(currentUserId)
-            .collection("user_actions")
-            .getDocuments()
-
-        // --- STEP B: Queue Database Deletions in Batch ---
-
-        var imageRefsToDelete: [StorageReference] = []
-
-        // Queue Places for deletion
-        for doc in placesSnapshot.documents {
-            batch.deleteDocument(doc.reference)
-
-            // Save the image reference to delete from Storage later
-            if let imageUrl = doc.data()["imageURL"] as? String {
-                let storageRef = storage.reference(forURL: imageUrl)
-                imageRefsToDelete.append(storageRef)
-            }
-        }
-
-        // Queue Bugs for deletion
-        for doc in bugsSnapshot.documents {
-            batch.deleteDocument(doc.reference)
-        }
-
-        // Queue User Actions for deletion
-        for doc in userActionsSnapshot.documents {
-            batch.deleteDocument(doc.reference)
-        }
-
-        // Queue the User Profile itself
-        let userProfileRef = db.collection("users").document(currentUserId)
-        batch.deleteDocument(userProfileRef)
-
-        // --- STEP C: Execute Database Changes (Atomic) ---
-        // If this line fails, NOTHING above gets deleted. Validating your "Stop if failed" rule.
-        try await batch.commit()
-
-        // --- STEP D: Clean up Storage (Images) ---
-        // We only reach here if the Database delete was successful.
-
-        // Using a TaskGroup to delete images in parallel for speed
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for ref in imageRefsToDelete {
-                group.addTask {
-                    try await ref.delete()
-                }
-            }
-            // Wait for all images to be deleted. If one fails, it throws an error.
-            try await group.waitForAll()
-        }
-
-        // --- STEP E: Delete Authentication Account ---
-        // The final step: Remove the login credentials.
-        try await Auth.auth().currentUser?.delete()
-    }
-
     func deleteAllPlacesCreatedByUser() async throws {
         // 1. Get all documents created by current user
         let snapshot = try await db.collection("places")
-            .whereField("userId", isEqualTo: currentUserId)
+            .whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID) // Or Constants.Strings.currentUserID
             .getDocuments()
 
         // Check if there are places to delete
         guard !snapshot.documents.isEmpty else { return }
 
-        // 2. Batch Delete (Performance Optimization)
+        // 2. Create Batch (Performance Optimization) 🚀
         let batch = db.batch()
 
         for doc in snapshot.documents {
+            // --- STEP A: Queue the Place for deletion ---
             batch.deleteDocument(doc.reference)
+
+            // --- STEP B: Queue the User Action for deletion (NEW) ✨ ---
+            // Since the document ID in 'user_actions' IS the placeId, we can find it directly!
+            let placeId = doc.documentID
+
+            let userActionRef = db.collection("users")
+                .document(Constants.Strings.currentUserID)
+                .collection("user_actions")
+                .document(placeId) // 🎯 Targeting the specific action for this place
+
+            batch.deleteDocument(userActionRef)
         }
 
-        // 3. Commit the batch (Execute delete)
+        // 3. Commit the batch (Execute all deletes at once) ✅
         try await batch.commit()
     }
 
@@ -316,9 +220,193 @@ class FirebaseManager {
 
         // 3. Filter manually using Swift
         let myPlaces = allPlaces.filter { place in
-            place.createdByUserId == currentUserId
+            place.createdByUserId == Constants.Strings.currentUserID
         }
 
         return myPlaces.sorted(by: { $0.createdAt > $1.createdAt })
+    }
+
+    // 1. Re-Authentication (We call this FIRST now)
+    func reauthenticateWithPassword(_ password: String) async throws {
+        guard let user = Auth.auth().currentUser, let email = user.email else { return }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        // This checks if the password is correct
+        try await user.reauthenticate(with: credential)
+    }
+
+    // 2. Main Delete Function (Called ONLY after re-auth succeeds)
+    func deleteEntireAccount() async throws {
+        guard let user = Auth.auth().currentUser else { return }
+
+        // Create Batch
+        let batch = db.batch()
+
+        // --- STEP A: Gather Data ---
+        let placesSnapshot = try await db.collection("places").whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
+        let bugsSnapshot = try await db.collection("bugs").whereField("userId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
+        let userActionsSnapshot = try await db.collection("users").document(Constants.Strings.currentUserID).collection("user_actions").getDocuments()
+        let reviewsSnapshot = try await db.collectionGroup("reviews")
+            .whereField("userId", isEqualTo: Constants.Strings.currentUserID)
+            .getDocuments()
+
+        // --- STEP B: Queue Database Deletions ---
+        var imageRefsToDelete: [StorageReference] = []
+
+        // Queue Places & their images
+        for doc in placesSnapshot.documents {
+            batch.deleteDocument(doc.reference)
+
+            // 1. Get String
+            if let imageUrl = doc.data()["imageURL"] as? String {
+                // 2. Create Reference
+                // Note: This assumes the URL is valid. If your DB has bad URLs, this could crash.
+                let storageRef = storage.reference(forURL: imageUrl)
+                imageRefsToDelete.append(storageRef)
+            }
+        }
+
+        for doc in bugsSnapshot.documents { batch.deleteDocument(doc.reference) }
+
+        for doc in userActionsSnapshot.documents { batch.deleteDocument(doc.reference) }
+
+        for doc in reviewsSnapshot.documents {
+            batch.deleteDocument(doc.reference)
+            if let reviewImgUrl = doc.data()["reviewImageURL"] as? String {
+                let storageRef = storage.reference(forURL: reviewImgUrl)
+                imageRefsToDelete.append(storageRef)
+            }
+        }
+
+        // Delete User Profile Document
+        batch.deleteDocument(db.collection("users").document(Constants.Strings.currentUserID))
+
+        // --- STEP C: Commit Database Changes ---
+        try await batch.commit()
+
+        // --- STEP D: Clean Storage ---
+        await withTaskGroup(of: Void.self) { group in
+            for ref in imageRefsToDelete {
+                group.addTask { try? await ref.delete() }
+            }
+        }
+
+        // --- STEP E: Delete Auth Account ---
+        // Since we just re-authenticated, this will succeed 100%
+        try await user.delete()
+    }
+
+    func fetchUserPersonalDetails(userID: String) async throws -> User {
+        // We use 'getDocument(as: User.self)' which automatically converts
+        // the Firestore JSON into your 'User' struct.
+        let user = try await db.collection("users")
+            .document(userID)
+            .getDocument(as: User.self)
+
+        return user
+    }
+
+    // MARK: - 🌟 Review & Rating System 🌟
+
+    // 1. Upload Review Image
+    func uploadReviewImage(_ image: UIImage) async throws -> String {
+        let filename = UUID().uuidString + ".jpg"
+        let storageRef = storage.reference().child("review_images/\(filename)") // Separate folder for reviews
+
+        // Compress image to save bandwidth
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
+        }
+
+        let _ = try await storageRef.putDataAsync(imageData)
+        let url = try await storageRef.downloadURL()
+        return url.absoluteString
+    }
+
+    // 2. Submit Review (Main Function)
+    /// Logic: Upload Image -> Save Review -> Recalculate Average
+
+    func submitReview(placeId: String, user: User, rating: Double, reviewText: String, reviewImage: UIImage) async throws {
+        // A. Validation
+        guard let userId = user.id else { return }
+
+        // B. Upload Image First 📸
+        let imageUrl = try await uploadReviewImage(reviewImage)
+
+        // C. Prepare Review Object
+        let review = PlaceReview(
+            userId: userId,
+            userName: user.fullName ?? "Tea Lover",
+            userImage: user.profileImageUrl,
+            rating: rating,
+            reviewText: reviewText,
+            reviewImageURL: imageUrl, // Mandatory Image
+            createdAt: Date()
+        )
+
+        let placeRef = db.collection("places").document(placeId)
+        let reviewRef = placeRef.collection("reviews").document(userId)
+
+        // D. Transaction for Safe Write 🛡️
+        // 👇 FIX: Added '_ =' to silence the 'unused result' warning
+        _ = try await db.runTransaction({ transaction, errorPointer -> Any? in
+            do {
+                // Save/Overwrite the review document
+                try transaction.setData(from: review, forDocument: reviewRef)
+            } catch let nsError as NSError {
+                errorPointer?.pointee = nsError
+                return nil
+            }
+            return nil
+        })
+
+        // E. Recalculate Average Rating 🧮
+        try await recalculatePlaceAverage(placeId: placeId)
+    }
+
+    // 3. Helper to Recalculate & Update Average
+    private func recalculatePlaceAverage(placeId: String) async throws {
+        let reviewsRef = db.collection("places").document(placeId).collection("reviews")
+        let snapshot = try await reviewsRef.getDocuments()
+
+        let documents = snapshot.documents
+
+        // Handle case with no reviews
+        if documents.isEmpty {
+            try await db.collection("places").document(placeId).updateData([
+                "rating": 0,
+                "total_review_count": 0,
+            ])
+            return
+        }
+
+        // Calculate Average
+        var totalRating = 0.0
+        for doc in documents {
+            if let r = doc.data()["rating"] as? Double {
+                totalRating += r
+            }
+        }
+
+        let average = totalRating / Double(documents.count)
+        let count = documents.count
+
+        // Update Main Place Document
+        try await db.collection("places").document(placeId).updateData([
+            "rating": average,
+            "total_review_count": count,
+        ])
+    }
+
+    // Fetch all reviews for a specific place (Sorted by Newest)
+    func fetchPlaceReviews(for placeId: String) async throws -> [PlaceReview] {
+        // Path: places/{placeId}/reviews
+        let snapshot = try await db.collection("places")
+            .document(placeId)
+            .collection("reviews")
+            .order(by: "created_at", descending: true) // Sort: Newest First
+            .getDocuments()
+
+        // Convert documents to PlaceReview array
+        return try snapshot.documents.compactMap { try $0.data(as: PlaceReview.self) }
     }
 }

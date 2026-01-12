@@ -5,6 +5,8 @@
 //  Created by Harsh on 31/12/25.
 //
 
+//import AuthenticationServices
+import FirebaseAuth
 import UIKit
 
 class LoginRegisterVC: UIViewController, UITextFieldDelegate {
@@ -24,7 +26,18 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     @IBOutlet var txtPassword: UITextField!
     @IBOutlet var txtConfirmPassword: UITextField!
     @IBOutlet var btnForgotPassword: UIButton!
-    @IBOutlet var btnLoginRegister: UIButton!
+    @IBOutlet var btnLoginRegister: UIButton! {
+        didSet {
+            btnLoginRegister.layer.cornerRadius = btnLoginRegister.bounds.height / 2
+            btnLoginRegister.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+        }
+    }
+
+    @IBOutlet var stackView: UIStackView!
+
+    @IBOutlet var btnApple: UIButton!
+    @IBOutlet var btnGoogle: UIButton!
+    @IBOutlet var btnFacebook: UIButton!
 
     // Variable to track current mode (Default is Login)
     var currentMode: AuthMode = .login
@@ -34,19 +47,23 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateUI(mode: .login)
-        setupGradientBackground()
+        // setupGradientBackground()
+
+        txtEmail.applyDefaultStyle()
+        txtPassword.applyDefaultStyle()
+        txtConfirmPassword.applyDefaultStyle()
     }
 
     deinit {
         print("💀 deinit LoginRegisterVC is dead. Memory Free!")
     }
-    
+
     private func setupGradientBackground() {
         let gradient = CAGradientLayer()
         gradient.colors = [
             UIColor.systemPurple.cgColor,
             UIColor.systemPink.cgColor,
-            UIColor.systemOrange.cgColor
+            UIColor.systemOrange.cgColor,
         ]
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 1, y: 1)
@@ -65,45 +82,40 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     func updateUI(mode: AuthMode) {
         currentMode = mode
 
+        // Email is ALWAYS visible
+        txtEmail.isHidden = false
+
+        // Password is visible unless we are in Forgot Password mode
+        txtPassword.isHidden = (mode == .forgotPassword)
+
+        // Confirm Password is visible ONLY in Register mode
+        txtConfirmPassword.isHidden = (mode != .register)
+
+        // Segment Control is hidden in Forgot Password mode
+        segmentControl.isHidden = (mode == .forgotPassword)
+
+        // Forgot Button is hidden in Register mode
+        btnForgotPassword.isHidden = (mode == .register)
+
+        switch mode {
+        case .login:
+            segmentControl.selectedSegmentIndex = 0
+            btnForgotPassword.setTitle("Forgot Password?", for: .normal)
+            btnLoginRegister.setTitle("Login", for: .normal)
+            imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
+
+        case .register:
+            segmentControl.selectedSegmentIndex = 1
+            btnLoginRegister.setTitle("Register", for: .normal)
+            imgLoginRegisterVector.image = UIImage(named: "SIGNUP_VECTOR")
+
+        case .forgotPassword:
+            btnForgotPassword.setTitle("Back to Login", for: .normal)
+            btnLoginRegister.setTitle("Send Reset Link", for: .normal)
+            imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
+        }
+
         UIView.animate(withDuration: 0.3) {
-            // --- A. Visibility Logic (Clean One-Liners) ---
-
-            // Email is ALWAYS visible
-            self.txtEmail.isHidden = false
-
-            // Password is visible unless we are in Forgot Password mode
-            self.txtPassword.isHidden = (mode == .forgotPassword)
-
-            // Confirm Password is visible ONLY in Register mode
-            self.txtConfirmPassword.isHidden = (mode != .register)
-
-            // Segment Control is hidden in Forgot Password mode (Focus on recovery)
-            self.segmentControl.isHidden = (mode == .forgotPassword)
-
-            // Forgot Button is hidden in Register mode (Visible in Login and Forgot modes)
-            self.btnForgotPassword.isHidden = (mode == .register)
-
-            // --- B. Text & Image Configuration ---
-            switch mode {
-            case .login:
-                self.segmentControl.selectedSegmentIndex = 0
-                self.btnForgotPassword.setTitle("Forgot Password?", for: .normal)
-                self.btnLoginRegister.setTitle("Login", for: .normal)
-                self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
-
-            case .register:
-                self.segmentControl.selectedSegmentIndex = 1
-                self.btnLoginRegister.setTitle("Register", for: .normal)
-                self.imgLoginRegisterVector.image = UIImage(named: "SIGNUP_VECTOR")
-
-            case .forgotPassword:
-                // Change button to "Back" so user can cancel
-                self.btnForgotPassword.setTitle("Back to Login", for: .normal)
-                self.btnLoginRegister.setTitle("Send Reset Link", for: .normal)
-                self.imgLoginRegisterVector.image = UIImage(named: "LOGIN_VECTOR")
-            }
-
-            // Force layout update for animation
             self.view.layoutIfNeeded()
         }
     }
@@ -233,30 +245,23 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
         if success {
             print("Success! User is in.")
-            // --- 🚀 NAVIGATE TO HOME ---
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
-            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeVC") as? HomeVC else {
-                print("Error: Could not find HomeVC in Main Storyboard")
-                return
-            }
-
-            let navVC = UINavigationController(rootViewController: homeVC)
-            navVC.modalPresentationStyle = .fullScreen
+            let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+            let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
 
             // Swap Root View Controller (Best Practice)
             if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate,
                let window = sceneDelegate.window {
-                window.rootViewController = navVC
+                window.rootViewController = tabBarVC
 
                 // Smooth transition animation
                 UIView.transition(
-                        with: window,
-                        duration: 0.3,
-                        options: .transitionFlipFromLeft,
-                        animations: nil,
-                        completion: nil
-                    )
+                    with: window,
+                    duration: 0.3,
+                    options: .transitionFlipFromLeft,
+                    animations: nil,
+                    completion: nil
+                )
             }
 
         } else {
@@ -266,3 +271,174 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         }
     }
 }
+
+// MARK: - Social Login Actions 🌍
+
+extension LoginRegisterVC {
+    // 🌍 Google Login
+    @IBAction func btnGoogleTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        performSocialLogin(provider: .google)
+    }
+
+    // 📘 Facebook Login
+    @IBAction func btnFacebookTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        performSocialLogin(provider: .facebook)
+    }
+
+    // MARK: - 🛠 Social Login Logic Helper
+
+    private func performSocialLogin(provider: AuthProviderType) {
+        LoaderManager.shared.startLoading()
+
+        // 1. 🌍 Handle Google (Async/Await)
+        if provider == .google {
+            Task {
+                do {
+                    // Start Google Login
+                    let (credential, user) = try await SocialAuthManager.shared.startGoogleLogin(in: self)
+
+                    // Sign In to Firebase
+                    try await AuthManager.shared.signInWithSocialCredential(credential: credential, userDetails: user)
+
+                    // Success! 🎉
+                    self.handleAuthResponse(success: true, error: nil)
+
+                } catch {
+                    self.handleSocialError(error)
+                }
+            }
+        }
+
+        // 2. 📘 Handle Facebook (Completion Handler)
+        else if provider == .facebook {
+            SocialAuthManager.shared.startFacebookLogin(in: self) { [weak self] result in
+                guard let self = self else { return }
+
+                switch result {
+                case .success(let (credential, user)):
+
+                    // Facebook worked! Now we need a Task to call Firebase (because Firebase is async)
+                    Task {
+                        do {
+                            try await AuthManager.shared.signInWithSocialCredential(credential: credential, userDetails: user)
+                            self.handleAuthResponse(success: true, error: nil)
+                        } catch {
+                            self.handleSocialError(error)
+                        }
+                    }
+
+                case let .failure(error):
+                    self.handleSocialError(error)
+                }
+            }
+        }
+    }
+
+    // MARK: - ⚠️ Error Handling Helper
+
+    private func handleSocialError(_ error: Error) {
+        LoaderManager.shared.stopLoading()
+        print("Social Login Error: \(error.localizedDescription)")
+
+        // Don't show alert if user just cancelled the popup
+        if let socialError = error as? SocialAuthError, case .cancelled = socialError {
+            return
+        }
+
+        Utility.showAlert(title: "Login Failed", message: error.localizedDescription, viewController: self)
+    }
+
+    @IBAction func btnAppleTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
+        print("🟢 Apple Sign-In Button Tapped")
+
+        Utility.showAlert(
+            title: "Server Error",
+            message: "Server is busy due to too much request please try again after some time.",
+            viewController: self
+        )
+
+        // MARK: - Code commented due to not having apple developer account.
+
+        /*
+         // 🚀 START LOGIN PROCESS
+         let appleIDProvider = ASAuthorizationAppleIDProvider()
+         let request = appleIDProvider.createRequest()
+
+         // 📝 We ask for the User's Full Name and Email
+         request.requestedScopes = [.fullName, .email]
+
+         // 🚀 Create the controller and show the popup
+         let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+
+         authorizationController.delegate = self
+         authorizationController.presentationContextProvider = self
+
+         authorizationController.performRequests()*/
+    }
+}
+
+/*
+ // MARK: - Apple Sign In Extensions
+
+ // We combine both protocols here: Delegate (for success/fail) and ContextProviding (for the window)
+ extension LoginRegisterVC: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+     // 🖥️ This tells Apple which window to show the popup on
+     // (This fixes the "method does not satisfy requirement" error)
+     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+         return view.window!
+     }
+
+     // ✅ SUCCESS: We got the data!
+     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+             print("\n----------- 🍎 APPLE DATA RECEIVED 🍎 -----------")
+
+             // 1. User Identifier (The unique ID for this user)
+             let userIdentifier = appleIDCredential.user
+             print("🆔 User ID: \(userIdentifier)")
+
+             // 2. Full Name (⚠️ Only comes the FIRST time you sign in!)
+             if let fullName = appleIDCredential.fullName {
+                 let firstName = fullName.givenName ?? "N/A"
+                 let lastName = fullName.familyName ?? "N/A"
+                 print("👤 Name: \(firstName) \(lastName)")
+             }
+
+             // 3. Email (⚠️ Only comes the FIRST time!)
+             if let email = appleIDCredential.email {
+                 print("📧 Email: \(email)")
+             }
+
+             // 4. Identity Token (For Firebase)
+             if let identityTokenData = appleIDCredential.identityToken,
+                let identityTokenString = String(data: identityTokenData, encoding: .utf8) {
+                 print("🔑 Identity Token (For Firebase): \(identityTokenString.prefix(20))...")
+             }
+
+             print("--------------------------------------------------\n")
+
+             // 👉 TODO: Here you will call your Firebase Login function
+         }
+     }
+
+     // ❌ FAILURE: Something went wrong
+     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+         print("🔴 Sign-In Failed: \(error.localizedDescription)")
+
+         // Handle user cancelling the popup
+         if let outputError = error as? ASAuthorizationError {
+             switch outputError.code {
+             case .canceled:
+                 print("User cancelled the login window.")
+             case .unknown:
+                 print("Unknown error.")
+             default:
+                 break
+             }
+         }
+     }
+ }
+ */

@@ -4,16 +4,15 @@
 //
 //  Created by Harsh on 31/12/25.
 //
- 
 
 import GoogleMaps
 import UIKit
 
 class DetailStaticCell: UITableViewCell {
-    
     // MARK: - IBOutlets
 
     // Basic Information
+    @IBOutlet var btnPlaceOwner: UIButton!
     @IBOutlet var btnPhone: UIButton! {
         didSet {
             btnPhone.layer.cornerRadius = btnPhone.bounds.height / 2
@@ -43,11 +42,12 @@ class DetailStaticCell: UITableViewCell {
     @IBOutlet var btnShare: UIButton!
 
     // MARK: - 🆕 Closures (Actions for Controller)
-    
+
     // These closures will tell the ViewController when a button is tapped.
     var onEditTapped: (() -> Void)?
     var onDeleteTapped: (() -> Void)?
     var onShareTapped: (() -> Void)?
+    var onPlaceOwnerTapped: (() -> Void)?
 
     // MARK: - Properties
 
@@ -55,6 +55,8 @@ class DetailStaticCell: UITableViewCell {
     private var targetLat = 37.331705
     private var targetLong = 122.030237
     private var googleMapView: GMSMapView?
+    
+    var placeOwnerUser : User?
 
     // Property Observer: Automatically configures the cell when data is assigned
     var teaPlace: TeaPlace? {
@@ -65,8 +67,13 @@ class DetailStaticCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        configureGoogleMap()
-        addTapGestureToMap()
+        if AppNetworkManager.shared.isConnected {
+            mapContainerView.isHidden = false
+            configureGoogleMap()
+            addTapGestureToMap()
+        } else {
+            mapContainerView.isHidden = true
+        }
     }
 
     // MARK: - Map Configuration
@@ -115,20 +122,47 @@ class DetailStaticCell: UITableViewCell {
         targetLat = place.latitude ?? 0.0
         targetLong = place.longitude ?? 0.0
         GoogleMapHelper.updateLocation(mapView: googleMapView, lat: targetLat, long: targetLong, showMarker: true)
-        
+
         // 5. Check Owner Permissions
         // We use the TeaActionManager helper to check if the current user created this place.
         let isOwner = TeaActionManager.canModify(place: place)
-        
+
         // 6. Manage Button Visibility
         // Hide Edit & Delete buttons if the user is not the owner.
         // Share button remains visible for everyone.
         btnEdit.isHidden = !isOwner
         btnDelete.isHidden = !isOwner
+        setOwnerName()
+    }
+
+    private func setOwnerName() {
+        if let owner = placeOwnerUser {
+            if let ownerName = owner.fullName {
+                btnPlaceOwner.setTitle("Place Created by : " + ownerName, for: .normal)
+            } else {
+                if let email = placeOwnerUser?.email, !email.isEmpty {
+                    let username = usernameFromEmail(email)
+
+                    btnPlaceOwner.setTitle("Place Created by : \(username)", for: .normal)
+                }
+            }
+        }
+    }
+
+    private func usernameFromEmail(_ email: String) -> String {
+        // Split email by "@"
+        let components = email.split(separator: "@")
+
+        // Return part before "@"
+        return String(components.first ?? "")
     }
 
     // MARK: - 🆕 IBActions (Triggers)
 
+    @IBAction func btnPlaceOwnerTapped(_ sender: UIButton) {
+        onPlaceOwnerTapped?()
+    }
+    
     @IBAction func btnEditTappedDetail(_ sender: UIButton) {
         // Trigger the closure to notify the ViewController
         onEditTapped?()
@@ -153,6 +187,9 @@ class DetailStaticCell: UITableViewCell {
 
     @objc private func mapTapped() {
         print("📍 Map Tapped! Redirecting...")
+        guard AppNetworkManager.shared.isConnected else {
+            return
+        }
         HapticHelper.heavy()
         openGoogleMaps(lat: targetLat, long: targetLong)
     }

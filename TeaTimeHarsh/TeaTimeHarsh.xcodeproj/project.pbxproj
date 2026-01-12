@@ -13,6 +13,10 @@
 		04A6A8A42F051ED0006FB7FE /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A32F051ED0006FB7FE /* FirebaseDatabase */; };
 		04A6A8A62F051ED0006FB7FE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A52F051ED0006FB7FE /* FirebaseFirestore */; };
 		04A6A8A82F051ED0006FB7FE /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 04A6A8A72F051ED0006FB7FE /* FirebaseStorage */; };
+		04B6C0BA2F10C48F00FC3FCF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 04B6C0B92F10C48F00FC3FCF /* GoogleSignIn */; };
+		04B6C0BC2F10C48F00FC3FCF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 04B6C0BB2F10C48F00FC3FCF /* GoogleSignInSwift */; };
+		04B6C0BF2F10C64C00FC3FCF /* FacebookLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 04B6C0BE2F10C64C00FC3FCF /* FacebookLogin */; };
+		04E589FD2F14DA1600F58AED /* Cosmos in Frameworks */ = {isa = PBXBuildFile; productRef = 04E589FC2F14DA1600F58AED /* Cosmos */; };
 		04E5B6FB2F026542005AAB46 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 04E5B6FA2F026542005AAB46 /* GoogleMaps */; };
 		04EE9A032F065E48001DB805 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 04EE9A022F065E48001DB805 /* Kingfisher */; };
 /* End PBXBuildFile section */
@@ -22,7 +26,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0421052A2EFE74D40078B30A /* Exceptions for "TeaTimeHarsh" folder in "TeaTimeHarsh" target */ = {
+		04AD697B2F110EA000875754 /* Exceptions for "TeaTimeHarsh" folder in "TeaTimeHarsh" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -35,7 +39,7 @@
 		042105172EFE74D30078B30A /* TeaTimeHarsh */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				0421052A2EFE74D40078B30A /* Exceptions for "TeaTimeHarsh" folder in "TeaTimeHarsh" target */,
+				04AD697B2F110EA000875754 /* Exceptions for "TeaTimeHarsh" folder in "TeaTimeHarsh" target */,
 			);
 			path = TeaTimeHarsh;
 			sourceTree = "<group>";
@@ -52,9 +56,13 @@
 				04A6A8A02F051ED0006FB7FE /* FirebaseAuth in Frameworks */,
 				04A6A8A22F051ED0006FB7FE /* FirebaseCore in Frameworks */,
 				04EE9A032F065E48001DB805 /* Kingfisher in Frameworks */,
+				04B6C0BF2F10C64C00FC3FCF /* FacebookLogin in Frameworks */,
+				04E589FD2F14DA1600F58AED /* Cosmos in Frameworks */,
+				04B6C0BC2F10C48F00FC3FCF /* GoogleSignInSwift in Frameworks */,
 				04A6A8A82F051ED0006FB7FE /* FirebaseStorage in Frameworks */,
 				043671EF2F0449E000A791F8 /* IQKeyboardManagerSwift in Frameworks */,
 				04A6A8A62F051ED0006FB7FE /* FirebaseFirestore in Frameworks */,
+				04B6C0BA2F10C48F00FC3FCF /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +113,10 @@
 				04A6A8A52F051ED0006FB7FE /* FirebaseFirestore */,
 				04A6A8A72F051ED0006FB7FE /* FirebaseStorage */,
 				04EE9A022F065E48001DB805 /* Kingfisher */,
+				04B6C0B92F10C48F00FC3FCF /* GoogleSignIn */,
+				04B6C0BB2F10C48F00FC3FCF /* GoogleSignInSwift */,
+				04B6C0BE2F10C64C00FC3FCF /* FacebookLogin */,
+				04E589FC2F14DA1600F58AED /* Cosmos */,
 			);
 			productName = TeaTimeHarsh;
 			productReference = 042105152EFE74D30078B30A /* TeaTimeHarsh.app */;
@@ -139,6 +151,9 @@
 				043671ED2F0449E000A791F8 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 				04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				04EE9A012F065E48001DB805 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				04B6C0B82F10C48F00FC3FCF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				04B6C0BD2F10C64C00FC3FCF /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
+				04E589FB2F14DA1600F58AED /* XCRemoteSwiftPackageReference "Cosmos" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 042105162EFE74D30078B30A /* Products */;
@@ -251,7 +266,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -314,7 +331,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -406,6 +425,30 @@
 				minimumVersion = 12.7.0;
 			};
 		};
+		04B6C0B82F10C48F00FC3FCF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+		04B6C0BD2F10C64C00FC3FCF /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/facebook-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 14.1.0;
+			};
+		};
+		04E589FB2F14DA1600F58AED /* XCRemoteSwiftPackageReference "Cosmos" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/Cosmos";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 25.0.1;
+			};
+		};
 		04E5B6F92F026542005AAB46 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
@@ -454,6 +497,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 04A6A89E2F051ED0006FB7FE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		04B6C0B92F10C48F00FC3FCF /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04B6C0B82F10C48F00FC3FCF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		04B6C0BB2F10C48F00FC3FCF /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04B6C0B82F10C48F00FC3FCF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		04B6C0BE2F10C64C00FC3FCF /* FacebookLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04B6C0BD2F10C64C00FC3FCF /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
+			productName = FacebookLogin;
+		};
+		04E589FC2F14DA1600F58AED /* Cosmos */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04E589FB2F14DA1600F58AED /* XCRemoteSwiftPackageReference "Cosmos" */;
+			productName = Cosmos;
 		};
 		04E5B6FA2F026542005AAB46 /* GoogleMaps */ = {
 			isa = XCSwiftPackageProductDependency;

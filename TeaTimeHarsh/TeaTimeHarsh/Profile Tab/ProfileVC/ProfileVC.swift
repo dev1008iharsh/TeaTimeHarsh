@@ -27,7 +27,7 @@ enum ProfileSection: Int, CaseIterable {
     var items: [ProfileRow] {
         switch self {
         case .personal: return [.editProfile, .favourites, .visited, .myPlaces]
-        case .preferences: return [.language, .notification, .appearance]
+        case .preferences: return [.language, .notification, .appearance, .appIcon]
         case .support: return [.help, .share, .rate, .bug, .privacy, .terms]
         case .account: return [.deleteAllPlaces, .deleteAccount, .logout]
         }
@@ -38,7 +38,7 @@ enum ProfileRow {
     // Personal
     case editProfile, favourites, visited, myPlaces
     // Preferences
-    case language, notification, appearance
+    case language, notification, appearance, appIcon
     // Support
     case help, share, rate, bug, privacy, terms
     // Account
@@ -53,6 +53,7 @@ enum ProfileRow {
         case .language: return "Language"
         case .notification: return "Notification"
         case .appearance: return "Appearance"
+        case .appIcon: return "Change app icon"
         case .help: return "Help & Support / FAQ"
         case .share: return "Share app"
         case .rate: return "Rate Us on App store"
@@ -74,6 +75,7 @@ enum ProfileRow {
         case .language: return "globe"
         case .notification: return "bell.badge"
         case .appearance: return "moon.stars"
+        case .appIcon: return "app.gift"
         case .help: return "questionmark.circle"
         case .share: return "square.and.arrow.up"
         case .rate: return "star"
@@ -96,11 +98,28 @@ enum ProfileRow {
 
 class ProfileVC: UIViewController {
     @IBOutlet var tblProfile: UITableView!
+    lazy var profileHeader: ProfileHeaderCell = {
+        // A. Load the XIB
+        guard let header = Bundle.main.loadNibNamed("ProfileHeaderCell", owner: nil)?.first as? ProfileHeaderCell else {
+            fatalError("❌ Could not load ProfileHeaderCell XIB file")
+        }
+
+        // B. Set the Frame
+        // Note: We use a default height, but we can update it later
+        header.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 120)
+
+        // C. Configure the Tap Action immediately
+        header.didTapProfileImage = { [weak self] in
+            guard let self = self else { return }
+            self.handleProfileImageTap() // 👇 Keeping logic clean by calling a function
+        }
+        return header
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTableHeader()
-        setNavigationTitleStyleNavBar(font: .systemFont(ofSize: 20, weight: .bold), color: .systemIndigo)
+        tblProfile.tableHeaderView = profileHeader
+        setCustomNavigationBarStyle()
         if #available(iOS 17.0, *) {
             registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
                 self.tblProfile.reloadData()
@@ -108,35 +127,21 @@ class ProfileVC: UIViewController {
         }
     }
 
-    func setupTableHeader() {
-        guard let header = Bundle.main.loadNibNamed("ProfileHeaderCell", owner: nil)?.first as? ProfileHeaderCell
-        else { return }
+    // MARK: - Helper Functions
 
-        header.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: tblProfile.frame.width,
-            height: 100
-        )
-        header.configure(image: UIImage(systemName: "person.circle.fill"))
-        header.didTapProfileImage = { [weak self] in
-            print("Tapped!")
-            guard let self = self else { return }
-
-            if ThemeManager.shared.isDarkModeActive {
-                print("We are in the shadows! 🌑")
-                ImageZoomViewer.shared
-                    .showFullScreen(
-                        from: header.imgProfile,
-                        backgroundColor: .black
-                    )
-            } else {
-                print("Let there be light! ☀️")
-                ImageZoomViewer.shared.showFullScreen(from: header.imgProfile, backgroundColor: .white)
-            }
+    func handleProfileImageTap() {
+        print("Tapped!")
+        // Accessing the global variable easily 👇
+        let imageToZoom = profileHeader.imgProfile
+        if ThemeManager.shared.isDarkModeActive {
+            ImageZoomViewer.shared
+                .showFullScreen(
+                    from: imageToZoom ?? UIImageView(),
+                    backgroundColor: .black
+                )
+        } else {
+            ImageZoomViewer.shared.showFullScreen(from: imageToZoom ?? UIImageView(), backgroundColor: .white)
         }
-
-        tblProfile.tableHeaderView = header
     }
 }
 
@@ -163,43 +168,47 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ProfileItemCell", for: indexPath)
 
-        // 🎯 Get the specific row data safely
-        guard let sectionType = ProfileSection(rawValue: indexPath.section) else { return UITableViewCell() }
+        // 🔥 RESET reused cell FIRST (MOST IMPORTANT)
+        cell.textLabel?.text = nil
+        cell.detailTextLabel?.text = nil
+        cell.imageView?.image = nil
+        cell.accessoryView = nil
+        cell.accessoryType = .none
+
+        guard let sectionType = ProfileSection(rawValue: indexPath.section) else { return cell }
         let item = sectionType.items[indexPath.row]
 
-        // Setup Basic Data
+        // Basic Data
         cell.textLabel?.text = item.title
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        cell.textLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         cell.imageView?.image = UIImage(systemName: item.iconName)
-
-        // Reset Text Color
-        cell.detailTextLabel?.text = nil
         cell.textLabel?.textColor = .label
         cell.imageView?.tintColor = .systemIndigo
 
-        // 🎨 Specific Visual Logic
+        // Destructive style
         if item.isDestructive {
             cell.textLabel?.textColor = .red
             cell.imageView?.tintColor = .red
         }
 
-        // Handle Detail Text (Right side text)
+        // Accessory handling
         switch item {
         case .notification:
             setupNotificationSwitch(for: cell)
 
         case .language:
             cell.detailTextLabel?.text = "English"
+            cell.accessoryType = .disclosureIndicator
 
         case .appearance:
             let currentTheme = ThemeManager.shared.getCurrentTheme()
             cell.detailTextLabel?.text = currentTheme.title
+            cell.accessoryType = .disclosureIndicator
 
         default:
-            break
+            cell.accessoryType = .disclosureIndicator
         }
 
-        cell.accessoryType = .disclosureIndicator
         return cell
     }
 
@@ -236,6 +245,13 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         // Personal
         case .editProfile:
             print("👤 Edit Profile Tapped")
+            let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
+            guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
+            editVC.onProfileUpdated = { [weak self] in
+                self?.profileHeader.setProfileImage()
+            }
+            navigationController?.pushViewController(editVC, animated: true)
+
         case .favourites:
             print("❤️ Favourites Tapped")
             navigateToHomeAndFilter(segmentIndex: 1)
@@ -248,51 +264,119 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
         // Preferences
         case .language:
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             print("🌍 Change Language")
         case .notification:
             print("🔔 Notification Settings")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
         case .appearance:
             print("🌗 Appearance Settings")
             showAppearanceOptions()
+            
+        case .appIcon:
+            print("📱 Change app icon")
+            navigateToChangeAppIcon()
 
         // Support
         case .help:
             print("❓ Help Tapped")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
         case .share:
             print("📤 Share App")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openShareSheetShareApp()
         case .rate:
             print("⭐️ Rate App")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/")
         case .bug:
             print("🐜 Report Bug")
             presentReportBugVC()
         case .privacy:
             print("🔒 Privacy Policy")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
         case .terms:
             print("📄 Terms & Conditions")
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
             // Account
 
         case .deleteAllPlaces:
             print("🗑️ Delete All Places ")
-
-            let vc = UserPlacesListVC()
-            vc.isDeleteAccount = false
-            present(vc, animated: true)
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
+            loadUserData()
 
         case .deleteAccount:
             print("🗑️ Delete Account Logic")
-            let vc = UserPlacesListVC()
-            vc.isDeleteAccount = true
-            present(vc, animated: true)
+            guard AppNetworkManager.shared.isConnected else {
+                showOfflineAlertAtProfile()
+                return
+            }
+            performDeleteAccount()
 
         case .logout:
             print("🚪 Logout Logic")
             confirmLogout()
         }
+    }
+
+    private func loadUserData() {
+        LoaderManager.shared.startLoading()
+        Task { [weak self] in
+            defer {
+                DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
+            }
+            guard let self = self else { return }
+            do {
+                let places = try await FirebaseManager.shared.fetchCurretnUserPlaces()
+
+                print("Successfully loaded \(places.count) places.")
+
+                if places.isEmpty {
+                    Utility.showAlertHandler(
+                        title: "Oops!",
+                        message: "You haven't added any places.🍵 Tap the ➕ button on the Home screen to get started! ✨",
+                        viewController: self
+                    ) { _ in }
+                } else {
+                    let vc = UserPlacesListVC()
+                    vc.places = places
+                    present(vc, animated: true)
+                }
+            } catch {
+                print("Error fetching user places: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func showOfflineAlertAtProfile() {
+        Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this profile screen action.", viewController: self)
     }
 
     // Helper function to switch tab and filter
@@ -320,6 +404,12 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 homeVC.tblTeaPlaces.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
             }
         }
+    }
+
+    private func navigateToChangeAppIcon() {
+        let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
+        guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "ChangeAppIconVC") as? ChangeAppIconVC else { return }
+        navigationController?.pushViewController(editVC, animated: true)
     }
 
     private func presentReportBugVC() {
@@ -398,5 +488,118 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
             present(activityVC, animated: true, completion: nil)
         }
+    }
+}
+
+extension ProfileVC {
+    // 1. The Main Trigger
+    // Now creates the Password Alert DIRECTLY (No extra "Are you sure" popup first)
+    private func performDeleteAccount() {
+        showReauthInputAlert()
+    }
+
+    // 2. The Password Popup (With the Full Warning Message)
+    private func showReauthInputAlert() {
+        // We combine your Title and Warning Message here
+        let alertTitle = "Delete Entire Account?"
+
+        // I added a small line break "\n\n" before the security instruction to make it readable
+        let alertMessage = """
+        This action will delete your profile and all your saved places. 📉 Everything you have added will be deleted. This action cannot be undone. 🚫 Once you delete, all data related to your account will be lost permanently. 🔴
+
+        For your security, please enter your password to confirm deletion. 🔒
+        """
+
+        let alert = UIAlertController(
+            title: alertTitle,
+            message: alertMessage,
+            preferredStyle: .alert
+        )
+
+        // Add the Password Text Field
+        alert.addTextField { textField in
+            textField.placeholder = "Enter your password"
+            textField.isSecureTextEntry = true
+        }
+
+        // The "Delete" Button
+        let deleteAction = UIAlertAction(title: "Delete Permanently", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+
+            // 1. Check if text field is empty
+            guard let password = alert.textFields?.first?.text, !password.isEmpty else {
+                self.showErrorAlert(message: "Password cannot be empty.")
+                return
+            }
+
+            // 2. Proceed to Verify & Delete
+            self.deleteAccountWithPassword(password)
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            print("Delete Account cancelled by user")
+        }
+
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+
+        present(alert, animated: true)
+    }
+
+    // 3. The Logic: Verify Password -> Then Delete
+    private func deleteAccountWithPassword(_ password: String) {
+        LoaderManager.shared.startLoading()
+
+        Task {
+            do {
+                // STEP A: Verify Password with Firebase 🕵️‍♂️
+                // If this fails (wrong password), it jumps to 'catch' block immediately.
+                try await FirebaseManager.shared.reauthenticateWithPassword(password)
+
+                // STEP B: Delete Everything 🗑️
+                // We only run this if Step A succeeded
+                try await FirebaseManager.shared.deleteEntireAccount()
+
+                // STEP C: Success UI
+                await MainActor.run {
+                    LoaderManager.shared.stopLoading()
+                    self.handleDeleteSuccess()
+                }
+
+            } catch {
+                // Failure (Wrong password, etc.)
+                await MainActor.run {
+                    LoaderManager.shared.stopLoading()
+                    // Show a helpful error message
+                    self.showErrorAlert(message: "Incorrect password or network error. Please try again.")
+                }
+            }
+        }
+    }
+
+    // MARK: - UI Helpers
+
+    // 4. Success Handler
+    private func handleDeleteSuccess() {
+        HapticHelper.success()
+        Utility.showAlertHandler(
+            title: "Account Deleted ✅",
+            message: "Your account has been permanently deleted. See you soon! 👋",
+            viewController: self
+        ) { _ in
+            if AuthManager.shared.signOut() {
+                UtilsProject.logoutAndNavigateToLoginVC()
+            }
+        }
+    }
+
+    // 5. Error Handler
+    private func showErrorAlert(message: String) {
+        HapticHelper.error()
+        Utility.showAlert(
+            title: "Error",
+            message: message,
+            viewController: self
+        )
     }
 }

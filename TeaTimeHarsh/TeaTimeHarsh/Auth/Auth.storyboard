@@ -33,10 +33,10 @@
                                     <action selector="onSegmentChanged:" destination="Y6W-OH-hqX" eventType="valueChanged" id="PqN-kJ-aTM"/>
                                 </connections>
                             </segmentedControl>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="wEb-8U-tnB">
-                                <rect key="frame" x="30" y="454" width="333" height="165"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="wEb-8U-tnB">
+                                <rect key="frame" x="30" y="459" width="333" height="159"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter email address" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="LxV-4V-W3t">
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter email address" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="LxV-4V-W3t">
                                         <rect key="frame" x="0.0" y="0.0" width="333" height="45"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="45" id="tk1-43-LMp"/>
@@ -47,16 +47,16 @@
                                             <outlet property="delegate" destination="Y6W-OH-hqX" id="gel-0L-sZd"/>
                                         </connections>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter password" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="mJM-VI-7ga">
-                                        <rect key="frame" x="0.0" y="60" width="333" height="45"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter password" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="mJM-VI-7ga">
+                                        <rect key="frame" x="0.0" y="57" width="333" height="45"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                                         <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="done" secureTextEntry="YES" textContentType="password"/>
                                         <connections>
                                             <outlet property="delegate" destination="Y6W-OH-hqX" id="aiL-dV-VeJ"/>
                                         </connections>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Confirm password" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="8oI-cn-yaX">
-                                        <rect key="frame" x="0.0" y="120" width="333" height="45"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter Confirm password" textAlignment="natural" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="8oI-cn-yaX">
+                                        <rect key="frame" x="0.0" y="114" width="333" height="45"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                                         <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="done" secureTextEntry="YES" textContentType="password"/>
                                         <connections>
@@ -65,23 +65,8 @@
                                     </textField>
                                 </subviews>
                             </stackView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dFx-My-g4R">
-                                <rect key="frame" x="106.66666666666669" y="639" width="180" height="45"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="180" id="Y9g-Ph-iUB"/>
-                                    <constraint firstAttribute="height" constant="45" id="YfT-cT-7le"/>
-                                </constraints>
-                                <color key="tintColor" systemColor="systemIndigoColor"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Login Now" cornerStyle="capsule">
-                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
-                                </buttonConfiguration>
-                                <connections>
-                                    <action selector="btnSubmitLoginRegister:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="kLd-4h-LXL"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S4I-xn-P98">
-                                <rect key="frame" x="114.66666666666669" y="689" width="164" height="35"/>
+                                <rect key="frame" x="114.66666666666669" y="688" width="164" height="35"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="35" id="8cu-rK-y3z"/>
                                 </constraints>
@@ -98,31 +83,90 @@
                                     <constraint firstAttribute="height" constant="60" id="jg3-nq-vzc"/>
                                 </constraints>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zkC-Bx-7LH">
+                                <rect key="frame" x="106.66666666666669" y="638" width="180" height="45"/>
+                                <color key="backgroundColor" systemColor="systemIndigoColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="45" id="jLd-dW-vmJ"/>
+                                    <constraint firstAttribute="width" constant="180" id="lby-hu-BeB"/>
+                                </constraints>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Login"/>
+                                <connections>
+                                    <action selector="btnSubmitLoginRegister:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="zeV-aH-Uhr"/>
+                                </connections>
+                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="Uob-rR-Vbh">
+                                <rect key="frame" x="117" y="738" width="159" height="45"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gVq-kl-6FH">
+                                        <rect key="frame" x="0.0" y="0.0" width="45" height="45"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="gVq-kl-6FH" secondAttribute="height" multiplier="1:1" id="FdL-Jn-pZ9"/>
+                                            <constraint firstAttribute="height" constant="45" id="Tlz-wc-nmD"/>
+                                        </constraints>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="facebook"/>
+                                        <connections>
+                                            <action selector="btnFacebookTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="aNS-z2-sEs"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1AM-85-c8a">
+                                        <rect key="frame" x="57" y="0.0" width="45" height="45"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="google"/>
+                                        <connections>
+                                            <action selector="btnGoogleTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="NY2-aU-KLk"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WSe-hU-tYp">
+                                        <rect key="frame" x="114" y="0.0" width="45" height="45"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="apple"/>
+                                        <connections>
+                                            <action selector="btnAppleTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="IsI-3O-Rug"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="479-yt-StS" firstAttribute="top" secondItem="amj-nr-ZJr" secondAttribute="bottom" constant="20" id="07P-ro-keb"/>
+                            <constraint firstItem="S4I-xn-P98" firstAttribute="centerX" secondItem="zkC-Bx-7LH" secondAttribute="centerX" id="0aE-NF-2TP"/>
                             <constraint firstItem="amj-nr-ZJr" firstAttribute="centerX" secondItem="zrv-uR-rkG" secondAttribute="centerX" id="0cF-83-hSG"/>
-                            <constraint firstItem="S4I-xn-P98" firstAttribute="centerX" secondItem="dFx-My-g4R" secondAttribute="centerX" id="0vl-kW-f7B"/>
+                            <constraint firstItem="S4I-xn-P98" firstAttribute="top" secondItem="zkC-Bx-7LH" secondAttribute="bottom" constant="5" id="8J8-Qi-lcp"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="centerX" secondItem="479-yt-StS" secondAttribute="centerX" id="8VE-fy-BXj"/>
+                            <constraint firstItem="Uob-rR-Vbh" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="ElR-Rc-sUu"/>
                             <constraint firstItem="479-yt-StS" firstAttribute="centerX" secondItem="amj-nr-ZJr" secondAttribute="centerX" id="G3Q-7i-4Fw"/>
                             <constraint firstItem="amj-nr-ZJr" firstAttribute="top" secondItem="zrv-uR-rkG" secondAttribute="bottom" constant="10" id="LTq-Lt-rsk"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="30" id="Qdu-9q-lPT"/>
-                            <constraint firstItem="wEb-8U-tnB" firstAttribute="top" secondItem="479-yt-StS" secondAttribute="bottom" constant="15" id="Sn4-y9-xJQ"/>
-                            <constraint firstItem="dFx-My-g4R" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="V66-C2-URP"/>
-                            <constraint firstItem="S4I-xn-P98" firstAttribute="top" secondItem="dFx-My-g4R" secondAttribute="bottom" constant="5" id="XXx-NI-pEs"/>
-                            <constraint firstItem="dFx-My-g4R" firstAttribute="top" secondItem="wEb-8U-tnB" secondAttribute="bottom" constant="20" id="eMh-Gq-5VE"/>
+                            <constraint firstItem="wEb-8U-tnB" firstAttribute="top" secondItem="479-yt-StS" secondAttribute="bottom" constant="20" id="Sn4-y9-xJQ"/>
+                            <constraint firstItem="Uob-rR-Vbh" firstAttribute="top" secondItem="S4I-xn-P98" secondAttribute="bottom" constant="15" id="Uek-PU-l2H"/>
+                            <constraint firstItem="zkC-Bx-7LH" firstAttribute="top" secondItem="wEb-8U-tnB" secondAttribute="bottom" constant="20" id="Wyh-ap-Xvo"/>
+                            <constraint firstItem="zkC-Bx-7LH" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="hlq-Tq-XOa"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="centerX" secondItem="vDu-zF-Fre" secondAttribute="centerX" id="ivU-yt-eEE"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="tE1-0L-cyg"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="OQu-yx-8GS"/>
                     <connections>
+                        <outlet property="btnApple" destination="WSe-hU-tYp" id="TQN-Dm-dUs"/>
+                        <outlet property="btnFacebook" destination="gVq-kl-6FH" id="Usm-vU-3NQ"/>
                         <outlet property="btnForgotPassword" destination="S4I-xn-P98" id="hjl-Zz-YG6"/>
-                        <outlet property="btnLoginRegister" destination="dFx-My-g4R" id="oJr-VL-clZ"/>
+                        <outlet property="btnGoogle" destination="1AM-85-c8a" id="W8w-av-NSU"/>
+                        <outlet property="btnLoginRegister" destination="zkC-Bx-7LH" id="zDj-K4-xET"/>
                         <outlet property="imgLoginRegisterVector" destination="amj-nr-ZJr" id="v1J-JJ-rsL"/>
                         <outlet property="segmentControl" destination="479-yt-StS" id="jAc-lV-Dii"/>
+                        <outlet property="stackView" destination="wEb-8U-tnB" id="01D-cx-ccA"/>
                         <outlet property="txtConfirmPassword" destination="8oI-cn-yaX" id="Bn8-Vn-dyl"/>
                         <outlet property="txtEmail" destination="LxV-4V-W3t" id="gTU-Wt-kBM"/>
                         <outlet property="txtPassword" destination="mJM-VI-7ga" id="iCt-cb-gCc"/>
@@ -152,6 +196,9 @@
     </scenes>
     <resources>
         <image name="SIGNUP_VECTOR" width="612" height="408"/>
+        <image name="apple" width="512" height="512"/>
+        <image name="facebook" width="512" height="512"/>
+        <image name="google" width="512" height="512"/>
         <image name="iconAppRound" width="1024" height="1024"/>
         <systemColor name="systemIndigoColor">
             <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

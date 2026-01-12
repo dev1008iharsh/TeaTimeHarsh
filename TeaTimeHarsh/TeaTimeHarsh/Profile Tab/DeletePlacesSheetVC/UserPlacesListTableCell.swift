@@ -9,7 +9,6 @@ import Foundation
 import UIKit
 
 class UserPlacesListTableCell: UITableViewCell {
-
     // 🟢 Static ID for easy reuse
     static let identifier = "UserPlacesListTableCell"
 
@@ -58,7 +57,7 @@ class UserPlacesListTableCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -68,10 +67,10 @@ class UserPlacesListTableCell: UITableViewCell {
         // Add subviews
         contentView.addSubview(iconImageView)
         contentView.addSubview(textStackView)
-        
+
         textStackView.addArrangedSubview(titleLabel)
         textStackView.addArrangedSubview(subtitleLabel)
-        
+
         // 📏 Constraints
         NSLayoutConstraint.activate([
             // Image Constraints (Fixed size mimic default look)
@@ -79,22 +78,22 @@ class UserPlacesListTableCell: UITableViewCell {
             iconImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             iconImageView.widthAnchor.constraint(equalToConstant: 40),
             iconImageView.heightAnchor.constraint(equalToConstant: 40),
-            
+
             // StackView Constraints
             textStackView.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 12),
             textStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             textStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            textStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
+            textStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
         ])
     }
 
     // 📤 Configuration Method
-    func configure(place:TeaPlace) {
+    func configure(place: TeaPlace) {
         titleLabel.text = place.name
         subtitleLabel.text = place.location
         ImageManagerKF.setImage(
-                from: place.imageURL,
-                into: iconImageView,
-                placeholderName: "photo")
+            from: place.imageURL,
+            into: iconImageView,
+            placeholderName: "")
     }
 }

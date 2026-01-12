@@ -16,9 +16,10 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Gq5-AW-KCe">
-                    <rect key="frame" x="219" y="130.33333333333331" width="96" height="101.33333333333334"/>
+                    <rect key="frame" x="202" y="113.33333333333333" width="130" height="135.33333333333331"/>
                     <color key="tintColor" systemColor="systemIndigoColor"/>
                     <constraints>
+                        <constraint firstAttribute="height" constant="130" id="BzK-SN-k9I"/>
                         <constraint firstAttribute="width" secondItem="Gq5-AW-KCe" secondAttribute="height" multiplier="1:1" id="DbN-fK-PV0"/>
                     </constraints>
                     <imageReference key="image" image="person.circle.fill" catalog="system" symbolScale="large"/>
@@ -27,7 +28,6 @@
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
             <constraints>
-                <constraint firstItem="Gq5-AW-KCe" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="15" id="IgS-Lk-iSU"/>
                 <constraint firstItem="Gq5-AW-KCe" firstAttribute="centerX" secondItem="vUN-kp-3ea" secondAttribute="centerX" id="b3U-Bh-Wvz"/>
                 <constraint firstItem="Gq5-AW-KCe" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="tA6-MX-hKu"/>
             </constraints>
@@ -44,7 +44,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemIndigoColor">
-            <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

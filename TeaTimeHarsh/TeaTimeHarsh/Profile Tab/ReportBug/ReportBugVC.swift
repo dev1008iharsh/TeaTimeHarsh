@@ -20,6 +20,8 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Disable swipe-down to dismiss
+        isModalInPresentation = true
         txtViewDesc.delegate = self
         setupTextView()
         setupImageCofiguration()
@@ -28,16 +30,16 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
     // 🔘 Submit Button Action
     @IBAction func submitTapped(_ sender: UIButton) {
         HapticHelper.medium()
-        guard let email = txtEmail.text, !email.isEmpty,Utility.isValidEmail(email) else {
+        guard let email = txtEmail.text, !email.isEmpty, Utility.isValidEmail(email) else {
             Utility.showAlert(title: "Validation Error", message: "Please enter valid email ID. 📧", viewController: self)
             return
         }
-        
-        guard let desc = txtViewDesc.text, !desc.isEmpty,desc != placeholderText else {
+
+        guard let desc = txtViewDesc.text, !desc.isEmpty, desc != placeholderText else {
             Utility.showAlert(title: "Validation Error", message: "Please enter a description of the bug related to screenshot. ✍️", viewController: self)
             return
         }
- 
+
         if !hasSelectedNewImage {
             Utility.showAlert(title: "Oops!", message: "Please attach a screenshot. 🖼️", viewController: self)
             return
@@ -75,9 +77,11 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
     }
 
     @IBAction func btnCloseSheet(_ sender: UIButton) {
-        self.dismiss(animated: true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
+
     private func setupTextView() {
+        txtEmail.applyDefaultStyle()
         // 2. Assign the delegate so this class can listen to events
         txtViewDesc.delegate = self
 

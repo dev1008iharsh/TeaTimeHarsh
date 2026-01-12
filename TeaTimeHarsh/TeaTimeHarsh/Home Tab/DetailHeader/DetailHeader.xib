@@ -27,7 +27,7 @@
                     </userDefinedRuntimeAttributes>
                 </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Location/place" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kdt-Zk-lcn" customClass="PaddedLabel" customModule="TeaTimeHarsh" customModuleProvider="target">
-                    <rect key="frame" x="20.000000000000007" y="250" width="108.66666666666669" height="30"/>
+                    <rect key="frame" x="20.000000000000007" y="246" width="108.66666666666669" height="32"/>
                     <color key="backgroundColor" red="0.90196078431372551" green="1" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                     <color key="textColor" systemColor="systemGreenColor"/>
@@ -45,7 +45,7 @@
                     </userDefinedRuntimeAttributes>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Open Now/ Closed Now" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g7Z-OK-vRV" customClass="PaddedLabel" customModule="TeaTimeHarsh" customModuleProvider="target">
-                    <rect key="frame" x="20" y="324" width="177" height="30"/>
+                    <rect key="frame" x="20" y="322" width="177" height="32"/>
                     <color key="backgroundColor" systemColor="systemIndigoColor"/>
                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="16"/>
                     <color key="textColor" systemColor="systemGroupedBackgroundColor"/>
@@ -82,26 +82,29 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PlaceName" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gwI-mO-rFY">
-                    <rect key="frame" x="20" y="283" width="159" height="36"/>
+                    <rect key="frame" x="20" y="281" width="159" height="36"/>
                     <fontDescription key="fontDescription" type="boldSystem" pointSize="30"/>
                     <color key="textColor" systemColor="systemGroupedBackgroundColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Average Rating 5 *" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="03i-Ft-JkH" customClass="PaddedLabel" customModule="TeaTimeHarsh" customModuleProvider="target">
-                    <rect key="frame" x="405.33333333333331" y="324" width="137.66666666666669" height="30"/>
-                    <color key="backgroundColor" red="1" green="0.97254901960784312" blue="0.80000000000000004" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                    <rect key="frame" x="405.33333333333331" y="322" width="137.66666666666669" height="32"/>
+                    <color key="backgroundColor" systemColor="systemBlueColor"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="30" id="dqY-Ib-vJz"/>
+                        <constraint firstAttribute="height" constant="32" id="dqY-Ib-vJz"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                    <color key="textColor" systemColor="systemOrangeColor"/>
+                    <color key="textColor" systemColor="systemBackgroundColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="number" keyPath="padding">
                             <real key="value" value="15"/>
                         </userDefinedRuntimeAttribute>
                         <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
-                            <real key="value" value="0.0"/>
+                            <real key="value" value="1"/>
+                        </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                            <color key="value" systemColor="systemBackgroundColor"/>
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </label>
@@ -143,7 +146,7 @@
                 <outlet property="lblCityLocaton" destination="kdt-Zk-lcn" id="GVX-fq-rof"/>
                 <outlet property="lblName" destination="gwI-mO-rFY" id="LL3-ya-L4z"/>
                 <outlet property="lblOpenCloseNow" destination="g7Z-OK-vRV" id="svN-mx-jX7"/>
-                <outlet property="lblRating" destination="03i-Ft-JkH" id="mOe-MT-uzO"/>
+                <outlet property="lblReview" destination="03i-Ft-JkH" id="b30-bZ-DYU"/>
             </connections>
             <point key="canvasLocation" x="267.93893129770993" y="39.436619718309863"/>
         </view>
@@ -152,17 +155,17 @@
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
+        <systemColor name="systemBlueColor">
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGroupedBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemIndigoColor">
-            <color red="0.38039215686274508" green="0.33333333333333331" blue="0.96078431372549022" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemOrangeColor">
-            <color red="1" green="0.55294117647058827" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemYellowColor">
             <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

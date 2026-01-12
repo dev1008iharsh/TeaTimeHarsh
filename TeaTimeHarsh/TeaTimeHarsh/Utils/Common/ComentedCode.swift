@@ -9,6 +9,70 @@
 
 /*
  
+ // UserDataManger Code
+ func fetchCurrentUserProfile(completion: @escaping (User?, String?) -> Void) {
+     // 1. Get the current User ID safely
+     guard let uid = Auth.auth().currentUser?.uid else {
+         completion(nil, "No user logged in")
+         return
+     }
+
+     let db = Firestore.firestore()
+     
+     // 2. Fetch the document using the modern "Codable" way
+     // ⭐️ PRO WAY: getDocument(as: User.self) automatically converts JSON to your User struct!
+     db.collection("users").document(uid).getDocument(as: User.self) { result in
+         
+         switch result {
+         case .success(let user):
+             // Success! We found the user and converted it
+             print("User data fetched successfully: \(user.fullName ?? "No Name")")
+             completion(user, nil)
+             
+         case .failure(let error):
+             // Something went wrong
+             print("Error decoding user: \(error.localizedDescription)")
+             completion(nil, error.localizedDescription)
+         }
+     }
+ }
+ 
+ func updateUserProfile(user: User, completion: @escaping (Bool, String?) -> Void) {
+     // 1. Get the current User ID
+     guard let uid = Auth.auth().currentUser?.uid else {
+         completion(false, "No user logged in")
+         return
+     }
+     
+     let db = Firestore.firestore()
+     
+     do {
+         // 2. Save the data
+         // ⭐️ PRO TIP: usage of 'merge: true'
+         // This ensures we update the fields in the 'user' object without
+         // accidentally deleting other fields if your model changes in the future.
+         try db.collection("users").document(uid).setData(from: user, merge: true) { error in
+             
+             if let error = error {
+                 print("Error updating profile: \(error.localizedDescription)")
+                 completion(false, error.localizedDescription)
+             } else {
+                 print("Profile updated successfully!")
+                 completion(true, nil)
+             }
+         }
+     } catch {
+         print("Error encoding user data: \(error.localizedDescription)")
+         completion(false, "Could not prepare data for saving")
+     }
+ }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  if FavouritePlacesStore.favourites.contains(placeID) {
      FavouritePlacesStore.favourites.remove(placeID)
  } else {

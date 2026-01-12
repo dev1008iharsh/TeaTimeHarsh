@@ -52,9 +52,11 @@ final class ImageManagerKF {
             switch result {
             case .success(let value):
                 // Optional: Log success for debugging
-                print("✅ Kingfisher: Image loaded from \(value.source.url?.absoluteString ?? "")")
+                //print("✅ Kingfisher: Image loaded from \(value.source.url?.absoluteString ?? "")")
+                break
             case .failure(let error):
                 print("❌ Kingfisher Error: \(error.localizedDescription)")
+                break
             }
         }
     }

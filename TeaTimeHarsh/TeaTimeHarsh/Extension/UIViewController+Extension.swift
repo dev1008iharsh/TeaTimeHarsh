@@ -5,8 +5,8 @@
 //  Created by Harsh on 27/12/25.
 //
 
-import UIKit
 import SafariServices
+import UIKit
 
 extension UIViewController {
     func hideBackButtonNavBar(hidden: Bool, swipeEnabled: Bool) {
@@ -82,66 +82,67 @@ extension UIViewController {
             previousController.navigationItem.backButtonDisplayMode = .minimal
         }
     }
+    /// Sets navigation title and bar button item color only
+    /// Sets navigation title font, size, and color without resetting appearance
+    func setCustomNavigationBarStyle(
+        font: UIFont = .systemFont(ofSize: 20, weight: .bold),
+        color: UIColor = .systemIndigo
+    ) {
+        guard let navController = navigationController else { return }
+        
+        let navBar = navController.navigationBar
+        
+        // Large title attributes
+        navBar.standardAppearance.largeTitleTextAttributes[.font] = font.withSize(35)
+        navBar.standardAppearance.largeTitleTextAttributes[.foregroundColor] = color
+        
+        // Small title attributes
+        navBar.standardAppearance.titleTextAttributes[.font] = font.withSize(20)
+        navBar.standardAppearance.titleTextAttributes[.foregroundColor] = color
+        
+        // Bar button items color
+        navBar.tintColor = color
+    }
+    /*
 
-    /// Adds padding to the Left side of the Large Title
+    /// Adds left spacing for Large Title safely (iOS 26 compatible)
     func setLargeTitleSpacingNavBar(_ spacing: CGFloat = 16) {
-        // 1. Get the current navigation controller (guard check to be safe)
-        guard let navController = navigationController else {
-            print("⚠️ Warning: No Navigation Controller found!")
-            return
-        }
-
-        // 2. Create the appearance settings
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-
-        // 3. Create the indentation style
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.firstLineHeadIndent = spacing // 📏 Uses the number you pass in
-
-        // 4. Apply the style
-        appearance.largeTitleTextAttributes = [
-            .paragraphStyle: paragraphStyle,
-            .foregroundColor: UIColor.label, // ⚫️ Standard text color
-        ]
-
-        // 5. Update the Navigation Bar
-        navController.navigationBar.standardAppearance = appearance
-        navController.navigationBar.scrollEdgeAppearance = appearance
+        guard let navBar = navigationController?.navigationBar else { return }
+        
+        // Use layout margins instead of text indentation (Apple-safe)
+        navBar.directionalLayoutMargins = NSDirectionalEdgeInsets(
+            top: 0,
+            leading: spacing,
+            bottom: 0,
+            trailing: 0
+        )
     }
 
-    /// Sets the Font and Color for Navigation Titles.
-    /// Sizes are automatically set to iOS Standards (Large: 34, Small: 17).
+    /// Sets font and color for Large and Small navigation titles
     func setNavigationTitleStyleNavBar(font: UIFont, color: UIColor) {
-        // 1. Safety Check
         guard let navController = navigationController else { return }
-
-        // 2. Define Standard Sizes (The "Defaults" you asked for)
-        let defaultLargeSize: CGFloat = 34.0
-        let defaultSmallSize: CGFloat = 17.0
-
-        // 3. Get current appearance (Copy to keep your previous Spacing settings! 🛡️)
-        let appearance = navController.navigationBar.standardAppearance.copy()
-
-        // --- LARGE TITLE CONFIG ---
-        let largeFont = font.withSize(defaultLargeSize) // Force size 34
-        var largeAttributes = appearance.largeTitleTextAttributes
-        largeAttributes[.font] = largeFont
-        largeAttributes[.foregroundColor] = color
-        appearance.largeTitleTextAttributes = largeAttributes
-
-        // --- SMALL TITLE CONFIG ---
-        let smallFont = font.withSize(defaultSmallSize) // Force size 17
-        var smallAttributes = appearance.titleTextAttributes
-        smallAttributes[.font] = smallFont
-        smallAttributes[.foregroundColor] = color
-        appearance.titleTextAttributes = smallAttributes
-
-        // 4. Update Navigation Bar
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.shadowColor = .clear
+        
+        // Large title styling
+        appearance.largeTitleTextAttributes = [
+            .font: font.withSize(34),
+            .foregroundColor: color
+        ]
+        
+        // Small title styling
+        appearance.titleTextAttributes = [
+            .font: font.withSize(17),
+            .foregroundColor: color
+        ]
+        
+        // Apply appearance
         navController.navigationBar.standardAppearance = appearance
         navController.navigationBar.scrollEdgeAppearance = appearance
         navController.navigationBar.compactAppearance = appearance
-    }
+    }*/
 
     /// 🌍 Opens a URL in the internal Safari Browser
     func openSafari(url urlString: String) {
