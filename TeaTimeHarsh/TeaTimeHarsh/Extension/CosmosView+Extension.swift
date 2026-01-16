@@ -15,7 +15,7 @@ extension CosmosView {
     func applyTeaThemeStyle(starSize: Double, isEditable: Bool, color: UIColor = .systemOrange) {
         settings.updateOnTouch = isEditable
         settings.fillMode = .half
-        settings.emptyBorderWidth = 2
+        settings.emptyBorderWidth = 1.5
         settings.starSize = starSize
         settings.starMargin = 2
         settings.filledColor = color

@@ -23,8 +23,11 @@ class PlaceReviewVC: UIViewController {
 
     var selectedRating: Double = 0.0 // Default 0
 
+    private var isTyping = false
+
     var arrReviews: [PlaceReview]? {
         didSet {
+            setNeedsUpdateContentUnavailableConfiguration()
             // Reload table automatically when data is set
             DispatchQueue.main.async { [weak self] in
                 self?.tblReview.reloadData()
@@ -38,7 +41,7 @@ class PlaceReviewVC: UIViewController {
     var reloadRating: (() -> Void)?
 
     // Constants for TextView
-    private let placeholderText = "Share your experience here... (Max 200 chars)"
+    private let placeholderText = "Share your experience here... (Max 250 characters)"
     private let placeholderColor = UIColor.systemGray2
     private let activeTextColor = UIColor.label
 
@@ -107,8 +110,35 @@ class PlaceReviewVC: UIViewController {
     private func setupData() {
         if let placeName = place?.name {
             titleReview.text = "\(placeName) Reviews"
-            lblShareExp.text = "How was your chai at \(placeName)?"
+            lblShareExp.text = "How was your experience at \(placeName)?"
         }
+    }
+
+    // MARK: - ⭐️ Key Logic: Empty State Configuration
+
+    override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+        guard let arrReviews else { return }
+        if !arrReviews.isEmpty || isTyping {
+            contentUnavailableConfiguration = nil
+            return
+        }
+        var config = UIContentUnavailableConfiguration.empty()
+        config.text = "No reviews yet. 😬"
+        config.secondaryText = "Looks like this place is waiting just for you… go on, make the first move ☺️💬"
+        config.image = UIImage(systemName: "bubble.left.and.exclamationmark.bubble.right")
+        config.button.title = "Write a Review"
+        config.imageProperties.tintColor = .systemIndigo
+        config.directionalLayoutMargins = NSDirectionalEdgeInsets(
+            top: 350,
+            leading: 30,
+            bottom: 0,
+            trailing: 30
+        )
+        config.buttonProperties.primaryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            txtViewReview.becomeFirstResponder()
+        }
+        contentUnavailableConfiguration = config
     }
 
     // MARK: - Actions
@@ -127,6 +157,7 @@ class PlaceReviewVC: UIViewController {
     @IBAction func btnSubmitReviewTapped(_ sender: UIButton) {
         view.endEditing(true) // Dismiss keyboard first
 
+        HapticHelper.success()
         // 1. Validation Logic
         if !validateInput() { return }
 
@@ -134,7 +165,11 @@ class PlaceReviewVC: UIViewController {
         guard let currentLoggedInUser = UserDataManager.shared.user,
               let currentPlaceId = place?.id,
               let reviewText = txtViewReview.text,
-              let selectedImageReview = imgReview.image else { return }
+              let selectedImageReview = imgReview.image else {
+            _ = AuthManager.shared.signOut()
+            UtilsProject.logoutAndNavigateToLoginVC()
+            return
+        }
 
         // 3. Submit Review
 
@@ -164,6 +199,8 @@ class PlaceReviewVC: UIViewController {
             Utility.showAlert(title: "Login Required 👤",
                               message: "Please log in to share your experience.Logout from profile and re-login to continue.",
                               viewController: self)
+            let _ = AuthManager.shared.signOut()
+            UtilsProject.logoutAndNavigateToLoginVC()
             return false
         }
 
@@ -177,9 +214,9 @@ class PlaceReviewVC: UIViewController {
         }
 
         // Check Text Length
-        guard reviewText.count <= 200 else {
+        guard reviewText.count <= 250 else {
             Utility.showAlert(title: "Too Long 📏",
-                              message: "Please keep your review under 200 characters.",
+                              message: "Please keep your review under 250 characters.",
                               viewController: self)
             return false
         }
@@ -226,9 +263,9 @@ class PlaceReviewVC: UIViewController {
                 // Error Handling
                 LoaderManager.shared.stopLoading()
                 btnSubmitReview.isEnabled = true // Re-enable button on error
-
+                HapticHelper.error()
                 print("❌ Error: \(error.localizedDescription)")
-                Utility.showAlert(title: "Upload Failed. please try again.",
+                Utility.showAlert(title: "❌ Error: Upload Failed. please try again.",
                                   message: error.localizedDescription,
                                   viewController: self)
             }
@@ -244,6 +281,8 @@ extension PlaceReviewVC: UITextViewDelegate {
             textView.text = ""
             textView.textColor = activeTextColor
         }
+        isTyping = true
+        setNeedsUpdateContentUnavailableConfiguration()
     }
 
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -251,6 +290,8 @@ extension PlaceReviewVC: UITextViewDelegate {
             textView.text = placeholderText
             textView.textColor = placeholderColor
         }
+        isTyping = false
+        setNeedsUpdateContentUnavailableConfiguration()
     }
 }
 
@@ -271,7 +312,7 @@ extension PlaceReviewVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 190
+        return 200
     }
 }
 

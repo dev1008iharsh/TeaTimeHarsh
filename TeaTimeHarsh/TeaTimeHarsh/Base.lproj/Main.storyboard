@@ -26,7 +26,7 @@
                                 </connections>
                             </tableView>
                             <segmentedControl toolTip="Filter places" opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Fi0-HU-VSZ">
-                                <rect key="frame" x="30.666666666666657" y="130" width="332" height="32"/>
+                                <rect key="frame" x="30.666666666666657" y="128" width="332" height="32"/>
                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                 <segments>
                                     <segment title="All"/>
@@ -34,6 +34,7 @@
                                     <segment title="Visited"/>
                                     <segment title="My Places"/>
                                 </segments>
+                                <color key="tintColor" systemColor="systemIndigoColor"/>
                                 <color key="selectedSegmentTintColor" systemColor="systemIndigoColor"/>
                                 <connections>
                                     <action selector="didChangeSegmentFilter:" destination="mBx-GQ-H4F" eventType="valueChanged" id="gWo-ZC-a4H"/>
@@ -45,7 +46,7 @@
                         <constraints>
                             <constraint firstItem="Fi0-HU-VSZ" firstAttribute="centerX" secondItem="yVn-yi-dDK" secondAttribute="centerX" id="4A1-j3-HXs"/>
                             <constraint firstAttribute="bottom" secondItem="yVn-yi-dDK" secondAttribute="bottom" id="UNi-c9-AKs"/>
-                            <constraint firstItem="Fi0-HU-VSZ" firstAttribute="top" secondItem="yVn-yi-dDK" secondAttribute="top" constant="12" id="Wdf-LK-xnS"/>
+                            <constraint firstItem="Fi0-HU-VSZ" firstAttribute="top" secondItem="yVn-yi-dDK" secondAttribute="top" constant="10" id="Wdf-LK-xnS"/>
                             <constraint firstItem="yVn-yi-dDK" firstAttribute="leading" secondItem="QAD-26-J0e" secondAttribute="leading" id="chp-52-PVF"/>
                             <constraint firstItem="yVn-yi-dDK" firstAttribute="top" secondItem="QAD-26-J0e" secondAttribute="top" id="jeJ-tv-epO"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Fi0-HU-VSZ" secondAttribute="trailing" id="vsM-Ui-Ljo"/>
@@ -576,7 +577,7 @@
         <!--LaunchVC-->
         <scene sceneID="xvm-08-nbX">
             <objects>
-                <viewController id="tyu-1Q-c6j" customClass="LaunchVC" customModule="TeaTimeHarsh" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LaunchVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="tyu-1Q-c6j" customClass="LaunchVC" customModule="TeaTimeHarsh" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="k5i-Gz-eYj">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

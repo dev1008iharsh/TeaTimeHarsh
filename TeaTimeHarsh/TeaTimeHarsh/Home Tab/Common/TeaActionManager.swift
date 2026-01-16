@@ -150,14 +150,14 @@ class TeaActionManager {
             timingText = "Opens at \(open)"
         }
 
-        // 🛠️ FIX: Correct Google Maps Link Generation
+        // 🛠️ Correct Google Maps Link Generation
         var mapLink = "Link Not Available"
         if let lat = place.latitude, let long = place.longitude {
             mapLink = "https://www.google.com/maps/search/?api=1&query=\(lat),\(long)"
         }
 
         return """
-        📍 *Place Details*
+        📍 Place Details
 
         🏷️ Name: \(place.name)
         📌 Location: \(place.location ?? "N/A")

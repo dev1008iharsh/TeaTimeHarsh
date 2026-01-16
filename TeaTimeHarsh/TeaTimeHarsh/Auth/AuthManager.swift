@@ -13,6 +13,10 @@ class AuthManager {
     static let shared = AuthManager()
     private init() {}
 
+    var isUserLoggedIn: Bool {
+        return Auth.auth().currentUser != nil
+    }
+
     // MARK: - 1. Sign Up (Register) Function
 
     func registerUser(email: String, pass: String, completion: @escaping (Bool, String?) -> Void) {
@@ -21,7 +25,7 @@ class AuthManager {
             // Check Auth Error
             if let error = error {
                 let friendlyMessage = self.getFriendlyError(error)
-                print("Register Error: \(friendlyMessage)")
+                print("❌ Register Error: \(friendlyMessage)")
                 completion(false, friendlyMessage)
                 return
             }
@@ -31,7 +35,7 @@ class AuthManager {
                 completion(false, "No User ID found")
                 return
             }
-            print("*uid", uid)
+            print(" *✅ register uid", uid)
 
             Constants.Strings.currentUserID = uid
 
@@ -42,9 +46,10 @@ class AuthManager {
             let db = Firestore.firestore()
             try? db.collection("users").document(uid).setData(from: newUser) { error in
                 if let error = error {
-                    print("Firestore Error: \(error.localizedDescription)")
+                    print("❌ Firestore Error: \(error.localizedDescription)")
                     completion(false, "Database save failed")
                 } else {
+                    UserDataManager.shared.saveUserToUserDefaults(newUser)
                     completion(true, nil)
                 }
             }
@@ -59,20 +64,20 @@ class AuthManager {
             // 1. Check Auth Error
             if let error = error {
                 let friendlyMessage = self.getFriendlyError(error)
-                print("Login Error: \(friendlyMessage)")
+                print("❌ Login Error: \(friendlyMessage)")
                 completion(false, friendlyMessage)
                 return
             }
 
             // 2. Get UID
             guard let uid = authResult?.user.uid else { completion(false, "User ID not found"); return }
-            print("*uid", uid)
+            print("*✅ login uid", uid)
             Constants.Strings.currentUserID = uid
 
             // 3. Fetch User Profile
             let userRef = Firestore.firestore().collection("users").document(uid)
 
-            // ⚠️ FIX: Firebase replies on a background thread.
+            // ⚠️  Firebase replies on a background thread.
             userRef.getDocument { snapshot, _ in
 
                 // 🚀 JUMP TO MAIN THREAD IMMEDIATELY
@@ -80,14 +85,14 @@ class AuthManager {
                 DispatchQueue.main.async {
                     // Check snapshot and Decode User (Now safe on Main Thread)
                     guard let snapshot = snapshot, snapshot.exists, let user = try? snapshot.data(as: User.self) else {
-                        completion(false, "User profile missing in database")
+                        completion(false, "User profile missing in database ❌")
                         return
                     }
 
                     // 4. Security Check
                     if !user.isActive {
                         try? Auth.auth().signOut()
-                        completion(false, "Your account has been disabled/banned.")
+                        completion(false, "Your account has been disabled/banned. 🔴")
                         return
                     }
 
@@ -107,7 +112,7 @@ class AuthManager {
 
             if let error = error {
                 let friendlyMessage = self.getFriendlyError(error)
-                print("Reset Error: \(friendlyMessage)")
+                print("❌ Reset Error: \(friendlyMessage)")
                 completion(false, friendlyMessage)
                 return
             }
@@ -119,16 +124,24 @@ class AuthManager {
     // MARK: - 4. Logout Function
 
     func signOut() -> Bool {
-        do {
-            try Auth.auth().signOut()
+        if isUserLoggedIn{
+            do {
+                try Auth.auth().signOut()
 
-            // 🧹 CLEANUP: Clear the stored ID and Keychain
-            Constants.Strings.currentUserID = ""
-            resetKeychain()
-
-            return true
-        } catch {
-            print("Sign out error: \(error)")
+                resetKeychain()
+                clearAllUserDefaults()
+                Constants.Strings.currentUserID = ""
+                CoreDataManager.shared.clearAllDataOfCoreData()
+                UserDataManager.shared.user = nil
+                UserProfileImageStorage.clearUserProfileImage()
+                print("✅ Successfully sign-out (All data cleared)")
+                return true
+            } catch {
+                print("❌ Sign out error: \(error)")
+                return false
+            }
+        } else {
+            print("❌ User already logged-out. Sign out error")
             return false
         }
     }
@@ -146,7 +159,14 @@ class AuthManager {
             SecItemDelete(spec as CFDictionary)
         }
     }
-
+    
+    func clearAllUserDefaults() {
+        guard let bundleID = Bundle.main.bundleIdentifier else { return }
+        UserDefaults.standard.removePersistentDomain(forName: bundleID)
+        UserDefaults.standard.synchronize()
+    }
+    
+    
     // MARK: - 5. Social Login Handler 🌐
 
     func signInWithSocialCredential(credential: AuthCredential, userDetails: User) async throws {

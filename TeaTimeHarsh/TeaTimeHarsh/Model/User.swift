@@ -7,7 +7,7 @@
  
 // MARK: - 🆔 Identity
 // 🔗 LINKING LOGIC: This 'id' is what you will save inside TeaModel as 'createdByUserID'
-// @DocumentID automatically maps the Firestore Document ID to this variable.
+// @DocumentID automatically maps the Firestore Document ID to this variable.//Removed due t ounable to store user in userdefault
 
 import Foundation
 import FirebaseFirestore
@@ -23,9 +23,8 @@ enum AuthProviderType: String, Codable {
 struct User: Identifiable, Codable {
     
     // MARK: - 🆔 Identity
-    @DocumentID var id: String?
-    
-  
+    var id: String?
+
     var username: String?
     var fullName: String?
     

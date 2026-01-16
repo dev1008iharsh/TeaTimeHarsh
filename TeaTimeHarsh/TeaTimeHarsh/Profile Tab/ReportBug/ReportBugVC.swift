@@ -66,11 +66,11 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
                 }
 
             } catch {
-                // ❌ Error aavyo
+                // ❌ Error
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
                     HapticHelper.error()
-                    Utility.showAlert(title: "Try again", message: "Error: \(error.localizedDescription)", viewController: self)
+                    Utility.showAlert(title: "❌ Error : Try again", message: "Error: \(error.localizedDescription)", viewController: self)
                 }
             }
         }

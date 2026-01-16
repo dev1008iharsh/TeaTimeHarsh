@@ -379,4 +379,7 @@ func signInWithSocialCredential(credential: AuthCredential, userDetails: User, c
         }
     }
 }
+ 
+ 
+ 
 */

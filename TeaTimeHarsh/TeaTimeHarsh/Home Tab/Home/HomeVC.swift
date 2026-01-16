@@ -66,7 +66,7 @@ class HomeVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupAllUI()
-        setupObservers() // 🔥 આ ફંક્શન કોલ થવું જરૂરી છે
+        setupObservers()
         loadData()
         presentTipIfNeeded()
     }
@@ -107,14 +107,12 @@ class HomeVC: UIViewController {
     func askUserToUpdateProfile() {
         let alert = UIAlertController(
             title: "👋 Hey Buddy!",
-            message: "Your profile looks incomplete.\n✨ Update it now so friends can recognize you easily! 😊 ",
+            message: "Your profile looks incomplete.\n✨ Update it now so friends can recognise you easily! 😊 ",
             preferredStyle: .alert
         )
 
         alert.addAction(UIAlertAction(title: "✏️ Update Profile", style: .default) { [weak self] _ in
-            let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-            guard let editVC = storyboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
-            self?.navigationController?.pushViewController(editVC, animated: true)
+            self?.tabBarController?.selectedIndex = 1
         })
         alert.addAction(UIAlertAction(title: "❌ Cancel", style: .destructive))
 
@@ -177,17 +175,14 @@ class HomeVC: UIViewController {
     @objc func handleConnectionRestored() {
         print("🚀 Internet Restored! Auto-refreshing Home & User Data...")
 
-        // ૧. Tea Places રિફ્રેશ કરો (થોડા Delay સાથે જેથી Connection stable થાય)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.loadData()
         }
 
-        // ૨. Global User Profile ચેક કરો (Missing હોય તો લઈ આવે)
         UserDataManager.shared.fetchUserProfileIfNeeded()
     }
 
     @objc private func didTapAddNavBar() {
-        // 🔥 GUARD: Internet Check
         guard AppNetworkManager.shared.isConnected else {
             showOfflineAlertAtHome()
             return
@@ -211,10 +206,10 @@ class HomeVC: UIViewController {
 
         // 2. Check Connection using your AppNetworkManager
         if AppNetworkManager.shared.isConnected {
-            print("🌍 Internet Available - Fetching from Firebase")
+            print("🌍 Internet Available for that fetching data from firebase")
             fetchFromFirebaseAndSync()
         } else {
-            print("🔌 No Internet - Fetching from CoreData")
+            print("🔌 No Internet Available - for that fetching from CoreData")
             fetchFromCoreData()
         }
     }
@@ -222,20 +217,27 @@ class HomeVC: UIViewController {
     // Scenario A: Online
     private func fetchFromFirebaseAndSync() {
         Task {
-            defer { stopLoadingUI() }
             do {
                 let places = try await FirebaseManager.shared.fetchAllPlaces()
                 await MainActor.run { self.arrTeaPlaces = places }
-
+                stopLoadingUI()
                 // Sync in background
                 CoreDataManager.shared.syncPlacesToLocalDB(places: places)
 
             } catch {
                 await MainActor.run {
                     // Fallback to local if API fails
+                    stopLoadingUI()
+                    HapticHelper.error()
                     print("⚠️ Firebase Error: \(error), trying local...")
-                    self.fetchFromCoreData()
-                    Utility.showAlert(title: "Error", message: "Could not connect to server. Showing offline data.", viewController: self)
+                    Utility
+                        .showAlertHandler(
+                            title: "❌ Error : Failed to get latest data",
+                            message: "Could not connect to server. Showing offline data.",
+                            viewController: self) { okAction in
+                                self.fetchFromCoreData()
+                            }
+                    
                 }
             }
         }
@@ -249,7 +251,7 @@ class HomeVC: UIViewController {
 
         if localPlaces.isEmpty {
             // Only show alert if screen is totally empty
-            Utility.showAlert(title: "Offline", message: "No internet and no saved data found.", viewController: self)
+            print("🔴 Offline - No internet and no saved data found.")
         }
     }
 

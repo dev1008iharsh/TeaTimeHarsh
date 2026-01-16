@@ -27,7 +27,7 @@ extension UIViewController {
         // 2. Configure the Image
         backButton.setImage(image, for: .normal)
 
-        // 🛠️ THE FIX: This tells the image to keep its original shape (1:1)
+        // 🛠️  This tells the image to keep its original shape (1:1)
         // and NOT stretch to fill the rectangle.
         backButton.imageView?.contentMode = .scaleAspectFit
 

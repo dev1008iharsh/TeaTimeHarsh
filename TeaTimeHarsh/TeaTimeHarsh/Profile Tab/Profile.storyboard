@@ -204,7 +204,7 @@
                                 <rect key="frame" x="0.0" y="118" width="393" height="734"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mRO-0z-fkN">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="800"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="790"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GuY-N0-iv9">
                                                 <rect key="frame" x="121.66666666666669" y="30" width="150" height="150"/>
@@ -290,7 +290,7 @@
                                                 </connections>
                                             </textView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="R0f-Np-bnd">
-                                                <rect key="frame" x="106.66666666666669" y="695" width="180" height="45"/>
+                                                <rect key="frame" x="106.66666666666669" y="685" width="180" height="45"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="45" id="Xda-jW-Jua"/>
                                                     <constraint firstAttribute="width" constant="180" id="bvv-bs-IUk"/>
@@ -315,7 +315,7 @@
                                             <constraint firstItem="1W4-JT-ltz" firstAttribute="centerX" secondItem="GuY-N0-iv9" secondAttribute="centerX" id="fom-I4-2MZ"/>
                                             <constraint firstItem="1W4-JT-ltz" firstAttribute="leading" secondItem="mRO-0z-fkN" secondAttribute="leading" constant="30" id="hfC-4l-Epe"/>
                                             <constraint firstItem="1W4-JT-ltz" firstAttribute="top" secondItem="GuY-N0-iv9" secondAttribute="bottom" constant="20" id="jjb-Ks-wbG"/>
-                                            <constraint firstItem="R0f-Np-bnd" firstAttribute="top" secondItem="WhL-QV-S6k" secondAttribute="bottom" constant="30" id="pih-wh-g8E"/>
+                                            <constraint firstItem="R0f-Np-bnd" firstAttribute="top" secondItem="WhL-QV-S6k" secondAttribute="bottom" constant="20" id="pih-wh-g8E"/>
                                             <constraint firstItem="GuY-N0-iv9" firstAttribute="top" secondItem="mRO-0z-fkN" secondAttribute="top" constant="30" id="xAh-DW-L64"/>
                                         </constraints>
                                     </view>

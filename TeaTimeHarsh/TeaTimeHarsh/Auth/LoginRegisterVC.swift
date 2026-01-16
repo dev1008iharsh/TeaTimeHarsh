@@ -46,6 +46,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        removePreviousUserIfAny()
         updateUI(mode: .login)
         // setupGradientBackground()
 
@@ -56,6 +57,14 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     deinit {
         print("💀 deinit LoginRegisterVC is dead. Memory Free!")
+    }
+    
+    private func removePreviousUserIfAny(){
+        if AppNetworkManager.shared.isConnected {
+            if AuthManager.shared.isUserLoggedIn{
+                let _ = AuthManager.shared.signOut()
+            }
+        }
     }
 
     private func setupGradientBackground() {
@@ -144,8 +153,10 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 3. Main Action Button Tapped (Handles All 3 Logics)
     @IBAction func btnSubmitLoginRegister(_ sender: UIButton) {
-        // Common Check: Email is always needed
 
+        HapticHelper.success()
+        view.endEditing(true)
+        
         guard let email = txtEmail.text?.trimmingCharacters(in: .whitespaces), !email.isEmpty,
               let password = txtPassword.text?.trimmingCharacters(in: .whitespaces), !password.isEmpty else {
             Utility.showAlert(title: "Missing Input", message: "Please enter email and password.", viewController: self)
@@ -244,7 +255,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         LoaderManager.shared.stopLoading()
 
         if success {
-            print("Success! User is in.")
+            print("Success! User is in.Successfully passed the auth flow ✅")
 
             let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
             let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
@@ -340,6 +351,7 @@ extension LoginRegisterVC {
 
     private func handleSocialError(_ error: Error) {
         LoaderManager.shared.stopLoading()
+        HapticHelper.error()
         print("Social Login Error: \(error.localizedDescription)")
 
         // Don't show alert if user just cancelled the popup

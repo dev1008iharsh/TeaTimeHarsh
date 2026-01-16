@@ -29,6 +29,7 @@
                                     <segment title="Login "/>
                                     <segment title="Register"/>
                                 </segments>
+                                <color key="tintColor" systemColor="systemIndigoColor"/>
                                 <connections>
                                     <action selector="onSegmentChanged:" destination="Y6W-OH-hqX" eventType="valueChanged" id="PqN-kJ-aTM"/>
                                 </connections>

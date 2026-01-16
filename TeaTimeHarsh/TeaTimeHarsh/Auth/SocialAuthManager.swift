@@ -72,9 +72,7 @@ class SocialAuthManager: NSObject {
         return (credential, newUser)
     }
 
-    // MARK: - 📘 Facebook Login Logic (Changed to Completion Handler)
-
-    // We removed 'async' and 'continuation' here to make it simpler.
+    // MARK: - 📘 Facebook Login Logic ( Completion Handler)
 
     func startFacebookLogin(in viewController: UIViewController, completion: @escaping (Result<(AuthCredential, User), Error>) -> Void) {
         let loginManager = LoginManager()

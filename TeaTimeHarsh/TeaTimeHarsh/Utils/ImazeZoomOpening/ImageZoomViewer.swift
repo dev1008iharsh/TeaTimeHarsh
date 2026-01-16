@@ -124,7 +124,7 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate {
     }
 
     @objc private func dismissFullScreen() {
-        guard let window = getWindow() else { return }
+        guard let _ = getWindow() else { return }
 
         // 7. Animate Close
         UIView.animate(withDuration: 0.4, animations: {

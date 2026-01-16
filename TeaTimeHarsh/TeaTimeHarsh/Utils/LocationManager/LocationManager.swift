@@ -14,12 +14,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     private let locationManager = CLLocationManager()
 
-    // 🛠️ FIX 1: Expose the authorization status publicly
+    // 🛠️  Expose the authorization status publicly
     var authorizationStatus: CLAuthorizationStatus {
         return locationManager.authorizationStatus
     }
 
-    // 🛠️ FIX 2: Expose the last known location
+    // 🛠️  Expose the last known location
     // This allows us to get the location INSTANTLY if the GPS is already warm.
     var lastKnownLocation: CLLocation? {
         return locationManager.location

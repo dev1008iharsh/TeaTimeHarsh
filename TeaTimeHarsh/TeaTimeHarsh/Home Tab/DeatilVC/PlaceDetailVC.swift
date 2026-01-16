@@ -226,7 +226,6 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
                     showOfflineAlertAtDetail()
                     return
                 }
-                guard let placeOwnerUser else { return }
                 presentBottomSheetOwnerDetails()
             }
         }
@@ -234,6 +233,7 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func presentBottomSheetOwnerDetails() {
+        guard let placeOwnerUser else { return }
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let ownerVC = storyboard.instantiateViewController(withIdentifier: "PlaceOwnerDetailsVC") as? PlaceOwnerDetailsVC else {
             return

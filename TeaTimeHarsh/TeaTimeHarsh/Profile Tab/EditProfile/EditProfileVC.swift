@@ -23,7 +23,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     @IBOutlet var txtViewBio: UITextView!
     @IBOutlet var btnUpdate: UIButton!
 
-    let placeholderText = "Enter short description about yourself"
+    let placeholderText = "Enter short description about yourself... (Max 250 characters)"
     let placeholderColor = UIColor.lightGray
     let textColor = UIColor.label
 
@@ -49,7 +49,6 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         setupImageCofiguration()
         setupTextViewAndFields()
         setupProfileData()
-        // fetchData()
     }
 
     private func setupTextViewAndFields() {
@@ -121,8 +120,8 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
             return "Please enter a short bio about yourself."
         }
 
-        guard bio.count <= 200 else {
-            return "Bio must be 200 characters or less."
+        guard bio.count <= 250 else {
+            return "Bio must be 250 characters or less."
         }
         return nil // ✅ All validations passed
     }
@@ -178,8 +177,8 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                 try await UserDataManager.shared.updateUserProfile(user: userToUpdate)
                 LoaderManager.shared.stopLoading()
                 // C. Success!
-                UserDataManager.shared.user = userToUpdate
-
+                
+                UserProfileImageStorage.saveUserProfileImage(profileImage)
                 Utility
                     .showAlertHandler(
                         title: "Success✅",

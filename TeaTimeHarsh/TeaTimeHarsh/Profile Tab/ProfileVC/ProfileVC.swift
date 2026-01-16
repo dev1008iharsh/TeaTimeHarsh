@@ -106,6 +106,7 @@ class ProfileVC: UIViewController {
 
         // B. Set the Frame
         // Note: We use a default height, but we can update it later
+        
         header.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 120)
 
         // C. Configure the Tap Action immediately
@@ -130,7 +131,7 @@ class ProfileVC: UIViewController {
     // MARK: - Helper Functions
 
     func handleProfileImageTap() {
-        print("Tapped!")
+        print("Profile Image Tapped!")
         // Accessing the global variable easily 👇
         let imageToZoom = profileHeader.imgProfile
         if ThemeManager.shared.isDarkModeActive {

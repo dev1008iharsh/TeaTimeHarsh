@@ -87,7 +87,7 @@ class FirebaseManager {
         let filename = UUID().uuidString + ".jpg"
         let storageRef = storage.reference().child("review_place_images/\(filename)")
 
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
         }
 
@@ -140,9 +140,9 @@ class FirebaseManager {
 
         do {
             try placesRef.setData(from: place)
-            print("✅ Update Success: Global place details updated.")
+            print("✅ UpdatePlace firebase api Success")
         } catch {
-            print("❌ Update Error: \(error.localizedDescription)")
+            print("❌ Error UpdatePlace firebase api  : \(error.localizedDescription)")
             throw error
         }
     }
@@ -152,7 +152,7 @@ class FirebaseManager {
         var imageUrlString = ""
 
         // 1️⃣ Jo Image hoy, to pehla Storage ma upload karo
-        if let image = image, let imageData = image.jpegData(compressionQuality: 0.9) {
+        if let image = image, let imageData = image.jpegData(compressionQuality: 0.7) {
             // Unique name apiye image ne
             let filename = UUID().uuidString
             let storageRef = storage.reference().child("bug_images/\(filename).jpg")
@@ -313,7 +313,7 @@ class FirebaseManager {
         let storageRef = storage.reference().child("review_images/\(filename)") // Separate folder for reviews
 
         // Compress image to save bandwidth
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
         }
 
@@ -347,7 +347,7 @@ class FirebaseManager {
         let reviewRef = placeRef.collection("reviews").document(userId)
 
         // D. Transaction for Safe Write 🛡️
-        // 👇 FIX: Added '_ =' to silence the 'unused result' warning
+        // 👇  Added '_ =' to silence the 'unused result' warning
         _ = try await db.runTransaction({ transaction, errorPointer -> Any? in
             do {
                 // Save/Overwrite the review document

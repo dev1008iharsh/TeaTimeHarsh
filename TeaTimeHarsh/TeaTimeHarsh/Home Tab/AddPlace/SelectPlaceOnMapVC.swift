@@ -111,7 +111,7 @@ class SelectPlaceOnMapVC: UIViewController {
             Utility.showAlert(title: "Location Error", message: "Could not find location.", viewController: self)
         }
 
-        // 🛠️ FIX: Check IMMEDIATE Location
+        // Check IMMEDIATE Location
         // If the GPS is already warm (running), get the location NOW.
         // Don't wait for the next update cycle.
         if let lastLocation = LocationManager.shared.lastKnownLocation {
@@ -152,6 +152,7 @@ class SelectPlaceOnMapVC: UIViewController {
 
     @IBAction func btnSubmitMapTapped(_ sender: UIButton) {
         HapticHelper.success()
+        view.endEditing(true)
         guard AppNetworkManager.shared.isConnected else {
             Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this action.", viewController: self)
             return
@@ -221,6 +222,13 @@ extension SelectPlaceOnMapVC {
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 if let error = error {
+                    HapticHelper.error()
+                    Utility
+                        .showAlert(
+                            title: "Address Not Found ❌",
+                            message: "We couldn't catch that spot. 📍 Please try moving the map or zooming in to pick a specific location.",
+                            viewController: self
+                        )
                     print("❌ Error: \(error.localizedDescription)")
                     self.lblAddress.text = "Address not found"
                     return

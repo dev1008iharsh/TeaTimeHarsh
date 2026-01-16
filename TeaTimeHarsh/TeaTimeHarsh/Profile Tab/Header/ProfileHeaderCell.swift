@@ -31,13 +31,44 @@ class ProfileHeaderCell: UIView {
     }
 
     func setProfileImage() {
-        if let profileUrl = UserDataManager.shared.user?.profileImageUrl {
-            ImageManagerKF
-                .setImage(
+
+        // 1️⃣ Check if profile is completed
+        guard let user = UserDataManager.shared.user,
+              let fullName = user.fullName,
+              !fullName.isEmpty else {
+
+            print("❌ Profile not completed → default system image")
+            imgProfile.image = UIImage(systemName: "person.circle.fill")
+            return
+        }
+
+        // 2️⃣ Profile completed → check internet
+        if AppNetworkManager.shared.isConnected {
+
+            print("🌐 Online → load image from URL")
+            
+            if let profileUrl = user.profileImageUrl, !profileUrl.isEmpty {
+                ImageManagerKF.setImage(
                     from: profileUrl,
                     into: imgProfile,
                     placeholderName: ""
                 )
+            } else {
+                // Safety fallback
+                print("🌐 ❌ there is internet but url of image is nil(empty)")
+                imgProfile.image = UIImage(systemName: "person.circle.fill")
+            }
+
+        } else {
+
+            print("📁 Offline → load image from local storage")
+            
+            if let offlineImage = UserProfileImageStorage.loadUserProfileImage() {
+                imgProfile.image = offlineImage
+            } else {
+                print("❌Offline but url from userdefault is nil (empty)")
+                imgProfile.image = UIImage(systemName: "person.circle.fill")
+            }
         }
     }
 

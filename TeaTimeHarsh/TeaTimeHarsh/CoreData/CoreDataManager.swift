@@ -20,10 +20,13 @@ class CoreDataManager {
          Make sure "TeaTimeHarsh" matches your .xcdatamodeld filename exactly.
          */
         let container = NSPersistentContainer(name: "TeaTimeHarsh")
+
         container.loadPersistentStores(completionHandler: { _, error in
             if let error = error as NSError? {
-                // Production app ma fatalError na vaparvi, pan development mate ok che.
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                print("❌ [CoreData] Critical Error loading persistent stores: \(error), \(error.userInfo)")
+
+                // Future Step: Crashlytics or Analytics setup
+                // log error to know it's failed
             }
         })
         return container
@@ -86,7 +89,7 @@ class CoreDataManager {
 
                 // 3. Save
                 try bgContext.save()
-                print("✅ [CoreData] Data synced successfully inside Manager")
+                print("✅ [CoreData] performBackgroundTask Data synced successfully.")
 
             } catch {
                 print("❌ [CoreData] Sync Error: \(error.localizedDescription)")
@@ -107,5 +110,26 @@ class CoreDataManager {
             print("❌ [CoreData] Fetch Error: \(error.localizedDescription)")
             return []
         }
+    }
+
+    func clearAllDataOfCoreData() {
+        let context = persistentContainer.viewContext
+        let model = persistentContainer.managedObjectModel
+
+        model.entities.forEach { entity in
+            guard let entityName = entity.name else { return }
+
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+
+            do {
+                try context.execute(deleteRequest)
+                context.reset()
+            } catch {
+                print("❌ Failed to clear entity \(entityName): \(error.localizedDescription)")
+            }
+        }
+
+        print("🧹 All Core Data data cleared")
     }
 }

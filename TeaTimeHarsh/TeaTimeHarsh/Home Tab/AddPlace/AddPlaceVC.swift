@@ -101,8 +101,15 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
             // 🔒 Security Check
             if place.createdByUserId != Constants.Strings.currentUserID {
-                Utility.showAlert(title: "Access Denied", message: "You can only edit places created by you.", viewController: self)
-                view.isUserInteractionEnabled = false
+                Utility
+                    .showAlertHandler(
+                        title: "Access Denied 🔴",
+                        message: "You can only edit places created by you. This place is not created by you ❌",
+                        viewController: self) { okAction in
+                            self.navigationController?
+                                .popViewController(animated: true)
+                        }
+                
                 return
             }
 
@@ -305,6 +312,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSubmitTapped(_ sender: UIButton) {
         HapticHelper.success()
+        view.endEditing(true)
         if let errorMsg = validateFields() {
             Utility.showAlert(title: "Invalid Data", message: errorMsg, viewController: self)
             return
@@ -386,7 +394,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         imgPlace.clipsToBounds = true
         imgPlace.contentMode = .scaleAspectFill
         imgPlace.backgroundColor = .secondarySystemBackground
-        imgPlace.image = UIImage(systemName: "photo")
+        imgPlace.image = UIImage(systemName: "plus")
         imgPlace.tintColor = .secondaryLabel
         imgPlace.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(didTapPlaceImage))
@@ -402,7 +410,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     private func setupMenuSelection() {
         // Dropdown Data
-        let ratingOptions = ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]
         let locationOptions = ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad", "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Surat"]
         let openingTimeOptions = ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00"]
         let closingTimeOptions = ["21:00", "22:00", "23:00", "23:59"]
