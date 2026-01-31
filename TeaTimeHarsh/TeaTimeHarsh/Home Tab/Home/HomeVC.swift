@@ -230,14 +230,13 @@ class HomeVC: UIViewController {
                     stopLoadingUI()
                     HapticHelper.error()
                     print("⚠️ Firebase Error: \(error), trying local...")
-                    Utility
+                    AlertHelper
                         .showAlertHandler(
                             title: "❌ Error : Failed to get latest data",
                             message: "Could not connect to server. Showing offline data.",
-                            viewController: self) { okAction in
+                            vc: self) { _ in
                                 self.fetchFromCoreData()
-                            }
-                    
+                        }
                 }
             }
         }
@@ -273,7 +272,7 @@ class HomeVC: UIViewController {
 
     // Helper for repetitive alerts
     private func showOfflineAlertAtHome() {
-        Utility.showAlert(title: "No Internet", message: "Please connect to the internet to perform this action.", viewController: self)
+        AlertHelper.showAlert(title: "No Internet", message: "Please connect to the internet to perform this action.", vc: self)
     }
 }
 
@@ -388,7 +387,7 @@ extension HomeVC {
                         if type == "fav" { self.arrTeaPlaces[index].isFav.toggle() }
                         if type == "visit" { self.arrTeaPlaces[index].isVisited.toggle() }
                         self.tblTeaPlaces.reloadData()
-                        Utility.showAlert(title: "Connection Error", message: "Changes reverted.", viewController: self)
+                        AlertHelper.showAlert(title: "Connection Error", message: "Changes reverted.", vc: self)
                     }
                 }
             }

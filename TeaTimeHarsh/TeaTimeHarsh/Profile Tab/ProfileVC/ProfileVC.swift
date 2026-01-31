@@ -54,7 +54,7 @@ enum ProfileRow {
         case .notification: return "Notification"
         case .appearance: return "Appearance"
         case .appIcon: return "Change app icon"
-        case .help: return "Help & Support / FAQ"
+        case .help: return "Help & Support"
         case .share: return "Share app"
         case .rate: return "Rate Us on App store"
         case .bug: return "Report bug"
@@ -106,7 +106,7 @@ class ProfileVC: UIViewController {
 
         // B. Set the Frame
         // Note: We use a default height, but we can update it later
-        
+
         header.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 120)
 
         // C. Configure the Tap Action immediately
@@ -279,7 +279,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         case .appearance:
             print("🌗 Appearance Settings")
             showAppearanceOptions()
-            
+
         case .appIcon:
             print("📱 Change app icon")
             navigateToChangeAppIcon()
@@ -291,7 +291,13 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
-            openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
+            EmailHelper.shared.sendEmail(
+                from: self,
+                recipients: [Constants.Strings.developerEmail],
+                subject: "Help & Support Request from \(UtilsProject.getAppName) - Profile Screen",
+                body: "Tell us more about the problem you're facing here...\n\n\n\n\n" +  EmailMetaData.supportInfo
+            )
+
         case .share:
             print("📤 Share App")
             guard AppNetworkManager.shared.isConnected else {
@@ -360,10 +366,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 print("Successfully loaded \(places.count) places.")
 
                 if places.isEmpty {
-                    Utility.showAlertHandler(
+                    AlertHelper.showAlertHandler(
                         title: "Oops!",
                         message: "You haven't added any places.🍵 Tap the ➕ button on the Home screen to get started! ✨",
-                        viewController: self
+                        vc: self
                     ) { _ in }
                 } else {
                     let vc = UserPlacesListVC()
@@ -377,7 +383,12 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func showOfflineAlertAtProfile() {
-        Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this profile screen action.", viewController: self)
+        AlertHelper
+            .showAlert(
+                title: "No Internet 🛜",
+                message: "Please connect to the internet to perform this profile screen action.",
+                vc: self
+            )
     }
 
     // Helper function to switch tab and filter
@@ -422,13 +433,21 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     private func confirmLogout() {
-        Utility.showYesNoConfirmAlert(
+        AlertHelper.showConfirmationAlert(
             title: "Logout Alert",
             message: "Logging out will end your current session. Do you want to continue?",
-            viewController: self
-        ) { [weak self] _ in
-            self?.performLogout()
-        } noAction: { _ in }
+            vc: self,
+            rightBtnTitle: "Logout",
+            rightBtnStyle: .destructive, // Red color to indicate ending session
+            leftBtnTitle: "Stay",
+            leftBtnStyle: .cancel,
+            rightAction: { [weak self] _ in
+                self?.performLogout()
+            },
+            leftAction: { _ in
+                // User chose to stay logged in
+            }
+        )
     }
 
     private func performLogout() {
@@ -436,7 +455,12 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         if success {
             UtilsProject.logoutAndNavigateToLoginVC()
         } else {
-            Utility.showAlert(title: "Error", message: "Could not log out.Please try again after some time.", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Error",
+                    message: "Could not log out.Please try again after some time.",
+                    vc: self
+                )
         }
     }
 
@@ -583,10 +607,10 @@ extension ProfileVC {
     // 4. Success Handler
     private func handleDeleteSuccess() {
         HapticHelper.success()
-        Utility.showAlertHandler(
+        AlertHelper.showAlertHandler(
             title: "Account Deleted ✅",
             message: "Your account has been permanently deleted. See you soon! 👋",
-            viewController: self
+            vc: self
         ) { _ in
             if AuthManager.shared.signOut() {
                 UtilsProject.logoutAndNavigateToLoginVC()
@@ -597,10 +621,10 @@ extension ProfileVC {
     // 5. Error Handler
     private func showErrorAlert(message: String) {
         HapticHelper.error()
-        Utility.showAlert(
+        AlertHelper.showAlert(
             title: "Error",
             message: message,
-            viewController: self
+            vc: self
         )
     }
 }

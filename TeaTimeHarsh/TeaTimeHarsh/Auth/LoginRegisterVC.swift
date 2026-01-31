@@ -5,7 +5,7 @@
 //  Created by Harsh on 31/12/25.
 //
 
-//import AuthenticationServices
+// import AuthenticationServices
 import FirebaseAuth
 import UIKit
 
@@ -58,11 +58,11 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     deinit {
         print("💀 deinit LoginRegisterVC is dead. Memory Free!")
     }
-    
-    private func removePreviousUserIfAny(){
+
+    private func removePreviousUserIfAny() {
         if AppNetworkManager.shared.isConnected {
-            if AuthManager.shared.isUserLoggedIn{
-                let _ = AuthManager.shared.signOut()
+            if AuthManager.shared.isUserLoggedIn {
+                _ = AuthManager.shared.signOut()
             }
         }
     }
@@ -153,18 +153,22 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 3. Main Action Button Tapped (Handles All 3 Logics)
     @IBAction func btnSubmitLoginRegister(_ sender: UIButton) {
-
         HapticHelper.success()
         view.endEditing(true)
-        
+
         guard let email = txtEmail.text?.trimmingCharacters(in: .whitespaces), !email.isEmpty,
               let password = txtPassword.text?.trimmingCharacters(in: .whitespaces), !password.isEmpty else {
-            Utility.showAlert(title: "Missing Input", message: "Please enter email and password.", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Missing Input",
+                    message: "Please enter email and password.",
+                    vc: self
+                )
             return
         }
 
         if !Utility.isValidEmail(email) {
-            Utility.showAlert(title: "Invalid Email", message: "Please enter a valid email address.", viewController: self)
+            AlertHelper.showAlert(title: "Invalid Email", message: "Please enter a valid email address.", vc: self)
             return
         }
 
@@ -173,7 +177,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         case .login:
             // --- LOGIN LOGIC ---
             guard let password = txtPassword.text, !password.isEmpty else {
-                Utility.showAlert(title: "Missing Password", message: "Please enter password.", viewController: self)
+                AlertHelper.showAlert(title: "Missing Password", message: "Please enter password.", vc: self)
                 return
             }
             print("*\(email) \(password)")
@@ -182,21 +186,26 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         case .register:
             // --- REGISTER LOGIC ---
             guard let password = txtPassword.text, !password.isEmpty else {
-                Utility.showAlert(title: "Missing Password", message: "Please enter password.", viewController: self)
+                AlertHelper
+                    .showAlert(
+                        title: "Missing Password",
+                        message: "Please enter password.",
+                        vc: self
+                    )
                 return
             }
 
             if !Utility.isPasswordValid(password) {
-                Utility.showAlert(
+                AlertHelper.showAlert(
                     title: "Weak Password",
                     message: "Password must contain:\n• At least 1 Capital Letter (A-Z)\n• At least 1 Small Letter (a-z)\n• At least 1 Special Symbol (@, $, #, etc.)\n• Minimum 6 characters.",
-                    viewController: self
+                    vc: self
                 )
                 return
             }
 
             guard let confirmPass = txtConfirmPassword.text, confirmPass == password else {
-                Utility.showAlert(title: "Mismatch", message: "Passwords do not match!", viewController: self)
+                AlertHelper.showAlert(title: "Mismatch", message: "Passwords do not match!", vc: self)
                 return
             }
             print("*\(email) \(password)")
@@ -235,16 +244,21 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
             guard let self = self else { return }
 
             if success {
-                Utility
+                AlertHelper
                     .showAlertHandler(
                         title: "Email Sent",
                         message: "A password reset link has been sent to \(email). Please check your inbox.",
-                        viewController: self) { _ in
+                        vc: self) { _ in
                             self.updateUI(mode: .login)
                     }
 
             } else {
-                Utility.showAlert(title: "Error", message: error ?? "Failed to send link.", viewController: self)
+                AlertHelper
+                    .showAlert(
+                        title: "Error",
+                        message: error ?? "Failed to send link.",
+                        vc: self
+                    )
             }
         }
     }
@@ -278,7 +292,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         } else {
             // Error handling
             let errorMsg = error ?? "Something went wrong."
-            Utility.showAlert(title: "Authentication Failed", message: errorMsg, viewController: self)
+            AlertHelper.showAlert(title: "Authentication Failed", message: errorMsg, vc: self)
         }
     }
 }
@@ -359,17 +373,17 @@ extension LoginRegisterVC {
             return
         }
 
-        Utility.showAlert(title: "Login Failed", message: error.localizedDescription, viewController: self)
+        AlertHelper.showAlert(title: "Login Failed", message: error.localizedDescription, vc: self)
     }
 
     @IBAction func btnAppleTapped(_ sender: UIButton) {
         HapticHelper.heavy()
         print("🟢 Apple Sign-In Button Tapped")
 
-        Utility.showAlert(
+        AlertHelper.showAlert(
             title: "Server Error",
             message: "Server is busy due to too much request please try again after some time.",
-            viewController: self
+            vc: self
         )
 
         // MARK: - Code commented due to not having apple developer account.

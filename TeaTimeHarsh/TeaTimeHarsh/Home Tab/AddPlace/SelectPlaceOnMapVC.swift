@@ -39,7 +39,7 @@ class SelectPlaceOnMapVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         guard AppNetworkManager.shared.isConnected else {
-            self.navigationController?.popViewController(animated: true)
+            navigationController?.popViewController(animated: true)
             return
         }
         setupMap()
@@ -108,7 +108,12 @@ class SelectPlaceOnMapVC: UIViewController {
             print("❌ Failed: \(error.localizedDescription)")
             guard let self = self else { return }
             HapticHelper.warning()
-            Utility.showAlert(title: "Location Error", message: "Could not find location.", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Location Error",
+                    message: "Could not find location.",
+                    vc: self
+                )
         }
 
         // Check IMMEDIATE Location
@@ -154,16 +159,21 @@ class SelectPlaceOnMapVC: UIViewController {
         HapticHelper.success()
         view.endEditing(true)
         guard AppNetworkManager.shared.isConnected else {
-            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this action.", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "No Internet 🛜",
+                    message: "Please connect to the internet to perform this action.",
+                    vc: self
+                )
             return
         }
         guard let lat = currentLatitude, let long = currentLongitude, let address = currentAddress
         else {
-            Utility
+            AlertHelper
                 .showAlert(
                     title: "Location Not Found",
                     message: "We couldn't catch that spot. 📍 Please try moving the map or zooming in to pick a specific location.",
-                    viewController: self
+                    vc: self
                 )
             return
         }
@@ -223,11 +233,11 @@ extension SelectPlaceOnMapVC {
                 guard let self = self else { return }
                 if let error = error {
                     HapticHelper.error()
-                    Utility
+                    AlertHelper
                         .showAlert(
                             title: "Address Not Found ❌",
                             message: "We couldn't catch that spot. 📍 Please try moving the map or zooming in to pick a specific location.",
-                            viewController: self
+                            vc: self
                         )
                     print("❌ Error: \(error.localizedDescription)")
                     self.lblAddress.text = "Address not found"

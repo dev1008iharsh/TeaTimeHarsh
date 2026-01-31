@@ -101,15 +101,15 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
             // 🔒 Security Check
             if place.createdByUserId != Constants.Strings.currentUserID {
-                Utility
+                AlertHelper
                     .showAlertHandler(
                         title: "Access Denied 🔴",
                         message: "You can only edit places created by you. This place is not created by you ❌",
-                        viewController: self) { okAction in
+                        vc: self) { _ in
                             self.navigationController?
                                 .popViewController(animated: true)
-                        }
-                
+                    }
+
                 return
             }
 
@@ -188,8 +188,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 // 5. Success Logic 🎉
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
-                    Utility.showAlertHandler(title: "Success ✅", message: getSuccessMessage(),
-                                             viewController: self) { _ in
+                    AlertHelper.showAlertHandler(title: "Success ✅", message: getSuccessMessage(),
+                                                 vc: self) { _ in
                         self.onPlaceAdded?(true)
 
                         self.navigationController?.popViewController(animated: true)
@@ -199,7 +199,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             } catch {
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
-                    Utility.showAlert(title: "Error", message: error.localizedDescription, viewController: self)
+                    AlertHelper.showAlert(title: "Error", message: error.localizedDescription, vc: self)
                 }
             }
         }
@@ -209,7 +209,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         // Add Mode: Must have new image
         // Edit Mode: Can reuse old image
         if case .add = screenMode, !hasSelectedNewImage {
-            Utility.showAlert(title: "Missing Image", message: "Please select an image.", viewController: self)
+            AlertHelper.showAlert(title: "Missing Image", message: "Please select an image.", vc: self)
             return false
         }
         return true
@@ -237,7 +237,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         let phone = txtPhone.text ?? ""
         let location = selectedLocation
         let address = lblAddress.text
-        
+
         switch screenMode {
         case .add:
             var newPlace = TeaPlace(
@@ -314,11 +314,11 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         HapticHelper.success()
         view.endEditing(true)
         if let errorMsg = validateFields() {
-            Utility.showAlert(title: "Invalid Data", message: errorMsg, viewController: self)
+            AlertHelper.showAlert(title: "Invalid Data", message: errorMsg, vc: self)
             return
         }
         guard AppNetworkManager.shared.isConnected else {
-            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform action on add place screen.", viewController: self)
+            AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform action on add place screen.", vc: self)
             return
         }
         savePlaceToFirebase()
@@ -346,7 +346,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     @IBAction func btnSelectLocationMap(_ sender: UIButton) {
         HapticHelper.medium()
         guard AppNetworkManager.shared.isConnected else {
-            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to open map screen and select location from map 📍.", viewController: self)
+            AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to open map screen and select location from map 📍.", vc: self)
             return
         }
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -418,7 +418,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         // Setup Bindings
         // City/Location
-       
 
         txtLocation.applySingleSelectionMenu(title: "Select City", items: locationOptions, selectedItem: selectedLocation) { [weak self] sel in
             guard let self else { return }

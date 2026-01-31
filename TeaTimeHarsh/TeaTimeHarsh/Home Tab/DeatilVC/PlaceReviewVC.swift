@@ -173,32 +173,39 @@ class PlaceReviewVC: UIViewController {
 
         // 3. Submit Review
 
-        Utility
-            .showYesNoConfirmAlert(
-                title: "Submit Review? ⚠️",
-                message: "You can submit a review for every place only once. If a review already exists, it will be replaced. Each user can submit only one review per place. Do you want to continue?",
-                viewController: self) { _ in
-                    self.submitReview(placeId: currentPlaceId, user: currentLoggedInUser, text: reviewText, image: selectedImageReview)
-            } noAction: { _ in
+        AlertHelper.showConfirmationAlert(
+            title: "Submit Review? ⚠️",
+            message: "You can submit a review for every place only once. If a review already exists, it will be replaced. Each user can submit only one review per place. Do you want to continue?",
+            vc: self,
+            rightBtnTitle: "Continue",
+            rightBtnStyle: .default,
+            leftBtnTitle: "Cancel",
+            leftBtnStyle: .destructive,
+            rightAction: { [weak self] _ in
+                guard let self = self else { return }
+                self.submitReview(placeId: currentPlaceId, user: currentLoggedInUser, text: reviewText, image: selectedImageReview)
+            },
+            leftAction: { _ in
                 print("no tapped at review replace dialogue")
             }
+        )
     }
 
     // Separated Validation Logic for cleaner code
     private func validateInput() -> Bool {
         // Check Image
         guard hasSelectedNewImage, imgReview.image != nil else {
-            Utility.showAlert(title: "Photo Required 📸",
-                              message: "We'd love to see your visit of tea place! Please attach a photo to make your review authentic.",
-                              viewController: self)
+            AlertHelper.showAlert(title: "Photo Required 📸",
+                                  message: "We'd love to see your visit of tea place! Please attach a photo to make your review authentic.",
+                                  vc: self)
             return false
         }
 
         // Check User Login
         guard UserDataManager.shared.user != nil else {
-            Utility.showAlert(title: "Login Required 👤",
-                              message: "Please log in to share your experience.Logout from profile and re-login to continue.",
-                              viewController: self)
+            AlertHelper.showAlert(title: "Login Required 👤",
+                                  message: "Please log in to share your experience.Logout from profile and re-login to continue.",
+                                  vc: self)
             let _ = AuthManager.shared.signOut()
             UtilsProject.logoutAndNavigateToLoginVC()
             return false
@@ -207,25 +214,25 @@ class PlaceReviewVC: UIViewController {
         // Check Text Content
         guard let reviewText = txtViewReview.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !reviewText.isEmpty, reviewText != placeholderText else {
-            Utility.showAlert(title: "Review Empty ✍️",
-                              message: "Please tell us a little bit about the place.",
-                              viewController: self)
+            AlertHelper.showAlert(title: "Review Empty ✍️",
+                                  message: "Please tell us a little bit about the place.",
+                                  vc: self)
             return false
         }
 
         // Check Text Length
         guard reviewText.count <= 250 else {
-            Utility.showAlert(title: "Too Long 📏",
-                              message: "Please keep your review under 250 characters.",
-                              viewController: self)
+            AlertHelper.showAlert(title: "Too Long 📏",
+                                  message: "Please keep your review under 250 characters.",
+                                  vc: self)
             return false
         }
 
         // Check Rating
         guard selectedRating > 0.0 else {
-            Utility.showAlert(title: "Rating Missing ⭐️",
-                              message: "Please give a star rating as per your experience.",
-                              viewController: self)
+            AlertHelper.showAlert(title: "Rating Missing ⭐️",
+                                  message: "Please give a star rating as per your experience.",
+                                  vc: self)
             return false
         }
 
@@ -252,10 +259,10 @@ class PlaceReviewVC: UIViewController {
                 self.reloadRating?()
                 print("✅ Review Submitted Successfully!")
 
-                Utility.showAlertHandler(
+                AlertHelper.showAlertHandler(
                     title: "Thank You.☕️ Review Submitted Successfully! ",
                     message: "Your review has been shared with the community.✅",
-                    viewController: self) { [weak self] _ in
+                    vc: self) { [weak self] _ in
                         self?.dismiss(animated: true)
                     }
 
@@ -265,9 +272,9 @@ class PlaceReviewVC: UIViewController {
                 btnSubmitReview.isEnabled = true // Re-enable button on error
                 HapticHelper.error()
                 print("❌ Error: \(error.localizedDescription)")
-                Utility.showAlert(title: "❌ Error: Upload Failed. please try again.",
-                                  message: error.localizedDescription,
-                                  viewController: self)
+                AlertHelper.showAlert(title: "❌ Error: Upload Failed. please try again.",
+                                      message: error.localizedDescription,
+                                      vc: self)
             }
         }
     }
@@ -352,9 +359,12 @@ class PlaceReviewTableCell: UITableViewCell {
 
         // Tap Gesture
         imgReview.isUserInteractionEnabled = true
-        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapReviewImage))
-        imgReview.addGestureRecognizer(tap)
+        let reviewTap = UITapGestureRecognizer(target: self, action: #selector(didTapReviewImage))
+        imgReview.addGestureRecognizer(reviewTap)
 
+        imgUser.isUserInteractionEnabled = true
+        let userTap = UITapGestureRecognizer(target: self, action: #selector(didTapUserImage))
+        imgUser.addGestureRecognizer(userTap)
         // Star Rating (Using Extension) ⭐️
         viewRatingCell.applyTeaThemeStyle(starSize: 20, isEditable: false, color: .systemIndigo)
     }
@@ -383,4 +393,13 @@ class PlaceReviewTableCell: UITableViewCell {
             ImageZoomViewer.shared.showFullScreen(from: imgReview, backgroundColor: .black)
         }
     }
+    
+    @objc private func didTapUserImage() {
+        HapticHelper.medium()
+        if imgUser.image != nil {
+            ImageZoomViewer.shared
+                .showFullScreen(from: imgUser, backgroundColor: .black)
+        }
+    }
+     
 }

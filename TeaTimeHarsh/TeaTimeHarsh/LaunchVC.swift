@@ -30,7 +30,7 @@ class LaunchVC: UIViewController {
     }
 
     private func loadCachedUser() {
-        if let user = UserDataManager.shared.loadUserFromUserDefaults(){
+        if let user = UserDataManager.shared.loadUserFromUserDefaults() {
             print("🚀 Launch User Email: \(user.email)")
             print("🚀 Launch User Name: \(user.fullName ?? "nil")")
         }
@@ -57,7 +57,7 @@ class LaunchVC: UIViewController {
         // UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
         // already doen in api response
         UserDataManager.shared.fetchUserProfileIfNeeded()
-        
+
         goToHome()
     }
 
@@ -77,7 +77,7 @@ class LaunchVC: UIViewController {
 
         UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
 
-        Utility.showAlertHandler(
+        AlertHelper.showAlertHandler(
             title: "🔌 You’re Offline",
             message: """
             You are currently using the offline version of the app.
@@ -87,7 +87,7 @@ class LaunchVC: UIViewController {
 
             🌐 Connect to the internet to unlock all features.
             """,
-            viewController: self
+            vc: self
         ) { [weak self] _ in
             self?.goToHome()
         }

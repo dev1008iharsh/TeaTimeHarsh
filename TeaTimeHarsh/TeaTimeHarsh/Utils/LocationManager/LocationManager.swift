@@ -62,26 +62,27 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     private func showPermissionDeniedAlert() {
         guard let vcName = viewControllerName else { return }
-        Utility.showCustomConfirmAlert(
+        AlertHelper.showConfirmationAlert(
             title: "Location Permission Denied",
             message: "Please enable location services in Settings.",
-            rightSideActionName: "Settings",
-            leftSideActionName: "Cancel",
-            viewController: vcName,
-            rightAction: { _ in self.openSettings() },
-            leftAction: { _ in }
+            vc: vcName,
+            rightBtnTitle: "Settings",
+            rightBtnStyle: .default,
+            leftBtnTitle: "Cancel",
+            leftBtnStyle: .destructive,
+            rightAction: { _ in
+                self.openSettings()
+            },
+            leftAction: { _ in
+                print("User cancelled location setup")
+            }
         )
     }
 
     private func showPermissionRestrictedAlert() {
         guard let vcName = viewControllerName else { return }
         HapticHelper.warning()
-        Utility
-            .showAlert(
-                title: "Restricted",
-                message: "Location is restricted.",
-                viewController: vcName
-            )
+        AlertHelper.showAlert(title: "Restricted", message: "Location is restricted.", vc: vcName)
     }
 
     func openSettings() {

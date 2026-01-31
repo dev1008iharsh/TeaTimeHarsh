@@ -139,11 +139,21 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
         // 1. 🛡️ Run Validation
         if let errorMessage = validateInput() {
-            Utility.showAlert(title: "Data validation Error", message: errorMessage, viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Data validation Error",
+                    message: errorMessage,
+                    vc: self
+                )
             return // Stop here! Do not proceed.
         }
         guard AppNetworkManager.shared.isConnected else {
-            Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to edit profile.", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "No Internet 🛜",
+                    message: "Please connect to the internet to edit profile.",
+                    vc: self
+                )
             return
         }
 
@@ -177,13 +187,13 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                 try await UserDataManager.shared.updateUserProfile(user: userToUpdate)
                 LoaderManager.shared.stopLoading()
                 // C. Success!
-                
+
                 UserProfileImageStorage.saveUserProfileImage(profileImage)
-                Utility
+                AlertHelper
                     .showAlertHandler(
                         title: "Success✅",
                         message: "Profile Updated Successfully! 🎉",
-                        viewController: self) { _ in
+                        vc: self) { _ in
                             self.onProfileUpdated?()
                             self.navigationController?
                                 .popViewController(animated: true)
@@ -191,10 +201,10 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
             } catch {
                 LoaderManager.shared.stopLoading()
-                Utility.showAlert(
+                AlertHelper.showAlert(
                     title: "Failed to update",
                     message: error.localizedDescription,
-                    viewController: self
+                    vc: self
                 )
             }
         }
@@ -339,16 +349,21 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     @objc private func didTapCancelBarButton() {
         HapticHelper.error()
 
-        Utility
-            .showCustomConfirmAlert(
-                title: "Discard Changes?",
-                message: "Unsaved changes will be lost. This action can not be undone.🔴",
-                rightSideActionName: "Discard",
-                leftSideActionName: "Keep Editing",
-                viewController: self) { _ in
-                    self.navigationController?.popViewController(animated: true)
-
-            } leftAction: { _ in
+        AlertHelper.showConfirmationAlert(
+            title: "Discard Changes?",
+            message: "Unsaved changes will be lost. This action can not be undone.🔴",
+            vc: self,
+            rightBtnTitle: "Discard",
+            rightBtnStyle: .destructive, // Makes 'Discard' button Red
+            leftBtnTitle: "Keep Editing",
+            leftBtnStyle: .cancel, // Makes 'Keep Editing' bold/standard
+            rightAction: { [weak self] _ in
+                // Pops the view controller if user confirms discard
+                self?.navigationController?.popViewController(animated: true)
+            },
+            leftAction: { _ in
+                // No action needed if user wants to stay
             }
+        )
     }
 }

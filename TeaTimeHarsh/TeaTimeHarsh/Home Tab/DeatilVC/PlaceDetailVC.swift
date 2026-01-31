@@ -94,8 +94,8 @@ class PlaceDetailVC: UIViewController {
             } catch {
                 LoaderManager.shared.stopLoading()
                 print("❌ Failed to fetch reviews: \(error.localizedDescription)")
-                Utility
-                    .showAlert(title: "Failed to fetch reviews", message: error.localizedDescription, viewController: self)
+                AlertHelper
+                    .showAlert(title: "Failed to fetch reviews", message: error.localizedDescription, vc: self)
             }
         }
     }
@@ -187,7 +187,12 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
             cell.onShareTapped = { [weak self] in
                 guard let self = self else { return }
                 guard AppNetworkManager.shared.isConnected else {
-                    Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this action because image is downloading from internet to share this place.", viewController: self)
+                    AlertHelper
+                        .showAlert(
+                            title: "No Internet 🛜",
+                            message: "Please connect to the internet to perform this action because image is downloading from internet to share this place.",
+                            vc: self
+                        )
                     return
                 }
                 self.actionManager.performShare(place: place, sourceView: cell.btnShare)
@@ -228,8 +233,21 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
                 }
                 presentBottomSheetOwnerDetails()
             }
+
+            // 5. Action on call button tapped
+            cell.onCallTapped = { [weak self] in
+                guard let self = self else { return }
+                presentContactActions()
+            }
         }
         return cell
+    }
+
+    private func presentContactActions() {
+        // Always include country code without '+'
+        if let phoneNumber = place?.phone, let placeName = place?.name {
+            ContactHelper.showContactMenu(on: self, phoneNumber: "91\(phoneNumber)", name: placeName)
+        }
     }
 
     func presentBottomSheetOwnerDetails() {
@@ -249,7 +267,12 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func showOfflineAlertAtDetail() {
-        Utility.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this place details screen action.", viewController: self)
+        AlertHelper
+            .showAlert(
+                title: "No Internet 🛜",
+                message: "Please connect to the internet to perform this place details screen action.",
+                vc: self
+            )
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

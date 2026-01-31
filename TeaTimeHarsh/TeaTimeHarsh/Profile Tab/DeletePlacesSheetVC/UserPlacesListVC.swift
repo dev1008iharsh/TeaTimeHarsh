@@ -150,48 +150,48 @@ class UserPlacesListVC: UIViewController {
     // MARK: - Network Logic
 
     private func performDeleteAllPlaces() {
-        Utility.showYesNoConfirmAlert(
+        // Calling the updated confirmation alert function
+        AlertHelper.showConfirmationAlert(
             title: "Delete All Places?",
             message: "Wait! Do you really want to remove all your added places? You won't be able to recover them later.🔴",
-            viewController: self
-        ) { [weak self] _ in
-            guard let self = self else { return }
+            vc: self,
+            rightBtnTitle: "Delete", // Standard right side button
+            rightBtnStyle: .destructive, // Red color to indicate danger
+            leftBtnTitle: "No", // Cancel button on the left
+            leftBtnStyle: .cancel,
+            rightAction: { [weak self] _ in
+                guard let self = self else { return }
 
-            Task {
-                LoaderManager.shared.startLoading()
-                do {
-                    defer {
-                        DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
-                    }
-                    try await FirebaseManager.shared.deleteAllPlacesCreatedByUser()
+                Task {
+                    LoaderManager.shared.startLoading()
+                    do {
+                        defer {
+                            DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
+                        }
+                        try await FirebaseManager.shared.deleteAllPlacesCreatedByUser()
 
-                    await MainActor.run {
-                        HapticHelper.success()
-                        self.dismiss(animated: true)
-                        NotificationCenter.default.post(name: .teaPlacesShouldReload, object: nil)
-                        /*
-                         Utility.showAlertHandler(
-                             title: "All places deleted ✅",
-                             message: "All places successfully deleted.  🍵 Tap the ➕ button on the Home screen to add new places ✨",
-                             viewController: self
-                         ) { _ in
-                             self.dismiss(animated: true)
-                         }*/
-                    }
-                } catch {
-                    await MainActor.run {
-                        HapticHelper.error()
-                        Utility.showAlert(
-                            title: "Error",
-                            message: error.localizedDescription,
-                            viewController: self
-                        )
+                        await MainActor.run {
+                            HapticHelper.success()
+                            self.dismiss(animated: true)
+                            NotificationCenter.default.post(name: .teaPlacesShouldReload, object: nil)
+                        }
+                    } catch {
+                        await MainActor.run {
+                            HapticHelper.error()
+                            // Showing error alert using the single button handler
+                            AlertHelper.showAlertHandler(
+                                title: "Error",
+                                message: error.localizedDescription,
+                                vc: self
+                            ) { _ in }
+                        }
                     }
                 }
+            },
+            leftAction: { _ in
+                print("Delete cancelled by user")
             }
-        } noAction: { _ in
-            print("Delete cancelled by user")
-        }
+        )
     }
 }
 

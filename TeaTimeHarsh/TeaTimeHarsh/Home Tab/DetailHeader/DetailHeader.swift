@@ -57,10 +57,20 @@ class DetailHeader: UIView {
         lblReview.isUserInteractionEnabled = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(didTapReviewLabel))
         lblReview.addGestureRecognizer(tap)
+        
+        imgPlace.isUserInteractionEnabled = true
+        let placeImgTap = UITapGestureRecognizer(target: self, action: #selector(didTapPlaceImage))
+        imgPlace.addGestureRecognizer(placeImgTap)
     }
 
     @objc private func didTapReviewLabel() {
         onReviewTapped?()
+    }
+    @objc private func didTapPlaceImage() {
+        HapticHelper.medium()
+        if imgPlace.image != nil {
+            ImageZoomViewer.shared.showFullScreen(from: imgPlace, backgroundColor: .black)
+        }
     }
 
     // MARK: - Configuration Method

@@ -31,17 +31,32 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
     @IBAction func submitTapped(_ sender: UIButton) {
         HapticHelper.medium()
         guard let email = txtEmail.text, !email.isEmpty, Utility.isValidEmail(email) else {
-            Utility.showAlert(title: "Validation Error", message: "Please enter valid email ID. 📧", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Validation Error",
+                    message: "Please enter valid email ID. 📧",
+                    vc: self
+                )
             return
         }
 
         guard let desc = txtViewDesc.text, !desc.isEmpty, desc != placeholderText else {
-            Utility.showAlert(title: "Validation Error", message: "Please enter a description of the bug related to screenshot. ✍️", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Validation Error",
+                    message: "Please enter a description of the bug related to screenshot. ✍️",
+                    vc: self
+                )
             return
         }
 
         if !hasSelectedNewImage {
-            Utility.showAlert(title: "Oops!", message: "Please attach a screenshot. 🖼️", viewController: self)
+            AlertHelper
+                .showAlert(
+                    title: "Oops!",
+                    message: "Please attach a screenshot. 🖼️",
+                    vc: self
+                )
             return
         }
         LoaderManager.shared.startLoading()
@@ -56,11 +71,11 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
                     print("Bug Reported Successfully! ✅")
                     LoaderManager.shared.stopLoading()
                     HapticHelper.success()
-                    Utility
+                    AlertHelper
                         .showAlertHandler(
                             title: "Bug Reported Successfully! ✅",
                             message: "Thank you! We received your report. We will reach to you soon using email address.",
-                            viewController: self) { _ in
+                            vc: self) { _ in
                                 self.dismiss(animated: true, completion: nil)
                         }
                 }
@@ -70,7 +85,7 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
                     HapticHelper.error()
-                    Utility.showAlert(title: "❌ Error : Try again", message: "Error: \(error.localizedDescription)", viewController: self)
+                    AlertHelper.showAlert(title: "❌ Error : Try again", message: "Error: \(error.localizedDescription)", vc: self)
                 }
             }
         }

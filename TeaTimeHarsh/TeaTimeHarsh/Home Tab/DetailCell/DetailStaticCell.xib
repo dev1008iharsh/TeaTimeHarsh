@@ -232,7 +232,7 @@
                     </subviews>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4co-Xq-YBc">
-                    <rect key="frame" x="20" y="335" width="456" height="62"/>
+                    <rect key="frame" x="20" y="335" width="456" height="72"/>
                     <subviews>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1un-Di-aeH">
                             <rect key="frame" x="0.0" y="0.0" width="456" height="1"/>
@@ -245,23 +245,24 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="URo-KO-rmG">
-                            <rect key="frame" x="0.0" y="6" width="456" height="50"/>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <rect key="frame" x="0.0" y="11" width="456" height="50"/>
+                            <color key="backgroundColor" systemColor="linkColor"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="50" id="Xe4-aV-EJw"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
-                            <color key="tintColor" systemColor="systemIndigoColor"/>
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="8" maxY="0.0"/>
-                            <state key="normal" title="Place Created by" image="person.circle.fill" catalog="system">
-                                <color key="titleColor" systemColor="systemIndigoColor"/>
+                            <state key="normal" title="Place Created by">
+                                <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <imageReference key="image" image="person.circle.fill" catalog="system" symbolScale="large"/>
                             </state>
                             <connections>
                                 <action selector="btnPlaceOwnerTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="xgn-Jz-QVk"/>
                             </connections>
                         </button>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h0L-tg-7KP">
-                            <rect key="frame" x="0.0" y="61" width="456" height="1"/>
+                            <rect key="frame" x="0.0" y="71" width="456" height="1"/>
                             <color key="backgroundColor" systemColor="systemGray4Color"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="1" id="dQR-6c-HPg"/>
@@ -276,17 +277,17 @@
                         <constraint firstAttribute="bottom" secondItem="h0L-tg-7KP" secondAttribute="bottom" id="0k4-6j-dCY"/>
                         <constraint firstItem="URo-KO-rmG" firstAttribute="centerX" secondItem="4co-Xq-YBc" secondAttribute="centerX" id="HvU-Vt-BAk"/>
                         <constraint firstAttribute="trailing" secondItem="URo-KO-rmG" secondAttribute="trailing" id="IiJ-uO-AOC"/>
-                        <constraint firstItem="URo-KO-rmG" firstAttribute="top" secondItem="1un-Di-aeH" secondAttribute="bottom" constant="5" id="JmB-lz-VC0"/>
+                        <constraint firstItem="URo-KO-rmG" firstAttribute="top" secondItem="1un-Di-aeH" secondAttribute="bottom" constant="10" id="JmB-lz-VC0"/>
                         <constraint firstItem="1un-Di-aeH" firstAttribute="top" secondItem="4co-Xq-YBc" secondAttribute="top" id="Lmq-OJ-QgL"/>
                         <constraint firstItem="h0L-tg-7KP" firstAttribute="leading" secondItem="4co-Xq-YBc" secondAttribute="leading" id="PMd-qn-7H5"/>
                         <constraint firstAttribute="trailing" secondItem="h0L-tg-7KP" secondAttribute="trailing" id="mH9-0u-3Ql"/>
                         <constraint firstAttribute="trailing" secondItem="1un-Di-aeH" secondAttribute="trailing" id="mug-eB-kjP"/>
                         <constraint firstItem="1un-Di-aeH" firstAttribute="leading" secondItem="4co-Xq-YBc" secondAttribute="leading" id="sNH-wQ-t5R"/>
-                        <constraint firstItem="h0L-tg-7KP" firstAttribute="top" secondItem="URo-KO-rmG" secondAttribute="bottom" constant="5" id="tjs-Fm-8Nr"/>
+                        <constraint firstItem="h0L-tg-7KP" firstAttribute="top" secondItem="URo-KO-rmG" secondAttribute="bottom" constant="10" id="tjs-Fm-8Nr"/>
                     </constraints>
                 </view>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KeE-hf-Isj">
-                    <rect key="frame" x="20" y="417" width="456" height="108"/>
+                    <rect key="frame" x="20" y="427" width="456" height="98"/>
                     <string key="text">imply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </string>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
@@ -396,6 +397,9 @@
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <image name="square.and.pencil" catalog="system" width="128" height="121"/>
         <image name="trash" catalog="system" width="117" height="128"/>
+        <systemColor name="linkColor">
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

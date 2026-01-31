@@ -82,6 +82,7 @@ extension UIViewController {
             previousController.navigationItem.backButtonDisplayMode = .minimal
         }
     }
+
     /// Sets navigation title and bar button item color only
     /// Sets navigation title font, size, and color without resetting appearance
     func setCustomNavigationBarStyle(
@@ -89,60 +90,61 @@ extension UIViewController {
         color: UIColor = .systemIndigo
     ) {
         guard let navController = navigationController else { return }
-        
+
         let navBar = navController.navigationBar
-        
+
         // Large title attributes
         navBar.standardAppearance.largeTitleTextAttributes[.font] = font.withSize(35)
         navBar.standardAppearance.largeTitleTextAttributes[.foregroundColor] = color
-        
+
         // Small title attributes
         navBar.standardAppearance.titleTextAttributes[.font] = font.withSize(20)
         navBar.standardAppearance.titleTextAttributes[.foregroundColor] = color
-        
+
         // Bar button items color
         navBar.tintColor = color
     }
+
     /*
 
-    /// Adds left spacing for Large Title safely (iOS 26 compatible)
-    func setLargeTitleSpacingNavBar(_ spacing: CGFloat = 16) {
-        guard let navBar = navigationController?.navigationBar else { return }
-        
-        // Use layout margins instead of text indentation (Apple-safe)
-        navBar.directionalLayoutMargins = NSDirectionalEdgeInsets(
-            top: 0,
-            leading: spacing,
-            bottom: 0,
-            trailing: 0
-        )
-    }
+     /// Adds left spacing for Large Title safely (iOS 26 compatible)
+     func setLargeTitleSpacingNavBar(_ spacing: CGFloat = 16) {
+         guard let navBar = navigationController?.navigationBar else { return }
 
-    /// Sets font and color for Large and Small navigation titles
-    func setNavigationTitleStyleNavBar(font: UIFont, color: UIColor) {
-        guard let navController = navigationController else { return }
-        
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.shadowColor = .clear
-        
-        // Large title styling
-        appearance.largeTitleTextAttributes = [
-            .font: font.withSize(34),
-            .foregroundColor: color
-        ]
-        
-        // Small title styling
-        appearance.titleTextAttributes = [
-            .font: font.withSize(17),
-            .foregroundColor: color
-        ]
-        
-        // Apply appearance
-        navController.navigationBar.standardAppearance = appearance
-        navController.navigationBar.scrollEdgeAppearance = appearance
-        navController.navigationBar.compactAppearance = appearance
-    }*/
+         // Use layout margins instead of text indentation (Apple-safe)
+         navBar.directionalLayoutMargins = NSDirectionalEdgeInsets(
+             top: 0,
+             leading: spacing,
+             bottom: 0,
+             trailing: 0
+         )
+     }
+
+     /// Sets font and color for Large and Small navigation titles
+     func setNavigationTitleStyleNavBar(font: UIFont, color: UIColor) {
+         guard let navController = navigationController else { return }
+
+         let appearance = UINavigationBarAppearance()
+         appearance.configureWithOpaqueBackground()
+         appearance.shadowColor = .clear
+
+         // Large title styling
+         appearance.largeTitleTextAttributes = [
+             .font: font.withSize(34),
+             .foregroundColor: color
+         ]
+
+         // Small title styling
+         appearance.titleTextAttributes = [
+             .font: font.withSize(17),
+             .foregroundColor: color
+         ]
+
+         // Apply appearance
+         navController.navigationBar.standardAppearance = appearance
+         navController.navigationBar.scrollEdgeAppearance = appearance
+         navController.navigationBar.compactAppearance = appearance
+     }*/
 
     /// 🌍 Opens a URL in the internal Safari Browser
     func openSafari(url urlString: String) {

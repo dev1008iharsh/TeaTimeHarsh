@@ -41,21 +41,27 @@ class TeaActionManager {
         guard TeaActionManager.canModify(place: place) else { return }
         guard let vc = viewController else { return }
 
-        Utility.showYesNoConfirmAlert(
+        AlertHelper.showConfirmationAlert(
             title: "Delete Place?",
             message: "Are you sure? This cannot be undone.",
-            viewController: vc
-        ) { [weak self] _ in
-            guard let self = self else { return }
+            vc: vc,
+            rightBtnTitle: "Delete",
+            rightBtnStyle: .destructive,
+            leftBtnTitle: "Cancel",
+            leftBtnStyle: .cancel,
+            rightAction: { [weak self] _ in
+                guard let self = self else { return }
 
-            self.executeDeleteAPI(placeID: place.id) {
-                // 1. Notify caller (e.g. remove from array)
-                onSuccess()
+                self.executeDeleteAPI(placeID: place.id) {
+                    // 1. Notify caller (e.g. remove from array)
+                    onSuccess()
 
-                // 2. Navigate back to Home 🚀
-                self.viewController?.navigationController?.popToRootViewController(animated: true)
-            }
-        } noAction: { _ in }
+                    // 2. Navigate back to Home 🚀
+                    self.viewController?.navigationController?.popToRootViewController(animated: true)
+                }
+            },
+            leftAction: { _ in }
+        )
     }
 
     // MARK: - 3. Edit Logic ✏️
@@ -139,7 +145,7 @@ class TeaActionManager {
 
     private func showAlert(title: String, message: String) {
         guard let vc = viewController else { return }
-        Utility.showAlert(title: title, message: message, viewController: vc)
+        AlertHelper.showAlert(title: title, message: message, vc: vc)
     }
 
     private func generateShareText(for place: TeaPlace) -> String {
@@ -169,7 +175,7 @@ class TeaActionManager {
 
         🌏 Map View: \(mapLink)
 
-        _Shared via TeaTimeHarsh App (dev.iharsh1008)_
+        _Shared via \(UtilsProject.getAppName) App \(Constants.Strings.developerEmail)_
         """
     }
 }

@@ -12,7 +12,12 @@ class DetailStaticCell: UITableViewCell {
     // MARK: - IBOutlets
 
     // Basic Information
-    @IBOutlet var btnPlaceOwner: UIButton!
+    @IBOutlet var btnPlaceOwner: UIButton! {
+        didSet {
+            btnPlaceOwner.layer.cornerRadius = btnPhone.bounds.height / 2
+        }
+    }
+
     @IBOutlet var btnPhone: UIButton! {
         didSet {
             btnPhone.layer.cornerRadius = btnPhone.bounds.height / 2
@@ -48,6 +53,7 @@ class DetailStaticCell: UITableViewCell {
     var onDeleteTapped: (() -> Void)?
     var onShareTapped: (() -> Void)?
     var onPlaceOwnerTapped: (() -> Void)?
+    var onCallTapped: (() -> Void)?
 
     // MARK: - Properties
 
@@ -55,8 +61,8 @@ class DetailStaticCell: UITableViewCell {
     private var targetLat = 37.331705
     private var targetLong = 122.030237
     private var googleMapView: GMSMapView?
-    
-    var placeOwnerUser : User?
+
+    var placeOwnerUser: User?
 
     // Property Observer: Automatically configures the cell when data is assigned
     var teaPlace: TeaPlace? {
@@ -162,7 +168,7 @@ class DetailStaticCell: UITableViewCell {
     @IBAction func btnPlaceOwnerTapped(_ sender: UIButton) {
         onPlaceOwnerTapped?()
     }
-    
+
     @IBAction func btnEditTappedDetail(_ sender: UIButton) {
         // Trigger the closure to notify the ViewController
         onEditTapped?()
@@ -177,12 +183,7 @@ class DetailStaticCell: UITableViewCell {
     }
 
     @IBAction func btnCallTapped(_ sender: UIButton) {
-        guard let phone = teaPlace?.phone,
-              let url = URL(string: "tel://\(phone)"),
-              UIApplication.shared.canOpenURL(url) else { return }
-
-        HapticHelper.medium()
-        UIApplication.shared.open(url)
+        onCallTapped?()
     }
 
     @objc private func mapTapped() {

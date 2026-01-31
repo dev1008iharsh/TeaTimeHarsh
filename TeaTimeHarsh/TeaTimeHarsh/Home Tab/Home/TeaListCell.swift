@@ -56,6 +56,10 @@ class TeaListCell: UITableViewCell {
         imgFav.backgroundColor = .tertiarySystemGroupedBackground
         imgFav.layer.cornerRadius = 5
         imgFav.isUserInteractionEnabled = true
+        
+        imgTeaPlace.isUserInteractionEnabled = true
+        let placeImgTap = UITapGestureRecognizer(target: self, action: #selector(didTapPlaceImage))
+        imgTeaPlace.addGestureRecognizer(placeImgTap)
     }
 
     // MARK: - 👆 Interactions
@@ -104,5 +108,11 @@ class TeaListCell: UITableViewCell {
 
         let heartIcon = teaPlace.isFav ? "heart.fill" : "heart"
         imgFav.image = UIImage(systemName: heartIcon)
+    }
+    @objc private func didTapPlaceImage() {
+        HapticHelper.medium()
+        if imgTeaPlace.image != nil {
+            ImageZoomViewer.shared.showFullScreen(from: imgTeaPlace, backgroundColor: .black)
+        }
     }
 }

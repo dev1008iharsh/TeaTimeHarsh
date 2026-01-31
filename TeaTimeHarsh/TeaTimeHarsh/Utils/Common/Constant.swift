@@ -11,7 +11,7 @@ struct Constants {
     struct Strings {
         static var currentUserID = ""
         static let appName = "TeaPlace"
-        static let loginTitle = "Login"
+        static let developerEmail = "dev.iharsh1008@gmail.com"
         static let registerTitle = "Register"
         static let ok = "OK"
         static let cancel = "Cancel"
@@ -65,5 +65,20 @@ final class UtilsProject {
             options: .transitionFlipFromRight,
             animations: nil
         )
+    }
+
+    static var getAppName: String {
+        // 1. Try to get the "Display Name" (Home screen name)
+        if let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+            return displayName
+        }
+
+        // 2. If not found, fallback to "Bundle Name" (Project name)
+        if let bundleName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String {
+            return bundleName
+        }
+
+        // 3. Fallback if everything fails
+        return "TeaTimeHarsh App"
     }
 }
