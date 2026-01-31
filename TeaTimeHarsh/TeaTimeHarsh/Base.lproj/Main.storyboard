@@ -180,14 +180,14 @@
                                         </constraints>
                                     </imageView>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mQW-nh-a8p">
-                                        <rect key="frame" x="96.666666666666686" y="21" width="200" height="200"/>
+                                        <rect key="frame" x="121.66666666666669" y="21" width="150" height="150"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="mQW-nh-a8p" secondAttribute="height" multiplier="1:1" id="jbL-8e-Jnf"/>
-                                            <constraint firstAttribute="height" constant="200" id="m15-AD-m7A"/>
+                                            <constraint firstAttribute="height" constant="150" id="m15-AD-m7A"/>
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="EtF-O8-v8E">
-                                        <rect key="frame" x="20" y="241" width="353" height="485"/>
+                                        <rect key="frame" x="20" y="191" width="353" height="485"/>
                                         <subviews>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place name" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="oDG-Q1-Ttz">
                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="45"/>
@@ -210,8 +210,17 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="p7h-Vq-9Qa"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place contact number" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="r5R-6E-sDD">
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place website" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="wdA-NE-Gx3">
                                                 <rect key="frame" x="0.0" y="110" width="353" height="45"/>
+                                                <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="URL" returnKeyType="next" enablesReturnKeyAutomatically="YES" textContentType="url"/>
+                                                <connections>
+                                                    <outlet property="delegate" destination="ZTw-uq-Uni" id="5Ts-0G-PKj"/>
+                                                </connections>
+                                            </textField>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter place contact number" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="r5R-6E-sDD">
+                                                <rect key="frame" x="0.0" y="165" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" keyboardType="phonePad" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
@@ -220,7 +229,7 @@
                                                 </connections>
                                             </textField>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select place location (city)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="x7l-49-3Vl">
-                                                <rect key="frame" x="0.0" y="165" width="353" height="45"/>
+                                                <rect key="frame" x="0.0" y="220" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -229,7 +238,7 @@
                                                 </connections>
                                             </textField>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select price range(Rs. 200-400)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="kVA-qt-Fjp">
-                                                <rect key="frame" x="0.0" y="220" width="353" height="45"/>
+                                                <rect key="frame" x="0.0" y="275" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -238,7 +247,7 @@
                                                 </connections>
                                             </textField>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select opening time(09:00 AM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Ylv-hR-OUJ">
-                                                <rect key="frame" x="0.0" y="275" width="353" height="45"/>
+                                                <rect key="frame" x="0.0" y="330" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -247,7 +256,7 @@
                                                 </connections>
                                             </textField>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select closing time(10:00 PM)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="aFS-aG-ibg">
-                                                <rect key="frame" x="0.0" y="330" width="353" height="45"/>
+                                                <rect key="frame" x="0.0" y="385" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -256,7 +265,7 @@
                                                 </connections>
                                             </textField>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select holidays (Saturday,Sunday)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="u79-LX-jkZ">
-                                                <rect key="frame" x="0.0" y="385" width="353" height="45"/>
+                                                <rect key="frame" x="0.0" y="440" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" spellCheckingType="yes" enablesReturnKeyAutomatically="YES"/>
@@ -264,22 +273,16 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="9JC-4F-0T5"/>
                                                 </connections>
                                             </textField>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address (automatically fetch from map, Please select below button to location on map)" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.40000000000000002" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n19-Yh-H1l">
-                                                <rect key="frame" x="0.0" y="440" width="353" height="45"/>
-                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
                                         </subviews>
                                     </stackView>
-                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p9z-3W-218">
-                                        <rect key="frame" x="94.333333333333329" y="741" width="204.33333333333337" height="35"/>
+                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Udj-zP-s9O">
+                                        <rect key="frame" x="70.000000000000014" y="691" width="253.33333333333337" height="40"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="35" id="XA7-Aj-y28"/>
+                                            <constraint firstAttribute="height" constant="40" id="Jpg-47-Hd7"/>
                                         </constraints>
                                         <color key="tintColor" systemColor="labelColor"/>
-                                        <buttonConfiguration key="configuration" style="gray" title="Select location on map" imagePadding="15" cornerStyle="medium">
-                                            <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="large"/>
+                                        <buttonConfiguration key="configuration" style="gray" title="Fetch place video from photos" imagePadding="10" cornerStyle="medium">
+                                            <imageReference key="image" image="video.badge.plus" catalog="system" symbolScale="large"/>
                                             <backgroundConfiguration key="background">
                                                 <color key="backgroundColor" systemColor="systemGray4Color"/>
                                             </backgroundConfiguration>
@@ -289,80 +292,219 @@
                                             <fontDescription key="titleFontDescription" type="system" pointSize="14"/>
                                         </buttonConfiguration>
                                         <connections>
-                                            <action selector="btnSelectLocationMap:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="z5K-qJ-JHD"/>
+                                            <action selector="btnSelectVideo:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="gwL-Eg-XoJ"/>
                                         </connections>
                                     </button>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiI-7G-HtZ">
-                                        <rect key="frame" x="20" y="791" width="353" height="200"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="w4B-AQ-spg">
+                                        <rect key="frame" x="20" y="741" width="353" height="198.66666666666663"/>
                                         <subviews>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MkY-Oj-gXa">
-                                                <rect key="frame" x="0.0" y="0.0" width="353" height="200"/>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cZG-mV-suM">
+                                                <rect key="frame" x="0.0" y="0.0" width="353" height="198.66666666666666"/>
+                                                <subviews>
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="RAa-0P-usS">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="198.66666666666666"/>
+                                                        <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
+                                                    </imageView>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QMR-vu-JA5">
+                                                        <rect key="frame" x="303" y="5" width="45" height="45"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="45" id="9aL-zf-YLn"/>
+                                                            <constraint firstAttribute="width" secondItem="QMR-vu-JA5" secondAttribute="height" multiplier="1:1" id="UFg-Ms-dSb"/>
+                                                        </constraints>
+                                                        <color key="tintColor" systemColor="systemPinkColor"/>
+                                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                        <state key="normal">
+                                                            <imageReference key="image" image="xmark.circle.fill" catalog="system" symbolScale="default"/>
+                                                            <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="27"/>
+                                                        </state>
+                                                        <connections>
+                                                            <action selector="btnRemoveSelectVideo:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="dbD-eX-yV0"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="200" id="5wR-re-odY"/>
+                                                    <constraint firstAttribute="bottom" secondItem="RAa-0P-usS" secondAttribute="bottom" id="4i5-eV-9pz"/>
+                                                    <constraint firstItem="RAa-0P-usS" firstAttribute="top" secondItem="cZG-mV-suM" secondAttribute="top" id="H9e-vJ-QD5"/>
+                                                    <constraint firstAttribute="width" secondItem="cZG-mV-suM" secondAttribute="height" multiplier="16:9" id="Wfy-p0-OA5"/>
+                                                    <constraint firstAttribute="trailing" secondItem="QMR-vu-JA5" secondAttribute="trailing" constant="5" id="aCK-u6-Rhb"/>
+                                                    <constraint firstAttribute="trailing" secondItem="RAa-0P-usS" secondAttribute="trailing" id="l5x-mA-5zV"/>
+                                                    <constraint firstItem="QMR-vu-JA5" firstAttribute="top" secondItem="cZG-mV-suM" secondAttribute="top" constant="5" id="nLi-j8-PgB"/>
+                                                    <constraint firstItem="RAa-0P-usS" firstAttribute="leading" secondItem="cZG-mV-suM" secondAttribute="leading" id="scN-pq-c0L"/>
                                                 </constraints>
                                             </view>
                                         </subviews>
                                     </stackView>
+                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nyN-OA-GKx">
+                                        <rect key="frame" x="89" y="954.66666666666674" width="215" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="L8P-zd-oHV"/>
+                                        </constraints>
+                                        <color key="tintColor" systemColor="labelColor"/>
+                                        <buttonConfiguration key="configuration" style="gray" title="Upload place items menu" imagePadding="10" cornerStyle="medium">
+                                            <imageReference key="image" image="document.badge.plus" catalog="system" symbolScale="large"/>
+                                            <backgroundConfiguration key="background">
+                                                <color key="backgroundColor" systemColor="systemGray4Color"/>
+                                            </backgroundConfiguration>
+                                            <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="medium" weight="bold">
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="12"/>
+                                            </preferredSymbolConfiguration>
+                                            <fontDescription key="titleFontDescription" type="system" pointSize="14"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="btnSelectMenu:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="169-Eu-q5Y"/>
+                                        </connections>
+                                    </button>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="hxv-7I-azi">
+                                        <rect key="frame" x="20" y="1004.6666666666667" width="353" height="150"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ldP-Fx-cZy">
+                                                <rect key="frame" x="0.0" y="0.0" width="353" height="150"/>
+                                                <subviews>
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0ra-oQ-qPH">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="150"/>
+                                                        <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
+                                                    </imageView>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wnJ-rt-nlf">
+                                                        <rect key="frame" x="303" y="5" width="45" height="45"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="45" id="Uje-m1-cSf"/>
+                                                        </constraints>
+                                                        <color key="tintColor" systemColor="systemPinkColor"/>
+                                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                        <state key="normal">
+                                                            <imageReference key="image" image="xmark.circle.fill" catalog="system" symbolScale="default"/>
+                                                            <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="27"/>
+                                                        </state>
+                                                        <connections>
+                                                            <action selector="btnRemoveSelectMenu:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="wGo-Hv-d99"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                                <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="trailing" secondItem="wnJ-rt-nlf" secondAttribute="trailing" constant="5" id="7La-yT-kgV"/>
+                                                    <constraint firstItem="wnJ-rt-nlf" firstAttribute="width" secondItem="wnJ-rt-nlf" secondAttribute="height" multiplier="1:1" id="IIO-Wr-sOj"/>
+                                                    <constraint firstAttribute="bottom" secondItem="0ra-oQ-qPH" secondAttribute="bottom" id="W3n-lc-bpo"/>
+                                                    <constraint firstItem="wnJ-rt-nlf" firstAttribute="top" secondItem="ldP-Fx-cZy" secondAttribute="top" constant="5" id="f6B-99-lQ2"/>
+                                                    <constraint firstAttribute="height" constant="150" id="hdA-Gn-Fwq"/>
+                                                    <constraint firstItem="0ra-oQ-qPH" firstAttribute="top" secondItem="ldP-Fx-cZy" secondAttribute="top" id="kN4-MP-h7K"/>
+                                                    <constraint firstAttribute="trailing" secondItem="0ra-oQ-qPH" secondAttribute="trailing" id="vkK-Ob-FZH"/>
+                                                    <constraint firstItem="0ra-oQ-qPH" firstAttribute="leading" secondItem="ldP-Fx-cZy" secondAttribute="leading" id="w8G-jr-c96"/>
+                                                </constraints>
+                                            </view>
+                                        </subviews>
+                                    </stackView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address (automatically fetch from map, Please select below button to location on map)" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.40000000000000002" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n19-Yh-H1l">
+                                        <rect key="frame" x="20" y="1174.6666666666667" width="353" height="33.666666666666742"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p9z-3W-218">
+                                        <rect key="frame" x="93" y="1223.3333333333333" width="207" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="q6p-bN-inF"/>
+                                        </constraints>
+                                        <color key="tintColor" systemColor="labelColor"/>
+                                        <buttonConfiguration key="configuration" style="gray" title="Select location on map" imagePadding="10" cornerStyle="medium">
+                                            <imageReference key="image" image="mappin.and.ellipse.circle" catalog="system" symbolScale="large"/>
+                                            <backgroundConfiguration key="background">
+                                                <color key="backgroundColor" systemColor="systemGray4Color"/>
+                                            </backgroundConfiguration>
+                                            <fontDescription key="titleFontDescription" type="system" pointSize="14"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="btnSelectLocationMap:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="z5K-qJ-JHD"/>
+                                        </connections>
+                                    </button>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiI-7G-HtZ">
+                                        <rect key="frame" x="20" y="1273.3333333333333" width="353" height="140"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MkY-Oj-gXa">
+                                                <rect key="frame" x="0.0" y="0.0" width="353" height="140"/>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="140" id="5wR-re-odY"/>
+                                                </constraints>
+                                            </view>
+                                        </subviews>
+                                    </stackView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BHA-FY-lQM">
+                                        <rect key="frame" x="20" y="1438.3333333333333" width="353" height="45"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="45" id="qsv-8L-gWB"/>
+                                        </constraints>
+                                        <color key="tintColor" systemColor="systemIndigoColor"/>
+                                        <buttonConfiguration key="configuration" style="filled" title="Submit" imagePadding="20" cornerStyle="capsule">
+                                            <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="large"/>
+                                            <backgroundConfiguration key="background">
+                                                <color key="backgroundColor" systemColor="systemIndigoColor"/>
+                                            </backgroundConfiguration>
+                                            <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                            </preferredSymbolConfiguration>
+                                            <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="20"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="btnSubmitTapped:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="QVW-b7-vTu"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="mQW-nh-a8p" firstAttribute="centerX" secondItem="9oz-FE-eSh" secondAttribute="centerX" id="0o1-SE-syk"/>
+                                    <constraint firstItem="hxv-7I-azi" firstAttribute="top" secondItem="nyN-OA-GKx" secondAttribute="bottom" constant="10" id="1cG-fD-IJr"/>
+                                    <constraint firstItem="hxv-7I-azi" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="4AY-AK-9Z8"/>
+                                    <constraint firstItem="w4B-AQ-spg" firstAttribute="top" secondItem="Udj-zP-s9O" secondAttribute="bottom" constant="10" id="4xN-ib-X2z"/>
+                                    <constraint firstItem="n19-Yh-H1l" firstAttribute="top" secondItem="hxv-7I-azi" secondAttribute="bottom" constant="20" id="5Kl-4g-Zx0"/>
+                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="eiI-7G-HtZ" secondAttribute="trailing" constant="20" id="64x-En-CaY"/>
                                     <constraint firstAttribute="trailing" secondItem="517-bF-GIo" secondAttribute="trailing" id="8Kr-TK-x2R"/>
-                                    <constraint firstItem="p9z-3W-218" firstAttribute="centerX" secondItem="EtF-O8-v8E" secondAttribute="centerX" id="C5J-Q6-Ju7"/>
-                                    <constraint firstItem="eiI-7G-HtZ" firstAttribute="top" secondItem="p9z-3W-218" secondAttribute="bottom" constant="15" id="N3a-3k-jbZ"/>
+                                    <constraint firstItem="nyN-OA-GKx" firstAttribute="top" secondItem="w4B-AQ-spg" secondAttribute="bottom" constant="15" id="Bdm-Us-V0P"/>
+                                    <constraint firstItem="p9z-3W-218" firstAttribute="centerX" secondItem="n19-Yh-H1l" secondAttribute="centerX" id="CD4-eO-gjn"/>
+                                    <constraint firstItem="BHA-FY-lQM" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="Gg8-4x-ipS"/>
                                     <constraint firstItem="EtF-O8-v8E" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="Ov9-ma-6pK"/>
+                                    <constraint firstItem="BHA-FY-lQM" firstAttribute="top" secondItem="eiI-7G-HtZ" secondAttribute="bottom" constant="25" id="QG2-AB-vzo"/>
+                                    <constraint firstItem="eiI-7G-HtZ" firstAttribute="top" secondItem="p9z-3W-218" secondAttribute="bottom" constant="10" id="SJK-Jj-6fc"/>
+                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="hxv-7I-azi" secondAttribute="trailing" constant="20" id="Vu8-yO-fu3"/>
+                                    <constraint firstItem="w4B-AQ-spg" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="Wer-V0-9Z1"/>
                                     <constraint firstItem="517-bF-GIo" firstAttribute="leading" secondItem="9oz-FE-eSh" secondAttribute="leading" id="Y8y-L6-fY1"/>
                                     <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="EtF-O8-v8E" secondAttribute="trailing" constant="20" id="Ygj-pP-huC"/>
                                     <constraint firstItem="517-bF-GIo" firstAttribute="width" secondItem="9oz-FE-eSh" secondAttribute="width" id="YxU-sg-J9e"/>
-                                    <constraint firstAttribute="bottom" secondItem="eiI-7G-HtZ" secondAttribute="bottom" constant="90" id="cjv-np-nTb"/>
-                                    <constraint firstItem="eiI-7G-HtZ" firstAttribute="leading" secondItem="EtF-O8-v8E" secondAttribute="leading" id="eoy-Ew-bbe"/>
-                                    <constraint firstItem="p9z-3W-218" firstAttribute="top" secondItem="EtF-O8-v8E" secondAttribute="bottom" constant="15" id="fUl-lV-BDb"/>
+                                    <constraint firstItem="KaD-hb-neo" firstAttribute="trailing" secondItem="w4B-AQ-spg" secondAttribute="trailing" constant="20" id="eJd-u8-3cA"/>
                                     <constraint firstItem="517-bF-GIo" firstAttribute="top" secondItem="9oz-FE-eSh" secondAttribute="top" id="fa0-0G-GvR"/>
+                                    <constraint firstItem="Udj-zP-s9O" firstAttribute="top" secondItem="EtF-O8-v8E" secondAttribute="bottom" constant="15" id="htZ-N0-Iqi"/>
+                                    <constraint firstItem="n19-Yh-H1l" firstAttribute="centerX" secondItem="9oz-FE-eSh" secondAttribute="centerX" id="iOP-yq-HaQ"/>
+                                    <constraint firstItem="Udj-zP-s9O" firstAttribute="centerX" secondItem="9oz-FE-eSh" secondAttribute="centerX" id="iOz-S5-zL5"/>
+                                    <constraint firstItem="p9z-3W-218" firstAttribute="top" secondItem="n19-Yh-H1l" secondAttribute="bottom" constant="15" id="jRj-iy-MBz"/>
+                                    <constraint firstItem="eiI-7G-HtZ" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="jxi-nw-aBL"/>
+                                    <constraint firstItem="n19-Yh-H1l" firstAttribute="leading" secondItem="KaD-hb-neo" secondAttribute="leading" constant="20" id="kcj-tc-6Jy"/>
+                                    <constraint firstItem="nyN-OA-GKx" firstAttribute="centerX" secondItem="9oz-FE-eSh" secondAttribute="centerX" id="uu1-zN-qSU"/>
                                     <constraint firstItem="EtF-O8-v8E" firstAttribute="top" secondItem="mQW-nh-a8p" secondAttribute="bottom" constant="20" id="v38-70-Cnl"/>
                                     <constraint firstItem="mQW-nh-a8p" firstAttribute="top" secondItem="517-bF-GIo" secondAttribute="bottom" constant="20" id="wlT-tc-eYh"/>
-                                    <constraint firstItem="eiI-7G-HtZ" firstAttribute="trailing" secondItem="EtF-O8-v8E" secondAttribute="trailing" id="xib-Lf-NYG"/>
+                                    <constraint firstItem="BHA-FY-lQM" firstAttribute="centerX" secondItem="9oz-FE-eSh" secondAttribute="centerX" id="xgY-pO-QuA"/>
+                                    <constraint firstAttribute="bottom" secondItem="BHA-FY-lQM" secondAttribute="bottom" constant="40" id="ype-9e-2yv"/>
                                 </constraints>
                                 <viewLayoutGuide key="contentLayoutGuide" id="viB-NR-3N3"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="KaD-hb-neo"/>
                             </scrollView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BHA-FY-lQM">
-                                <rect key="frame" x="20" y="719" width="353" height="45"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="45" id="qsv-8L-gWB"/>
-                                </constraints>
-                                <color key="tintColor" systemColor="systemIndigoColor"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Submit" imagePadding="20" cornerStyle="capsule">
-                                    <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="large"/>
-                                    <backgroundConfiguration key="background">
-                                        <color key="backgroundColor" systemColor="systemIndigoColor"/>
-                                    </backgroundConfiguration>
-                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font" scale="large" weight="bold">
-                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
-                                    </preferredSymbolConfiguration>
-                                    <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="20"/>
-                                </buttonConfiguration>
-                                <connections>
-                                    <action selector="btnSubmitTapped:" destination="ZTw-uq-Uni" eventType="touchUpInside" id="QVW-b7-vTu"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="WU9-Xf-Tdn"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="WU9-Xf-Tdn" firstAttribute="trailing" secondItem="9oz-FE-eSh" secondAttribute="trailing" id="GGf-KQ-ai6"/>
-                            <constraint firstItem="BHA-FY-lQM" firstAttribute="leading" secondItem="zp8-uH-efT" secondAttribute="leading" constant="20" id="NWT-bc-bQz"/>
                             <constraint firstItem="9oz-FE-eSh" firstAttribute="leading" secondItem="WU9-Xf-Tdn" secondAttribute="leading" id="cc0-0p-mSA"/>
                             <constraint firstItem="WU9-Xf-Tdn" firstAttribute="bottom" secondItem="9oz-FE-eSh" secondAttribute="bottom" id="jd9-AS-xsV"/>
-                            <constraint firstItem="WU9-Xf-Tdn" firstAttribute="bottom" secondItem="BHA-FY-lQM" secondAttribute="bottom" constant="20" id="lMR-4s-H7Q"/>
-                            <constraint firstAttribute="trailing" secondItem="BHA-FY-lQM" secondAttribute="trailing" constant="20" id="vuj-rB-p2q"/>
                             <constraint firstItem="9oz-FE-eSh" firstAttribute="top" secondItem="WU9-Xf-Tdn" secondAttribute="top" id="zG5-HY-9sR"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="btnSubmit" destination="BHA-FY-lQM" id="IDw-2W-dCf"/>
                         <outlet property="imgPlace" destination="mQW-nh-a8p" id="iw4-Qz-rKH"/>
+                        <outlet property="imgSelectedMenu" destination="0ra-oQ-qPH" id="yrj-kD-vVK"/>
+                        <outlet property="imgSelectedVideoThumbnail" destination="RAa-0P-usS" id="WLf-iV-WSy"/>
                         <outlet property="lblAddress" destination="n19-Yh-H1l" id="JUE-Fj-eN5"/>
                         <outlet property="mapContainerView" destination="MkY-Oj-gXa" id="1NB-Mo-RQf"/>
+                        <outlet property="menuContainerView" destination="ldP-Fx-cZy" id="0df-sZ-eIb"/>
                         <outlet property="txtClosingTime" destination="aFS-aG-ibg" id="mer-Ue-N3M"/>
                         <outlet property="txtDesc" destination="Urq-lJ-CQY" id="psX-gr-bxZ"/>
                         <outlet property="txtHoliday" destination="u79-LX-jkZ" id="Jhc-yf-a5d"/>
@@ -371,11 +513,13 @@
                         <outlet property="txtOpeningTime" destination="Ylv-hR-OUJ" id="8jh-E4-ZJR"/>
                         <outlet property="txtPhone" destination="r5R-6E-sDD" id="VuS-gM-Uhf"/>
                         <outlet property="txtPriceRange" destination="kVA-qt-Fjp" id="wSr-Wq-j4z"/>
+                        <outlet property="txtWebsite" destination="wdA-NE-Gx3" id="bkg-Wf-HjK"/>
+                        <outlet property="videoContainerView" destination="cZG-mV-suM" id="Gr1-xd-40Z"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jhx-Ib-nno" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1006.8702290076335" y="822.53521126760563"/>
+            <point key="canvasLocation" x="1006.8702290076335" y="821.83098591549299"/>
         </scene>
         <!--Select Location-->
         <scene sceneID="Ypx-EJ-2DJ">
@@ -891,13 +1035,17 @@
         </scene>
     </scenes>
     <resources>
+        <image name="document.badge.plus" catalog="system" width="116" height="128"/>
         <image name="house" catalog="system" width="128" height="104"/>
         <image name="house.fill" catalog="system" width="128" height="104"/>
         <image name="iconAppRound" width="1024" height="1024"/>
         <image name="locationPin" width="512" height="512"/>
+        <image name="mappin.and.ellipse.circle" catalog="system" width="128" height="123"/>
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <image name="tip_1" width="672" height="322"/>
         <image name="tip_2" width="672" height="348"/>
+        <image name="video.badge.plus" catalog="system" width="128" height="93"/>
+        <image name="xmark.circle.fill" catalog="system" width="128" height="123"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
@@ -915,6 +1063,9 @@
         </systemColor>
         <systemColor name="systemIndigoColor">
             <color red="0.34509803919999998" green="0.33725490200000002" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemPinkColor">
+            <color red="1" green="0.1764705882" blue="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemGroupedBackgroundColor">
             <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

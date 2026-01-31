@@ -52,7 +52,7 @@ class TeaActionManager {
             rightAction: { [weak self] _ in
                 guard let self = self else { return }
 
-                self.executeDeleteAPI(placeID: place.id) {
+                self.executeDeleteAPI(place: place) {
                     // 1. Notify caller (e.g. remove from array)
                     onSuccess()
 
@@ -88,7 +88,10 @@ class TeaActionManager {
 
     // MARK: - Internal Helpers (Private) 🛠️
 
-    private func executeDeleteAPI(placeID: String, onSuccess: @escaping () -> Void) {
+    private func executeDeleteAPI(
+        place: TeaPlace,
+        onSuccess: @escaping () -> Void
+    ) {
         LoaderManager.shared.startLoading()
 
         Task {
@@ -98,7 +101,7 @@ class TeaActionManager {
             }
 
             do {
-                try await FirebaseManager.shared.deletePlace(placeId: placeID)
+                try await FirebaseManager.shared.deletePlace(place: place)
 
                 await MainActor.run {
                     HapticHelper.success()

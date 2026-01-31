@@ -71,32 +71,118 @@ class FirebaseManager {
         try await userActionRef.setData(data, merge: true)
     }
 
-    // MARK: - Delete Place 🗑️
-
-    func deletePlace(placeId: String) async throws {
-        // Delete from Global
-        try await db.collection("places").document(placeId).delete()
-        // Delete from User Actions (Optional, but good for cleanup)
-        try await db.collection("users").document(Constants.Strings.currentUserID)
-            .collection("user_actions").document(placeId).delete()
-    }
-
     // MARK: - Image Upload 📸
 
-    func uploadImage(_ image: UIImage) async throws -> String {
+    func uploadImage(_ image: UIImage, onProgress: @escaping (Double) -> Void) async throws -> String {
         let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("review_place_images/\(filename)")
+        let storageRef = storage.reference().child("place_images/\(filename)")
 
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
-            throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
+            throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Image compression failed"])
         }
 
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        let _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
-        let url = try await storageRef.downloadURL()
-        return url.absoluteString
+        // Use 'putData' task to observe progress
+        let uploadTask = storageRef.putData(imageData, metadata: metadata)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            uploadTask.observe(.progress) { snapshot in
+                guard let progress = snapshot.progress else { return }
+                let percent = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
+                onProgress(percent)
+            }
+
+            uploadTask.observe(.success) { _ in
+                storageRef.downloadURL { url, error in
+                    if let url = url {
+                        continuation.resume(returning: url.absoluteString)
+                    } else {
+                        continuation.resume(throwing: error ?? NSError(domain: "UploadError", code: 0))
+                    }
+                }
+            }
+
+            uploadTask.observe(.failure) { snapshot in
+                if let error = snapshot.error {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    // MARK: - 🎥 Upload Video (New)
+
+    /// - Returns: Tuple containing (videoDownloadURL, thumbnailDownloadURL)
+    func uploadVideo(compressedVideoURL: URL, onProgress: @escaping (Double) -> Void) async throws -> (videoUrl: String, thumbUrl: String) {
+        // 1. Generate & Upload Thumbnail first (Quick operation)
+        guard let thumbImage = VideoHelper.generateThumbnail(from: compressedVideoURL) else {
+            throw NSError(domain: "VideoError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not generate thumbnail"])
+        }
+        // Thumbnail contributes very little to progress, so we just await it.
+        let thumbUrlString = try await uploadImage(thumbImage, onProgress: { _ in })
+
+        // 2. Upload Video File
+        let filename = UUID().uuidString + ".mp4" // or .mov depending on compression
+        let videoRef = storage.reference().child("place_videos/\(filename)")
+        let metadata = StorageMetadata()
+        metadata.contentType = "video/mp4"
+
+        let videoData = try Data(contentsOf: compressedVideoURL)
+        let uploadTask = videoRef.putData(videoData, metadata: metadata)
+
+        let videoUrlString: String = try await withCheckedThrowingContinuation { continuation in
+            uploadTask.observe(.progress) { snapshot in
+                guard let progress = snapshot.progress else { return }
+                let percent = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
+                onProgress(percent)
+            }
+
+            uploadTask.observe(.success) { _ in
+                videoRef.downloadURL { url, error in
+                    if let url = url { continuation.resume(returning: url.absoluteString) }
+                    else { continuation.resume(throwing: error!) }
+                }
+            }
+
+            uploadTask.observe(.failure) { snapshot in
+                if let error = snapshot.error { continuation.resume(throwing: error) }
+            }
+        }
+
+        return (videoUrlString, thumbUrlString)
+    }
+
+    // MARK: - 📄 Upload PDF (New)
+
+    func uploadPDF(pdfURL: URL, onProgress: @escaping (Double) -> Void) async throws -> String {
+        let filename = UUID().uuidString + ".pdf"
+        let pdfRef = storage.reference().child("place_docs/\(filename)")
+        let metadata = StorageMetadata()
+        metadata.contentType = "application/pdf"
+
+        let pdfData = try Data(contentsOf: pdfURL)
+        let uploadTask = pdfRef.putData(pdfData, metadata: metadata)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            uploadTask.observe(.progress) { snapshot in
+                guard let progress = snapshot.progress else { return }
+                let percent = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
+                onProgress(percent)
+            }
+
+            uploadTask.observe(.success) { _ in
+                pdfRef.downloadURL { url, error in
+                    if let url = url { continuation.resume(returning: url.absoluteString) }
+                    else { continuation.resume(throwing: error!) }
+                }
+            }
+
+            uploadTask.observe(.failure) { snapshot in
+                if let error = snapshot.error { continuation.resume(throwing: error) }
+            }
+        }
     }
 
     // MARK: - Add Place (Create) 💾
@@ -179,36 +265,192 @@ class FirebaseManager {
         try await db.collection("bugs").addDocument(data: bugData)
     }
 
-    func deleteAllPlacesCreatedByUser() async throws {
-        // 1. Get all documents created by current user
-        let snapshot = try await db.collection("places")
-            .whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID) // Or Constants.Strings.currentUserID
-            .getDocuments()
+    // MARK: - 🗑️ Storage Cleanup Helper
 
-        // Check if there are places to delete
-        guard !snapshot.documents.isEmpty else { return }
+    private func deleteFileFromStorage(url: String?) async {
+        guard let urlString = url, !urlString.isEmpty else { return }
+        let storageRef = storage.reference(forURL: urlString)
+        try? await storageRef.delete()
+    }
 
-        // 2. Create Batch (Performance Optimization) 🚀
+    // MARK: - Delete Single Place (Complete Cleanup) 🏚️
+
+    func deletePlace(place: TeaPlace) async throws {
         let batch = db.batch()
+        var urlsToDelete: [String] = []
 
-        for doc in snapshot.documents {
-            // --- STEP A: Queue the Place for deletion ---
-            batch.deleteDocument(doc.reference)
+        // --- A. Place Media URLs ---
+        if let img = place.imageURL { urlsToDelete.append(img) }
+        if let vid = place.videoURL { urlsToDelete.append(vid) }
+        if let thumb = place.videoThumbnailURL { urlsToDelete.append(thumb) }
+        if let pdf = place.pdfURL { urlsToDelete.append(pdf) }
 
-            // --- STEP B: Queue the User Action for deletion (NEW) ✨ ---
-            // Since the document ID in 'user_actions' IS the placeId, we can find it directly!
-            let placeId = doc.documentID
+        // --- B. Delete Place Reviews (Subcollection) ---
+        // Fetch all reviews written on THIS place
+        let reviewsSnapshot = try await db.collection("places").document(place.id)
+            .collection("reviews").getDocuments()
 
-            let userActionRef = db.collection("users")
-                .document(Constants.Strings.currentUserID)
-                .collection("user_actions")
-                .document(placeId) // 🎯 Targeting the specific action for this place
+        for doc in reviewsSnapshot.documents {
+            batch.deleteDocument(doc.reference) // Delete review doc
 
-            batch.deleteDocument(userActionRef)
+            // If review has an image, add to delete list
+            if let reviewImg = doc.data()["review_image_url"] as? String {
+                urlsToDelete.append(reviewImg)
+            }
         }
 
-        // 3. Commit the batch (Execute all deletes at once) ✅
+        // --- C. Delete Main Documents ---
+        // Delete Place Document
+        batch.deleteDocument(db.collection("places").document(place.id))
+
+        // Delete User Action (Visited/Fav status)
+        batch.deleteDocument(db.collection("users").document(Constants.Strings.currentUserID)
+            .collection("user_actions").document(place.id))
+
+        // --- D. Execute ---
         try await batch.commit()
+
+        // --- E. Clean Storage ---
+        await withTaskGroup(of: Void.self) { group in
+            for url in urlsToDelete {
+                group.addTask { await self.deleteFileFromStorage(url: url) }
+            }
+        }
+    }
+
+    // MARK: - 🛠️ Helper: Queue Places for Deletion
+
+    /// Prepares batch operations to delete all places created by a user and collects their media URLs.
+    /// Also handles sub-collections (reviews) and their images.
+    private func queuePlacesDeletion(for userId: String, in batch: WriteBatch) async throws -> [String] {
+        var urlsToDelete: [String] = []
+
+        // 1. Fetch User's Places
+        let snapshot = try await db.collection("places")
+            .whereField("createdByUserId", isEqualTo: userId)
+            .getDocuments()
+
+        for placeDoc in snapshot.documents {
+            // A. Queue Place Document Delete
+            batch.deleteDocument(placeDoc.reference)
+
+            // B. Queue User Action Document Delete (Visited/Fav)
+            let userActionRef = db.collection("users").document(userId)
+                .collection("user_actions").document(placeDoc.documentID)
+            batch.deleteDocument(userActionRef)
+
+            // C. Collect Place Media URLs 📥
+            let data = placeDoc.data()
+            if let img = data["imageURL"] as? String { urlsToDelete.append(img) }
+            if let vid = data["videoURL"] as? String { urlsToDelete.append(vid) } // ✅ New
+            if let thumb = data["videoThumbnailURL"] as? String { urlsToDelete.append(thumb) } // ✅ New
+            if let pdf = data["pdfURL"] as? String { urlsToDelete.append(pdf) } // ✅ New
+
+            // D. Fetch & Delete Reviews inside this Place (Subcollection) 🕵️‍♂️
+            // Note: We need to wait here to fetch subcollections
+            let reviewsSnapshot = try await db.collection("places").document(placeDoc.documentID)
+                .collection("reviews").getDocuments()
+
+            for reviewDoc in reviewsSnapshot.documents {
+                batch.deleteDocument(reviewDoc.reference)
+                // Collect Review Image
+                if let reviewImg = reviewDoc.data()["review_image_url"] as? String {
+                    urlsToDelete.append(reviewImg)
+                }
+            }
+        }
+
+        return urlsToDelete
+    }
+
+    // MARK: - Delete All Places 🧨
+
+    func deleteAllPlacesCreatedByUser() async throws {
+        // 1. Create Batch
+        let batch = db.batch()
+
+        // 2. Use Helper to queue deletions and get URLs 🤝
+        // This handles Places, User Actions, Sub-reviews, and all their Images/Videos
+        let urlsToDelete = try await queuePlacesDeletion(for: Constants.Strings.currentUserID, in: batch)
+
+        // If no data found, just return
+        guard !urlsToDelete.isEmpty else { return }
+
+        // 3. Commit DB Changes
+        try await batch.commit()
+
+        // 4. Clean Storage (Parallel) 🚀
+        await withTaskGroup(of: Void.self) { group in
+            for url in urlsToDelete {
+                group.addTask { await self.deleteFileFromStorage(url: url) }
+            }
+        }
+    }
+
+    // MARK: - Account Deletion Logic 💀
+
+    // 1. Re-Authentication
+    func reauthenticateWithPassword(_ password: String) async throws {
+        guard let user = Auth.auth().currentUser, let email = user.email else { return }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        try await user.reauthenticate(with: credential)
+    }
+
+    // 2. Main Delete Function
+    func deleteEntireAccount() async throws {
+        guard let user = Auth.auth().currentUser else { return }
+
+        let batch = db.batch()
+        var allUrlsToDelete: [String] = []
+
+        // --- STEP A: Use Helper for Places & their Reviews (No Duplication!) ---
+        let placeUrls = try await queuePlacesDeletion(for: Constants.Strings.currentUserID, in: batch)
+        allUrlsToDelete.append(contentsOf: placeUrls)
+
+        // --- STEP B: Gather Other User Data ---
+
+        // 1. User Reviews on OTHER places (Where I commented on someone else's place)
+        let myReviewsSnapshot = try await db.collectionGroup("reviews")
+            .whereField("user_id", isEqualTo: Constants.Strings.currentUserID).getDocuments()
+
+        for doc in myReviewsSnapshot.documents {
+            batch.deleteDocument(doc.reference)
+            if let reviewImg = doc.data()["review_image_url"] as? String {
+                allUrlsToDelete.append(reviewImg)
+            }
+        }
+
+        // 2. Bugs Reports
+        let bugsSnapshot = try await db.collection("bugs")
+            .whereField("userId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
+        for doc in bugsSnapshot.documents { batch.deleteDocument(doc.reference) }
+
+        // 3. User Actions Collection (Clean sweep)
+        let userActionsSnapshot = try await db.collection("users").document(Constants.Strings.currentUserID)
+            .collection("user_actions").getDocuments()
+        for doc in userActionsSnapshot.documents { batch.deleteDocument(doc.reference) }
+
+        // 4. User Profile & Profile Image
+        let userDocRef = db.collection("users").document(Constants.Strings.currentUserID)
+        let userDoc = try await userDocRef.getDocument()
+
+        if let profileImg = userDoc.data()?["profile_image_url"] as? String {
+            allUrlsToDelete.append(profileImg) // Delete Profile Pic 👤
+        }
+        batch.deleteDocument(userDocRef)
+
+        // --- STEP C: Commit DB Changes ---
+        try await batch.commit()
+
+        // --- STEP D: Clean Storage ---
+        await withTaskGroup(of: Void.self) { group in
+            for url in allUrlsToDelete {
+                group.addTask { await self.deleteFileFromStorage(url: url) }
+            }
+        }
+
+        // --- STEP E: Delete Auth Account ---
+        try await user.delete()
     }
 
     func fetchCurretnUserPlaces() async throws -> [TeaPlace] {
@@ -224,75 +466,6 @@ class FirebaseManager {
         }
 
         return myPlaces.sorted(by: { $0.createdAt > $1.createdAt })
-    }
-
-    // 1. Re-Authentication (We call this FIRST now)
-    func reauthenticateWithPassword(_ password: String) async throws {
-        guard let user = Auth.auth().currentUser, let email = user.email else { return }
-        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
-        // This checks if the password is correct
-        try await user.reauthenticate(with: credential)
-    }
-
-    // 2. Main Delete Function (Called ONLY after re-auth succeeds)
-    func deleteEntireAccount() async throws {
-        guard let user = Auth.auth().currentUser else { return }
-
-        // Create Batch
-        let batch = db.batch()
-
-        // --- STEP A: Gather Data ---
-        let placesSnapshot = try await db.collection("places").whereField("createdByUserId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
-        let bugsSnapshot = try await db.collection("bugs").whereField("userId", isEqualTo: Constants.Strings.currentUserID).getDocuments()
-        let userActionsSnapshot = try await db.collection("users").document(Constants.Strings.currentUserID).collection("user_actions").getDocuments()
-        let reviewsSnapshot = try await db.collectionGroup("reviews")
-            .whereField("userId", isEqualTo: Constants.Strings.currentUserID)
-            .getDocuments()
-
-        // --- STEP B: Queue Database Deletions ---
-        var imageRefsToDelete: [StorageReference] = []
-
-        // Queue Places & their images
-        for doc in placesSnapshot.documents {
-            batch.deleteDocument(doc.reference)
-
-            // 1. Get String
-            if let imageUrl = doc.data()["imageURL"] as? String {
-                // 2. Create Reference
-                // Note: This assumes the URL is valid. If your DB has bad URLs, this could crash.
-                let storageRef = storage.reference(forURL: imageUrl)
-                imageRefsToDelete.append(storageRef)
-            }
-        }
-
-        for doc in bugsSnapshot.documents { batch.deleteDocument(doc.reference) }
-
-        for doc in userActionsSnapshot.documents { batch.deleteDocument(doc.reference) }
-
-        for doc in reviewsSnapshot.documents {
-            batch.deleteDocument(doc.reference)
-            if let reviewImgUrl = doc.data()["reviewImageURL"] as? String {
-                let storageRef = storage.reference(forURL: reviewImgUrl)
-                imageRefsToDelete.append(storageRef)
-            }
-        }
-
-        // Delete User Profile Document
-        batch.deleteDocument(db.collection("users").document(Constants.Strings.currentUserID))
-
-        // --- STEP C: Commit Database Changes ---
-        try await batch.commit()
-
-        // --- STEP D: Clean Storage ---
-        await withTaskGroup(of: Void.self) { group in
-            for ref in imageRefsToDelete {
-                group.addTask { try? await ref.delete() }
-            }
-        }
-
-        // --- STEP E: Delete Auth Account ---
-        // Since we just re-authenticated, this will succeed 100%
-        try await user.delete()
     }
 
     func fetchUserPersonalDetails(userID: String) async throws -> User {

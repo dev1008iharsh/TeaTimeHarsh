@@ -16,9 +16,13 @@
         <attribute name="longitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="openingTime" optional="YES" attributeType="String"/>
+        <attribute name="pdfURL" optional="YES" attributeType="String"/>
         <attribute name="phone" optional="YES" attributeType="String"/>
         <attribute name="priceRange" optional="YES" attributeType="String"/>
         <attribute name="rating" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="totalReviewCount" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="videoThumbnailURL" optional="YES" attributeType="String"/>
+        <attribute name="videoURL" optional="YES" attributeType="String"/>
+        <attribute name="website" optional="YES" attributeType="String"/>
     </entity>
 </model>

@@ -87,10 +87,10 @@ class PlaceOwnerDetailsVC: UIViewController {
         //  Calling the internal helper function
         updateLabel(lblFullName, prefix: "(Tappable) Place Owner's Name", value: ownerUser.fullName)
         updateLabel(lblUserName, prefix: "Place Owner's Username", value: ownerUser.username)
-        updateLabel(lblEmail, prefix: "(Tappable) Place Owner's Email", value: ownerUser.email)
+        updateLabel(lblEmail, prefix: "Place Owner's Email", value: ownerUser.email)
         updateLabel(lblBio, prefix: "Place Owner's Bio", value: ownerUser.bio)
         updateLabel(lblBirthDate, prefix: "Place Owner's Birthdate", value: ownerUser.birthDateString)
-        updateLabel(lblContactNumber, prefix: "Place Owner's Contact Number", value: ownerUser.phoneNumber)
+        updateLabel(lblContactNumber, prefix: "(Tappable) Place Owner's Contact Number", value: ownerUser.phoneNumber)
         
         let imgValue = ownerUser.profileImageUrl
         if let value = imgValue, !value.isEmpty {

@@ -380,6 +380,36 @@ func signInWithSocialCredential(credential: AuthCredential, userDetails: User, c
     }
 }
  
- 
+  LOAD ENTIRE PDF INSTED OF CREATE THUMBNAIL OF PDF
+  // MARK: - Helper: PDF Preview Inside Container 📄
+  private func showPDFPreviewInsideContainer(url: URL) {
+      // 1. Clear old views
+      menuContainerView.subviews.forEach { $0.removeFromSuperview() }
+
+      // 2. Setup PDFView
+      let pdfView = PDFView(frame: menuContainerView.bounds)
+      pdfView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+      pdfView.autoScales = true
+      pdfView.displayMode = .twoUp // Show thumbnail style
+      pdfView.isUserInteractionEnabled = false // Disable scroll, let tap gesture handle full screen
+
+      menuContainerView.addSubview(pdfView)
+      menuContainerView.isHidden = false
+
+      // 3. Load Document (Async)
+      DispatchQueue.global(qos: .userInitiated).async {
+          // Works for both Local File and Remote URL
+          if let document = PDFDocument(url: url) {
+              DispatchQueue.main.async {
+                  pdfView.document = document
+              }
+          } else if let data = try? Data(contentsOf: url), let document = PDFDocument(data: data) {
+              // Fallback for remote data
+              DispatchQueue.main.async {
+                  pdfView.document = document
+              }
+          }
+      }
+  
  
 */
