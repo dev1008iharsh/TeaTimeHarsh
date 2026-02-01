@@ -70,7 +70,7 @@ class CoreDataManager {
                     entity.name = place.name
                     entity.desc = place.desc
                     entity.phone = place.phone
-                    entity.location = place.location
+                    entity.city = place.city
                     entity.address = place.address
                     entity.imageURL = place.imageURL
                     entity.priceRange = place.priceRange

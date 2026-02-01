@@ -228,7 +228,7 @@
                                                     <outlet property="delegate" destination="ZTw-uq-Uni" id="LR9-c9-cz5"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select place location (city)" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="x7l-49-3Vl">
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Select place city" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="x7l-49-3Vl">
                                                 <rect key="frame" x="0.0" y="220" width="353" height="45"/>
                                                 <rect key="contentStretch" x="0.0" y="1" width="1" height="1"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
@@ -368,6 +368,7 @@
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wnJ-rt-nlf">
                                                         <rect key="frame" x="303" y="5" width="45" height="45"/>
                                                         <constraints>
+                                                            <constraint firstAttribute="width" secondItem="wnJ-rt-nlf" secondAttribute="height" multiplier="1:1" id="IIO-Wr-sOj"/>
                                                             <constraint firstAttribute="height" constant="45" id="Uje-m1-cSf"/>
                                                         </constraints>
                                                         <color key="tintColor" systemColor="systemPinkColor"/>
@@ -384,7 +385,6 @@
                                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="trailing" secondItem="wnJ-rt-nlf" secondAttribute="trailing" constant="5" id="7La-yT-kgV"/>
-                                                    <constraint firstItem="wnJ-rt-nlf" firstAttribute="width" secondItem="wnJ-rt-nlf" secondAttribute="height" multiplier="1:1" id="IIO-Wr-sOj"/>
                                                     <constraint firstAttribute="bottom" secondItem="0ra-oQ-qPH" secondAttribute="bottom" id="W3n-lc-bpo"/>
                                                     <constraint firstItem="wnJ-rt-nlf" firstAttribute="top" secondItem="ldP-Fx-cZy" secondAttribute="top" constant="5" id="f6B-99-lQ2"/>
                                                     <constraint firstAttribute="height" constant="150" id="hdA-Gn-Fwq"/>
@@ -505,10 +505,10 @@
                         <outlet property="lblAddress" destination="n19-Yh-H1l" id="JUE-Fj-eN5"/>
                         <outlet property="mapContainerView" destination="MkY-Oj-gXa" id="1NB-Mo-RQf"/>
                         <outlet property="menuContainerView" destination="ldP-Fx-cZy" id="0df-sZ-eIb"/>
+                        <outlet property="txtCity" destination="x7l-49-3Vl" id="9g0-Pf-mNb"/>
                         <outlet property="txtClosingTime" destination="aFS-aG-ibg" id="mer-Ue-N3M"/>
                         <outlet property="txtDesc" destination="Urq-lJ-CQY" id="psX-gr-bxZ"/>
                         <outlet property="txtHoliday" destination="u79-LX-jkZ" id="Jhc-yf-a5d"/>
-                        <outlet property="txtLocation" destination="x7l-49-3Vl" id="9g0-Pf-mNb"/>
                         <outlet property="txtName" destination="oDG-Q1-Ttz" id="uTf-Yq-V6e"/>
                         <outlet property="txtOpeningTime" destination="Ylv-hR-OUJ" id="8jh-E4-ZJR"/>
                         <outlet property="txtPhone" destination="r5R-6E-sDD" id="VuS-gM-Uhf"/>

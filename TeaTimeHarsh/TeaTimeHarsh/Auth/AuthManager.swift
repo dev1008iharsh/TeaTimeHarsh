@@ -133,7 +133,7 @@ class AuthManager {
                 Constants.Strings.currentUserID = ""
                 CoreDataManager.shared.clearAllDataOfCoreData()
                 UserDataManager.shared.user = nil
-                UserProfileImageStorage.clearUserProfileImage()
+                UserProfileImageStorage.clearAllStoredFiles()
                 print("✅ Successfully sign-out (All data cleared)")
                 return true
             } catch {

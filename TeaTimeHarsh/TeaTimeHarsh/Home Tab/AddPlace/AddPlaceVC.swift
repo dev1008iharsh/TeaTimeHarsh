@@ -8,6 +8,7 @@
 import AVFoundation // ✅ Required for Video Thumbnail
 import AVKit // 🎥 For Video Player
 import GoogleMaps
+import Kingfisher
 // import PDFKit // 📄 For PDF Thumbnail inside View
 import PhotosUI // ✅ Required for Video Picker
 import QuickLook // 👁️ For Local PDF Preview
@@ -34,7 +35,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     @IBOutlet var txtPhone: UITextField!
 
     // Dropdown Fields
-    @IBOutlet var txtLocation: UITextField!
+    @IBOutlet var txtCity: UITextField!
     @IBOutlet var txtPriceRange: UITextField!
     @IBOutlet var txtOpeningTime: UITextField!
     @IBOutlet var txtClosingTime: UITextField!
@@ -72,7 +73,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     private var existingPDFURL: String?
 
     // Dropdown Selections
-    private var selectedLocation: String?
+    private var selectedCity: String?
     private var selectedPriceRange: String?
     private var selectedOpeningTime: String?
     private var selectedClosingTime: String?
@@ -81,6 +82,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // Location Data
     private var selectedLatitude: Double?
     private var selectedLongitude: Double?
+
+    // Task Management 🧵
+    private var uploadTask: Task<Void, Never>?
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
 
     // MARK: - Lifecycle
 
@@ -100,9 +105,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     deinit {
-        // Cleanup Temp Files on Exit 🧹
-        clearTempFile(at: selectedVideoURL)
-        clearTempFile(at: selectedPDFURL)
         print("💀 deinit AddPlaceVC is dead. Memory Free & Temp Files Cleaned!")
     }
 
@@ -164,8 +166,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         txtPhone.text = place.phone
         lblAddress.text = place.address
 
-        selectedLocation = place.location
-        txtLocation.text = selectedLocation
+        selectedCity = place.city
+        txtCity.text = selectedCity
 
         selectedPriceRange = place.priceRange
         txtPriceRange.text = selectedPriceRange
@@ -190,7 +192,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         existingImageURL = place.imageURL
         ImageManagerKF.setImage(from: place.imageURL, into: imgPlace, placeholderName: "")
 
-        // 5. Set Video Data (✅ NEW)
+        // 5. Set Video Data
         existingVideoURL = place.videoURL
         existingVideoThumbURL = place.videoThumbnailURL
 
@@ -199,7 +201,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             ImageManagerKF.setImage(from: thumbURL, into: imgSelectedVideoThumbnail, placeholderName: "")
         }
 
-        // 6. Set PDF Data (✅ NEW)
+        // 6. Set PDF Data
         existingPDFURL = place.pdfURL
         if let pdfString = place.pdfURL, let url = URL(string: pdfString) {
             menuContainerView.isHidden = false
@@ -213,7 +215,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         txtDesc.applyDefaultStyle()
         txtWebsite.applyDefaultStyle()
         txtPhone.applyDefaultStyle()
-        txtLocation.applyDefaultStyle()
+        txtCity.applyDefaultStyle()
         txtPriceRange.applyDefaultStyle()
         txtOpeningTime.applyDefaultStyle()
         txtClosingTime.applyDefaultStyle()
@@ -225,130 +227,344 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     func savePlaceToFirebase() {
         print("⏳ Process Started...")
 
-        // 1. Show Custom Progress Loader (on Window) ⏳
-        guard let window = view.window else { return }
-        UploadProgressHUD.shared.show(on: window)
+        // 1. Validation First 🛡️
+        if let errorMsg = validateFields() {
+            AlertHelper.showAlert(title: "Invalid Data", message: errorMsg, vc: self)
+            return
+        }
 
-        Task {
+        // 2. Lock UI & Start Background Task 🔒
+        prepareUIForUpload(isUploading: true)
+
+        // 3. Save Draft to Persistence 💾
+        saveDraftState()
+
+        // 4. Start Async Process
+        uploadTask = Task {
             do {
-                // MARK: - Step A: Image Upload (Weight: 20%) 🖼️
+                // Step A: Upload Media
+                let mediaURLs = try await uploadAllMedia()
 
-                var finalImageURL = existingImageURL ?? ""
+                // Step B: Save to Database
+                try await saveToDatabase(media: mediaURLs)
 
-                // If user picked a NEW image, upload it
-                if hasSelectedNewImage, let image = imgPlace.image {
-                    UploadProgressHUD.shared.updateProgress(0.05) // Started
-
-                    finalImageURL = try await FirebaseManager.shared.uploadImage(image) { progress in
-                        // Map 0-100% of image upload to 0-20% of total progress
-                        let totalProgress = 0.0 + (progress * 0.2)
-                        UploadProgressHUD.shared.updateProgress(totalProgress)
-                    }
-                } else {
-                    // If reusing old image, assume this step is done
-                    UploadProgressHUD.shared.updateProgress(0.2)
-                }
-
-                // MARK: - Step B: Video Processing & Upload (Weight: 60%) 🎥
-
-                var finalVideoURL: String? = existingVideoURL // Keep old if editing
-                var finalThumbURL: String? = existingVideoThumbURL
-
-                if let rawVideoURL = selectedVideoURL {
-                    print("🎥 Compressing Video to 720p HEVC...")
-
-                    // 1. Compress Video (Async Wait)
-                    let compressedURL = await withCheckedContinuation { continuation in
-                        VideoHelper.compressTo720pHEVC(inputURL: rawVideoURL) { url in
-                            continuation.resume(returning: url)
-                        }
-                    }
-
-                    if let compressedVideo = compressedURL {
-                        print("☁️ Uploading Video...")
-                        // 2. Upload Compressed Video
-                        let result = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressedVideo) { progress in
-                            // Map 0-100% of video upload to 20-80% of total progress
-                            let totalProgress = 0.2 + (progress * 0.6)
-                            UploadProgressHUD.shared.updateProgress(totalProgress)
-                        }
-
-                        finalVideoURL = result.videoUrl
-                        finalThumbURL = result.thumbUrl
-                    }
-                } else {
-                    // No new video selected, skip to 80%
-                    UploadProgressHUD.shared.updateProgress(0.8)
-                }
-
-                // MARK: - Step C: PDF Upload (Weight: 20%) 📄
-
-                var finalPDFURL: String? = existingPDFURL // Keep old if editing
-
-                if let pdfURL = selectedPDFURL {
-                    print("☁️ Uploading PDF...")
-                    finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL) { progress in
-                        // Map 0-100% of PDF upload to 80-100% of total progress
-                        let totalProgress = 0.8 + (progress * 0.2)
-                        UploadProgressHUD.shared.updateProgress(totalProgress)
-                    }
-                } else {
-                    // No new PDF, progress complete (100%)
-                    UploadProgressHUD.shared.updateProgress(1.0)
-                }
-
-                // MARK: - Step D: Create Object & Save 💾
-
-                let placeToSave = constructTeaPlaceObject(
-                    imageURL: finalImageURL,
-                    videoURL: finalVideoURL,
-                    videoThumbURL: finalThumbURL,
-                    pdfURL: finalPDFURL
-                )
-
-                print("*** Save To Firebase API Params :", placeToSave)
-
-                // Perform Database Operation (Add or Update)
-                try await performDatabaseOperation(place: placeToSave)
-
-                // MARK: - Step E: Success 🎉
-
-                await MainActor.run {
-                    UploadProgressHUD.shared.dismiss()
-                    HapticHelper.success()
-
-                    AlertHelper.showAlertHandler(
-                        title: "Success ✅",
-                        message: getSuccessMessage(),
-                        vc: self
-                    ) { _ in
-                        self.onPlaceAdded?(true)
-                        self.navigationController?.popViewController(animated: true)
-                    }
-                }
+                // Step C: Success
+                await handleUploadSuccess()
 
             } catch {
-                // MARK: - Step F: Error Handling ❌
-
-                await MainActor.run {
-                    UploadProgressHUD.shared.dismiss() // Hide loader
-                    HapticHelper.error()
-                    print("❌ Save Error: \(error.localizedDescription)")
-                    AlertHelper.showAlert(title: "Error", message: error.localizedDescription, vc: self)
-                }
+                // Step D: Failure
+                await handleUploadFailure(error: error)
             }
         }
     }
 
+    // MARK: - Upload Workers 👷‍♂️
+
+    /// 1. Save current state to disk so we can resume if app crashes
+    private func saveDraftState() {
+        var placeIDValue: String?
+        var isEdit = false
+        let currentRating: Double
+        if case let .edit(cPlace) = screenMode {
+            currentRating = cPlace.rating ?? 0.0
+            isEdit = true
+            placeIDValue = cPlace.id
+        } else {
+            currentRating = 0.0
+            isEdit = false
+        }
+
+        UploadPersistenceManager.shared.saveUploadState(
+            isEditMode: isEdit,
+            placeID: placeIDValue,
+            name: txtName.text?.trimmed ?? "",
+            desc: txtDesc.text?.trimmed ?? "",
+            website: txtWebsite.text?.removeAllSpaces ?? "",
+            phone: txtPhone.text?.removeAllSpaces ?? "",
+            address: lblAddress.text?.trimmed ?? "",
+            rating: currentRating,
+            location: selectedCity,
+            price: selectedPriceRange,
+            open: selectedOpeningTime,
+            close: selectedClosingTime,
+            holiday: selectedHoliday,
+            lat: selectedLatitude,
+            long: selectedLongitude,
+            existingImg: existingImageURL,
+            existingVid: existingVideoURL,
+            existingThumb: existingVideoThumbURL,
+            existingPDF: existingPDFURL,
+            newImage: hasSelectedNewImage ? imgPlace.image : nil,
+            newVideoURL: selectedVideoURL,
+            newPDFURL: selectedPDFURL,
+            hasSelectedNewImage: hasSelectedNewImage
+        )
+    }
+
+    /// 2. Heavy Lifting: Image -> Video -> PDF Uploads
+    private func uploadAllMedia() async throws -> (image: String, video: String?, thumb: String?, pdf: String?) {
+        // A. Image
+        var finalImageURL = existingImageURL ?? ""
+        if hasSelectedNewImage, let image = imgPlace.image {
+            UploadProgressHUD.shared.updateProgress(0.05)
+            finalImageURL = try await FirebaseManager.shared.uploadImage(image) { p in
+                UploadProgressHUD.shared.updateProgress(0.0 + (p * 0.2))
+            }
+        } else {
+            UploadProgressHUD.shared.updateProgress(0.2)
+        }
+
+        // B. Video
+        var finalVideoURL = existingVideoURL
+        var finalThumbURL = existingVideoThumbURL
+
+        if let rawVideoURL = selectedVideoURL {
+            print("🎥😬 Compressing Video...")
+            // Compression
+            let compressedURL = await withCheckedContinuation { continuation in
+                VideoHelper.compressTo720p(inputURL: rawVideoURL) { url, _ in
+                    continuation.resume(returning: url)
+                }
+            }
+
+            if let compressed = compressedURL {
+                print("☁️⬆️ Uploading Video...")
+                let result = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressed) { p in
+                    UploadProgressHUD.shared.updateProgress(0.2 + (p * 0.6))
+                }
+                finalVideoURL = result.videoUrl
+                finalThumbURL = result.thumbUrl
+            }
+        } else {
+            UploadProgressHUD.shared.updateProgress(0.8)
+        }
+
+        // C. PDF
+        var finalPDFURL = existingPDFURL
+        if let pdfURL = selectedPDFURL {
+            print("☁️⬆️ Uploading PDF...")
+            finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL) { p in
+                UploadProgressHUD.shared.updateProgress(0.8 + (p * 0.2))
+            }
+        } else {
+            UploadProgressHUD.shared.updateProgress(1.0)
+        }
+
+        return (finalImageURL, finalVideoURL, finalThumbURL, finalPDFURL)
+    }
+
+    /// 3. Create Object and Write to Firestore
+    private func saveToDatabase(media: (image: String, video: String?, thumb: String?, pdf: String?)) async throws {
+        let placeToSave = constructTeaPlaceObject(
+            imageURL: media.image,
+            videoURL: media.video,
+            videoThumbURL: media.thumb,
+            pdfURL: media.pdf
+        )
+
+        print("*** ⬆️ SENDING TEXT BASED DATA AFTER UPLOAD - Save To Firebase API Params :", placeToSave)
+        try await performDatabaseOperation(place: placeToSave)
+    }
+
+    // MARK: - Success / Error Handling
+
+    private func handleUploadSuccess() async {
+        await MainActor.run {
+            // ✅ Success: Clean the draft
+            UploadPersistenceManager.shared.clearUploadState()
+
+            prepareUIForUpload(isUploading: false)
+            HapticHelper.success()
+
+            AlertHelper.showAlertHandler(title: "Success ✅", message: getSuccessMessage(), vc: self) { _ in
+                self.onPlaceAdded?(true)
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+
+    private func handleUploadFailure(error: Error) async {
+        await MainActor.run {
+            // ❌ Error: Do NOT clear draft (User can retry)
+            prepareUIForUpload(isUploading: false)
+            HapticHelper.error()
+            print("❌ Save Error: \(error.localizedDescription)")
+            AlertHelper.showAlert(title: "Error", message: error.localizedDescription, vc: self)
+        }
+    }
+
+    // UI Locker Helper - Fixed for Background Safety
+    private func prepareUIForUpload(isUploading: Bool) {
+        if isUploading {
+            // 1. Request Background Time with Expiration Handler 🛡️
+            backgroundTaskID = UIApplication.shared.beginBackgroundTask { [weak self] in
+                print("⚠️ Background time expired! Cancelling upload task to prevent crash.")
+                // Force cancel the async task if OS says time is up
+                self?.uploadTask?.cancel()
+                self?.endBackgroundTask()
+            }
+
+            guard let window = view.window else { return }
+            UploadProgressHUD.shared.show(on: window)
+
+            // Lock UI
+            navigationItem.hidesBackButton = true
+            view.isUserInteractionEnabled = false
+
+        } else {
+            // 2. Cleanup: Success or Error
+            endBackgroundTask()
+            UploadProgressHUD.shared.dismiss()
+
+            // Unlock UI
+            navigationItem.hidesBackButton = false
+            view.isUserInteractionEnabled = true
+        }
+    }
+
+    private func endBackgroundTask() {
+        if backgroundTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = .invalid
+        }
+    }
+
+    // MARK: - Public: Restore from Draft
+
+    func restoreFromDraft(model: PendingUploadModel) {
+        // 1. Restore Mode 🚩
+        if model.isEditMode, let id = model.placeID {
+            // Create a dummy TeaPlace object to satisfy the .edit enum case.
+            // We use the ID from the draft and current User ID to maintain ownership.
+            let dummyPlace = TeaPlace(
+                id: id,
+                name: model.name,
+                desc: model.desc,
+                website: model.website,
+                phone: model.phone,
+                city: model.city,
+                address: model.addressLabel,
+                latitude: model.latitude,
+                longitude: model.longitude,
+                imageURL: model.existingImageURL ?? "",
+                videoURL: model.existingVideoURL,
+                videoThumbnailURL: model.existingThumbURL,
+                pdfURL: model.existingPDFURL,
+                rating: model.rating,
+                totalReviewCount: 0, // Default for dummy
+                priceRange: model.priceRange,
+                openingTime: model.openingTime,
+                closingTime: model.closingTime,
+                holiday: model.holiday,
+                createdByUserId: Constants.Strings.currentUserID,
+                createdAt: Date()
+            )
+            screenMode = .edit(dummyPlace)
+
+            // UI Update for Edit Mode
+            btnSubmit.setTitle("Update", for: .normal)
+        } else {
+            screenMode = .add
+            btnSubmit.setTitle("Submit", for: .normal)
+        }
+
+        // 2. Restore UI Text 📝
+        txtName.text = model.name
+        txtDesc.text = model.desc
+        txtWebsite.text = model.website
+        txtPhone.text = model.phone
+        lblAddress.text = model.addressLabel
+
+        // 3. Restore Dropdowns 🔽
+        selectedCity = model.city; txtCity.text = model.city
+        selectedPriceRange = model.priceRange; txtPriceRange.text = model.priceRange
+        selectedOpeningTime = model.openingTime; txtOpeningTime.text = model.openingTime
+        selectedClosingTime = model.closingTime; txtClosingTime.text = model.closingTime
+        selectedHoliday = model.holiday; txtHoliday.text = model.holiday
+
+        // 4. Restore Map 📍
+        selectedLatitude = model.latitude
+        selectedLongitude = model.longitude
+        if let lat = selectedLatitude, let long = selectedLongitude {
+            mapContainerView.isHidden = false
+            GoogleMapHelper.updateLocation(mapView: googleMapView, lat: lat, long: long, showMarker: true)
+        }
+
+        // 5. Restore Media 🎥
+
+        // A. Image
+        hasSelectedNewImage = model.hasSelectedNewImage
+        if let localImgPath = model.localImagePath,
+           let fullURL = UploadPersistenceManager.shared.getFullURL(for: localImgPath),
+           let img = UIImage(contentsOfFile: fullURL.path) {
+            imgPlace.image = img
+        } else if let remoteImg = model.existingImageURL {
+            existingImageURL = remoteImg
+
+            // Use .forceRefresh to ignore local cache and fetch latest from server
+            imgPlace.kf.setImage(
+                with: URL(string: remoteImg),
+                options: [.forceRefresh]
+            )
+        }
+
+        // B. Video
+        existingVideoURL = model.existingVideoURL
+        existingVideoThumbURL = model.existingThumbURL
+
+        if let localVidPath = model.localVideoPath,
+           let fullURL = UploadPersistenceManager.shared.getFullURL(for: localVidPath) {
+            // Check if the permanent video file actually exists on disk
+            if FileManager.default.fileExists(atPath: fullURL.path) {
+                // Restore Selection
+                selectedVideoURL = fullURL
+                videoContainerView.isHidden = false
+
+                // Generate Thumbnail in background
+                DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                    let thumb = VideoHelper.generateThumbnail(from: fullURL)
+                    DispatchQueue.main.async {
+                        self?.imgSelectedVideoThumbnail.image = thumb
+                    }
+                }
+            } else {
+                // File missing on disk, keep UI hidden
+                selectedVideoURL = nil
+                videoContainerView.isHidden = true
+                print("⚠️ Video file missing on disk, keeping container hidden.")
+            }
+        }
+
+        // C. PDF
+        existingPDFURL = model.existingPDFURL
+
+        if let localPDFPath = model.localPDFPath,
+           let fullURL = UploadPersistenceManager.shared.getFullURL(for: localPDFPath) {
+            // Check if the permanent PDF file actually exists on disk
+            if FileManager.default.fileExists(atPath: fullURL.path) {
+                selectedPDFURL = fullURL
+                menuContainerView.isHidden = false
+                showPDFPreviewInsideContainer(url: fullURL)
+            } else {
+                // File missing on disk, keep UI hidden
+                selectedPDFURL = nil
+                menuContainerView.isHidden = true
+                print("⚠️ PDF file missing on disk, keeping container hidden.")
+            }
+        }
+
+        print("✅ UI Restored from Draft successfully! Mode: \(model.isEditMode ? "Edit" : "Add")")
+    }
+
     private func constructTeaPlaceObject(imageURL: String, videoURL: String?, videoThumbURL: String?, pdfURL: String?) -> TeaPlace {
         // Strings where we only need to trim start/end spaces
-        let name = txtName.text?.trimmed ?? ""
-        let address = lblAddress.text?.trimmed ?? "" // Assuming you have address
-        let desc = txtDesc.text?.trimmed ?? ""
-        let location = selectedLocation?.trimmed
+        let nameTrimmed = txtName.text?.trimmed ?? ""
+        let addressTrimmed = lblAddress.text?.trimmed ?? "" // Assuming you have address
+        let descTrimmed = txtDesc.text?.trimmed ?? ""
+        let cityTrimmed = selectedCity?.trimmed
 
         // Technical fields where NO spaces are allowed at all
-        let phone = txtPhone.text?.removeAllSpaces ?? ""
+        let phoneCleaned = txtPhone.text?.removeAllSpaces ?? ""
         var website = txtWebsite.text?.removeAllSpaces ?? ""
 
         // 3. Website Protocol Logic
@@ -363,12 +579,12 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         case .add:
             var newPlace = TeaPlace(
                 id: UUID().uuidString,
-                name: name,
-                desc: desc,
+                name: nameTrimmed,
+                desc: descTrimmed,
                 website: website,
-                phone: phone,
-                location: location,
-                address: address,
+                phone: phoneCleaned,
+                city: cityTrimmed,
+                address: addressTrimmed,
                 latitude: selectedLatitude,
                 longitude: selectedLongitude,
                 imageURL: imageURL,
@@ -393,12 +609,12 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             // Update existing object (Keep ID & Owner same)
             return TeaPlace(
                 id: existingPlace.id, // KEEP ID
-                name: name,
-                desc: desc,
+                name: nameTrimmed,
+                desc: descTrimmed,
                 website: website,
-                phone: phone,
-                location: location,
-                address: address,
+                phone: phoneCleaned,
+                city: cityTrimmed,
+                address: addressTrimmed,
                 latitude: selectedLatitude,
                 longitude: selectedLongitude,
                 imageURL: imageURL,
@@ -457,10 +673,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         guard let phone = txtPhone.text?.removeAllSpaces, phone.count == 10, phone.isNumeric else {
             return "Enter valid 10-digit contact number"
         }
-        guard let website = txtWebsite.text?.removeAllSpaces, website.isEmpty || website.isValidWebsite else { return "Enter valid website starting with www. and ending with domain name." }
+        guard let website = txtWebsite.text?.removeAllSpaces, website.isEmpty || website.isValidWebsite else { return "Enter valid website starting with www. or https and ending with domain name." }
 
         // 3. 📍 Dropdown & Location Validation
-        guard selectedLocation != nil else { return "Please select city location" }
+        guard selectedCity != nil else { return "Please select city" }
         guard selectedPriceRange != nil else { return "Please select price range" }
         guard selectedOpeningTime != nil else { return "Please select opening time" }
         guard selectedClosingTime != nil else { return "Please select closing time" }
@@ -478,7 +694,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         // Logic: Pass if (New PDF Selected) OR (Edit Mode AND Old PDF Exists)
         let hasPDF = selectedPDFURL != nil || (existingPDFURL != nil && !existingPDFURL!.isEmpty)
         if !hasPDF {
-            return "Please select a PDF document. It is mandatory 📄"
+            return "Please select a place menu in PDF document. It is mandatory 📄"
         }
 
         return nil // ✅ All Good!
@@ -486,65 +702,67 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     // MARK: - Helper: Clear Temp File 🧹
 
-    private func clearTempFile(at url: URL?) {
+    private func clearStoredFile(at url: URL?) {
         guard let url = url else { return }
-        do {
-            try FileManager.default.removeItem(at: url)
-            print("🧹 Old temp file deleted: \(url.lastPathComponent)")
-        } catch {
-            // It's okay if file doesn't exist
-            print("⚠️ Info: Temp file cleanup skipped/failed: \(error.localizedDescription)")
+
+        // Final check: Only delete if the file exists at the given path
+        if FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.removeItem(at: url)
+                print("🧹 File deleted from Documents: \(url.lastPathComponent)")
+            } catch {
+                print("❌ Error: Failed to delete stored file: \(error.localizedDescription)")
+            }
+        } else {
+            print("⚠️ Info: Cleanup skipped, file not found at path.")
         }
     }
 
     // MARK: - Helper: PDF Preview Inside Container 📄
 
-    // MARK: - Helper: PDF Preview Inside Container 📄
+    private func showPDFPreviewInsideContainer(url: URL) {
+        // 1. UI Preparation
+        menuContainerView.isHidden = false
+        menuContainerView.layoutIfNeeded() // Ensure we have correct bounds for thumbnail
 
-        private func showPDFPreviewInsideContainer(url: URL) {
-            // 1. UI Preparation
-            menuContainerView.isHidden = false
-            menuContainerView.layoutIfNeeded() // Ensure we have correct bounds for thumbnail
-            
-            LoaderManager.shared.startLoading()
-            
-            // Initial state before thumbnail is ready
-            imgSelectedMenu.image = nil
-            imgSelectedMenu.alpha = 0
-            
-            // Calculate size for the thumbnail generator
-            var targetSize = menuContainerView.bounds.size
-            
-            // Handle zero size case if view is just being unhidden
-            if targetSize.width == 0 {
-                let screenWidth = UIScreen.main.bounds.width
-                targetSize = CGSize(width: screenWidth - 40, height: 150)
-            }
+        LoaderManager.shared.startLoading()
 
-            // 2. Generate Thumbnail in Background ⚡️
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let self = self else { return }
-                
-                // ✅ Generate Thumbnail using your PDFHelper
-                if let thumbnail = PDFHelper.generateTwoPageThumbnail(of: targetSize, for: url) {
-                    
-                    DispatchQueue.main.async {
-                        // 3. Update UI on Main Thread
-                        self.imgSelectedMenu.image = thumbnail
-                        
-                        UIView.animate(withDuration: 0.3) {
-                            self.imgSelectedMenu.alpha = 1
-                        }
-                        LoaderManager.shared.stopLoading()
+        // Initial state before thumbnail is ready
+        imgSelectedMenu.image = nil
+        imgSelectedMenu.alpha = 0
+
+        // Calculate size for the thumbnail generator
+        var targetSize = menuContainerView.bounds.size
+
+        // Handle zero size case if view is just being unhidden
+        if targetSize.width == 0 {
+            let screenWidth = UIScreen.main.bounds.width
+            targetSize = CGSize(width: screenWidth - 40, height: 150)
+        }
+
+        // 2. Generate Thumbnail in Background ⚡️
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
+            // ✅ Generate Thumbnail using your PDFHelper
+            if let thumbnail = PDFHelper.generateTwoPageThumbnail(of: targetSize, for: url) {
+                DispatchQueue.main.async {
+                    // 3. Update UI on Main Thread
+                    self.imgSelectedMenu.image = thumbnail
+
+                    UIView.animate(withDuration: 0.3) {
+                        self.imgSelectedMenu.alpha = 1
                     }
-                } else {
-                    DispatchQueue.main.async {
-                        LoaderManager.shared.stopLoading()
-                        print("❌ Failed to generate PDF thumbnail")
-                    }
+                    LoaderManager.shared.stopLoading()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    LoaderManager.shared.stopLoading()
+                    print("❌ Failed to generate PDF thumbnail")
                 }
             }
         }
+    }
 
     // MARK: - Actions
 
@@ -579,8 +797,6 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         navigationController?.pushViewController(mapVC, animated: true)
     }
 
-    // MARK: - Video Selection Action
-
     @IBAction func btnSelectVideo(_ sender: UIButton) {
         HapticHelper.light()
         var config = PHPickerConfiguration()
@@ -596,10 +812,17 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSelectMenu(_ sender: UIButton) {
         HapticHelper.light()
-        let supportedTypes: [UTType] = [UTType.pdf]
-        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes)
+
+        // Strictly allow only PDF
+        let supportedTypes: [UTType] = [.pdf]
+
+        // ✅ asCopy: true
+        // This creates a copy in tmp folder automatically, so no permission issues.
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
+
         documentPicker.delegate = self
         documentPicker.allowsMultipleSelection = false
+
         present(documentPicker, animated: true)
     }
 
@@ -608,7 +831,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         AlertHelper.showConfirmationAlert(
             title: "Remove Video? 🎥",
-            message: "Are you sure you want to remove this video? This action cannot be undone.",
+            message: "Are you sure you want to remove this video? This action cannot be undone.🔴",
             vc: self,
             rightBtnTitle: "Remove",
             rightBtnStyle: .destructive,
@@ -628,7 +851,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         AlertHelper.showConfirmationAlert(
             title: "Remove PDF? 📄",
-            message: "Are you sure you want to remove this PDF document? This action cannot be undone.",
+            message: "Are you sure you want to remove this PDF document? This action cannot be undone.🔴",
             vc: self,
             rightBtnTitle: "Remove",
             rightBtnStyle: .destructive,
@@ -644,27 +867,31 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     private func performRemovePDF() {
-        // Cleanup
-        clearTempFile(at: selectedPDFURL)
+        // Cleanup physical file from Documents folder
+        clearStoredFile(at: selectedPDFURL)
+
+        // Reset Variables
         selectedPDFURL = nil
         existingPDFURL = nil // Edit mode removal
 
         // Hide UI
         menuContainerView.isHidden = true
         imgSelectedMenu.image = nil
-        print("🗑️ PDF Removed")
+
+        print("🗑️❌ PDF Permanent File Removed")
     }
 
     private func performRemoveVideo() {
-        // Cleanup
-        clearTempFile(at: selectedVideoURL)
+        // Cleanup physical file from Documents folder
+        clearStoredFile(at: selectedVideoURL)
+
         selectedVideoURL = nil
         existingVideoURL = nil // Edit mode removal
 
         // Hide UI
         videoContainerView.isHidden = true
         imgSelectedVideoThumbnail.image = nil
-        print("🗑️ Video Removed")
+        print("🗑️❌ Video Permanent File Removed")
     }
 
     // MARK: - Preview Logic 👁️
@@ -769,19 +996,19 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     private func setupMenuSelection() {
         // Dropdown Data
-        let locationOptions = ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad", "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Surat"]
+        let cityOptions: [String] = ["Mumbai", "Delhi", "Bengaluru", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad", "Surat", "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Bhopal", "Vadodara", "Noida", "Gurugram", "Chandigarh", "Patna", "Visakhapatnam", "Coimbatore", "Kochi", "Guwahati"]
         let openingTimeOptions = ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00"]
         let closingTimeOptions = ["21:00", "22:00", "23:00", "23:59"]
         let priceRangeOptions = ["0-200", "200-400", "400-600", "600-800", "800-1000", "more then 1000"]
-        let holidayOptions = ["Sunday", "Saturday, Sunday"]
+        let holidayOptions = ["None", "Sunday", "Saturday, Sunday"]
 
         // Setup Bindings
         // City/Location
 
-        txtLocation.applySingleSelectionMenu(title: "Select City", items: locationOptions, selectedItem: selectedLocation) { [weak self] sel in
+        txtCity.applySingleSelectionMenu(title: "Select City", items: cityOptions, selectedItem: selectedCity) { [weak self] sel in
             guard let self else { return }
             self.view.endEditing(true)
-            self.selectedLocation = sel
+            self.selectedCity = sel
         }
 
         // Price Range
@@ -843,58 +1070,118 @@ extension AddPlaceVC: SelectPlaceOnMapVCDelegate {
 // MARK: - Video & PDF Pickers Delegate
 
 extension AddPlaceVC: PHPickerViewControllerDelegate {
+    // MARK: - PHPicker Entry Point
+
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
 
-        guard let provider = results.first?.itemProvider, provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) else { return }
+        // 1. Validate result and provider
+        guard let provider = results.first?.itemProvider,
+              provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) else { return }
 
-        // 🚀 START LOADER: Process is starting
         LoaderManager.shared.startLoading()
 
-        provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { [weak self] url, error in
+        // 2. Load File Representation
+        provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { [weak self] originalURL, error in
             guard let self = self else { return }
 
-            // ⚠️ Error Handling: If URL is nil, stop loader
-            guard let url = url else {
-                DispatchQueue.main.async {
-                    LoaderManager.shared.stopLoading()
-                    print("❌ Error loading video: \(String(describing: error))")
-                }
+            if let error = error {
+                print("❌ Picker Error: \(error.localizedDescription)")
+                DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
                 return
             }
 
-            // 1. Copy video to temp directory
-            let fileName = "\(UUID().uuidString).mp4"
-            let newURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+            guard let url = originalURL else { return }
+
+            // 3. Immediate Copy to Documents Directory (Permanent) 📂
+            let fileName = "Place_Local_Video_\(UUID().uuidString).\(url.pathExtension)"
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let permanentURL = documentsURL.appendingPathComponent(fileName)
 
             do {
-                try FileManager.default.copyItem(at: url, to: newURL)
+                if FileManager.default.fileExists(atPath: permanentURL.path) {
+                    try FileManager.default.removeItem(at: permanentURL)
+                }
 
-                // 2. Generate Thumbnail (Time Consuming Task)
-                let thumb = VideoHelper.generateThumbnail(from: newURL)
+                // Copy the ephemeral file to stable app storage
+                try FileManager.default.copyItem(at: url, to: permanentURL)
 
-                DispatchQueue.main.async {
-                    // 🔥 Cleanup Old File
-                    self.clearTempFile(at: self.selectedVideoURL)
+                // 4. Move to processing stage using the stable URL
+                self.processVideo(url: permanentURL)
 
-                    // 3. Update UI
-                    self.selectedVideoURL = newURL
-                    self.videoContainerView.isHidden = false
+            } catch {
+                print("❌ Local Disk Copy Error: \(error.localizedDescription)")
+                DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
+            }
+        }
+    }
 
-                    if let thumb = thumb {
-                        self.imgSelectedVideoThumbnail.image = thumb
+    // MARK: - Video Processing Logic
+
+    private func processVideo(url: URL) {
+        // 1. File Size Validation (Fast Fail)
+        if let resources = try? url.resourceValues(forKeys: [.fileSizeKey]),
+           let fileSize = resources.fileSize, fileSize > (1000 * 1024 * 1024) { // 1GB Limit
+            DispatchQueue.main.async {
+                LoaderManager.shared.stopLoading()
+                AlertHelper.showAlert(title: "Video Too Large 📦", message: "Please select a video smaller than 1 GB.", vc: self)
+                self.clearStoredFile(at: url) // Clean up if validation fails
+            }
+            return
+        }
+
+        // 2. Modern Swift Concurrency for Duration & Compression
+        Task { [weak self] in
+            guard let self = self else { return }
+
+            let asset = AVAsset(url: url)
+
+            do {
+                // Load duration using modern async/await
+                let duration = try await asset.load(.duration)
+
+                if duration.seconds > 180 { // 3 Minutes Limit
+                    await MainActor.run {
+                        LoaderManager.shared.stopLoading()
+                        AlertHelper.showAlert(title: "Video Too Long ⏳", message: "Please select a video shorter than 3 minutes.", vc: self)
+                        self.clearStoredFile(at: url) // Clean up if validation fails
                     }
+                    return
+                }
 
-                    print("✅ New Video Selected: \(fileName)")
+                // 3. Video Compression
+                // Passing the stable Documents URL to helper
+                VideoHelper.compressTo720p(inputURL: url) { [weak self] compressedURL, _ in
+                    guard let self = self else { return }
 
-                    // 🏁 STOP LOADER: Everything is ready!
-                    LoaderManager.shared.stopLoading()
+                    if let finalURL = compressedURL {
+                        // Generate Thumbnail from the final compressed video
+                        let thumb = VideoHelper.generateThumbnail(from: finalURL)
+
+                        DispatchQueue.main.async {
+                            // Note: We don't delete 'url' here if you want to keep the raw file,
+                            // but usually, we cleanup raw and keep the compressed one in Documents.
+                            self.clearStoredFile(at: url) // Cleanup raw local copy
+                            self.clearStoredFile(at: self.selectedVideoURL) // Cleanup previous stable selection
+
+                            // Update UI State with the new stable path
+                            self.selectedVideoURL = finalURL
+                            self.videoContainerView.isHidden = false
+                            self.imgSelectedVideoThumbnail.image = thumb
+
+                            print("✅ Process Complete: \(finalURL.lastPathComponent)")
+                            LoaderManager.shared.stopLoading()
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            LoaderManager.shared.stopLoading()
+                            self.clearStoredFile(at: url)
+                        }
+                    }
                 }
             } catch {
-                DispatchQueue.main.async {
-                    LoaderManager.shared.stopLoading()
-                    print("❌ Error copying video: \(error.localizedDescription)")
-                }
+                print("❌ AVAsset Loading Error: \(error.localizedDescription)")
+                await MainActor.run { LoaderManager.shared.stopLoading() }
             }
         }
     }
@@ -904,24 +1191,75 @@ extension AddPlaceVC: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let url = urls.first else { return }
 
-        guard url.startAccessingSecurityScopedResource() else { return }
-        defer { url.stopAccessingSecurityScopedResource() }
+        // Note: No need for startAccessingSecurityScopedResource() because of asCopy: true
 
-        // Copy PDF to temp
-        let fileName = "\(UUID().uuidString).pdf"
-        let newURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-        try? FileManager.default.copyItem(at: url, to: newURL)
+        // 1. Strict Extension Check 🛡️
+        if url.pathExtension.lowercased() != "pdf" {
+            // Delete the invalid file iOS created
+            clearStoredFile(at: url)
+            AlertHelper.showAlert(title: "Invalid File ❌", message: "Please select a valid PDF file.", vc: self)
+            return
+        }
 
-        // 🔥 Cleanup OLD file if user re-selects
-        clearTempFile(at: selectedPDFURL)
+        // 2. File Size Check (Max 200 MB) 📦
+        do {
+            let resources = try url.resourceValues(forKeys: [.fileSizeKey])
+            if let fileSize = resources.fileSize {
+                let maxSize = 200 * 1024 * 1024 // 200 MB in Bytes
 
-        selectedPDFURL = newURL
-        menuContainerView.isHidden = false
+                if fileSize > maxSize {
+                    // 🛑 Too Large! Delete this temp file immediately
+                    clearStoredFile(at: url)
 
-        // 🔥 Show Preview Inside Container
-        showPDFPreviewInsideContainer(url: newURL)
+                    AlertHelper.showAlert(title: "File Too Large ⚠️", message: "PDF size must be less than 200 MB.", vc: self)
+                    return
+                }
+            }
+        } catch {
+            print("❌ Error checking file size: \(error.localizedDescription)")
+            clearStoredFile(at: url) // Safety cleanup
+            return
+        }
 
-        print("✅ PDF Selected: \(fileName)")
+        // ✅ 3. Success Logic (Using Permanent Documents Directory) 📂
+
+        // Create a unique name for our permanent copy
+        let fileName = "Place_Local_Menu_PDF_\(UUID().uuidString).pdf"
+
+        // Get the Documents Directory path
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let permanentURL = documentsURL.appendingPathComponent(fileName)
+
+        do {
+            // Remove OLD PDF selection from permanent storage if exists
+            if let oldURL = selectedPDFURL {
+                clearStoredFile(at: oldURL)
+            }
+
+            // Copy file from picker's ephemeral location to our stable Documents location
+            // This ensures the file stays even if the app restarts or back button is pressed
+            try FileManager.default.copyItem(at: url, to: permanentURL)
+
+            // Assign our new stable permanent URL
+            selectedPDFURL = permanentURL
+
+            // Clean up the picker's original temp file provided by iOS
+            clearStoredFile(at: url)
+
+            menuContainerView.isHidden = false
+
+            // Show Preview using our own permanent copy
+            showPDFPreviewInsideContainer(url: permanentURL)
+
+            print("✅ PDF Selected & Validated (Copied to Documents): \(permanentURL.lastPathComponent)")
+
+        } catch {
+            print("❌ Local Permanent Copy Error: \(error.localizedDescription)")
+            // Fallback to original URL if copy fails
+            selectedPDFURL = url
+            menuContainerView.isHidden = false
+            showPDFPreviewInsideContainer(url: url)
+        }
     }
 }
 

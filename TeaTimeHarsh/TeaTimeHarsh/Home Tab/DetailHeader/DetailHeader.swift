@@ -86,7 +86,7 @@ class DetailHeader: UIView {
             lblReview.text = "Average " + rating.description + " ⭐️ " + "(\(totalReviews.description))"
         }
 
-        lblCityLocaton.text = "\(place.location ?? "Default Location")"
+        lblCityLocaton.text = "\(place.city ?? "Default Location")"
 
         ImageManagerKF.setImage(
             from: place.imageURL,

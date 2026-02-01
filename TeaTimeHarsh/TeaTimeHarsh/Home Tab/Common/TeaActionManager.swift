@@ -169,7 +169,7 @@ class TeaActionManager {
         📍 Place Details
 
         🏷️ Name: \(place.name)
-        📌 Location: \(place.location ?? "N/A")
+        📌 Location: \(place.city ?? "N/A")
         📞 Phone: \(place.phone ?? "N/A")
         ⭐️ Rating: \(String(format: "%.1f", place.rating ?? 0.0))
 

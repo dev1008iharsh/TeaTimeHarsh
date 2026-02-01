@@ -90,7 +90,7 @@ class UserPlacesListTableCell: UITableViewCell {
     // 📤 Configuration Method
     func configure(place: TeaPlace) {
         titleLabel.text = place.name
-        subtitleLabel.text = place.location
+        subtitleLabel.text = place.city
         ImageManagerKF.setImage(
             from: place.imageURL,
             into: iconImageView,

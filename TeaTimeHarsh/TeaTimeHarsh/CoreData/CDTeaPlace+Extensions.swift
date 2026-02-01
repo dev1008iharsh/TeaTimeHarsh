@@ -23,7 +23,7 @@ extension CDTeaPlace {
             desc: desc,
             website: website,
             phone: phone,
-            location: location,
+            city: city,
             address: address,
             latitude: latitude,
             longitude: longitude,

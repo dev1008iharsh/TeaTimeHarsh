@@ -43,7 +43,7 @@ class HomeVC: UIViewController {
         if !currentSearchText.isEmpty {
             filtered = filtered.filter { place in
                 let nameMatch = place.name.localizedCaseInsensitiveContains(currentSearchText)
-                let locationMatch = (place.location ?? "").localizedCaseInsensitiveContains(currentSearchText)
+                let locationMatch = (place.city ?? "").localizedCaseInsensitiveContains(currentSearchText)
                 return nameMatch || locationMatch
             }
         }
@@ -67,7 +67,7 @@ class HomeVC: UIViewController {
         super.viewDidLoad()
         setupAllUI()
         setupObservers()
-        loadData()
+        fetchLatestDataApi()
         presentTipIfNeeded()
     }
 
@@ -99,11 +99,90 @@ class HomeVC: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if UserDataManager.shared.user?.fullName == nil {
-            askUserToUpdateProfile()
+
+        // 1. Ensure Internet Connection
+        if AppNetworkManager.shared.isConnected {
+            // Priority 1: Check for interrupted uploads first
+            if let draft = UploadPersistenceManager.shared.getPendingUpload() {
+                // If a draft is found, show the resume action sheet
+                checkPendingUploads()
+                return // 🛑 Stop here to avoid multiple alerts appearing at once
+            }
+
+            // Priority 2: Check if Profile is incomplete
+            // This will only run if NO pending upload was found
+            if UserDataManager.shared.user?.fullName == nil {
+                askUserToUpdateProfile()
+            }
         }
     }
 
+    private func checkPendingUploads() {
+        guard let draft = UploadPersistenceManager.shared.getPendingUpload() else { return }
+
+        let actions = [
+            // Action 1: Resume Upload 🚀
+
+            SheetAction(title: "Resume Place Upload 🚀", style: .default) {
+                // A. Initialize AddPlaceVC
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let addVC = storyboard.instantiateViewController(withIdentifier: "AddPlaceVC") as? AddPlaceVC {
+                    // B. Force Load UI (Important: outlets will be nil otherwise)
+                    addVC.loadViewIfNeeded()
+
+                    // C. Restore Data form Draft
+                    addVC.restoreFromDraft(model: draft)
+
+                    // D. Push to Screen
+                    self.navigationController?.pushViewController(addVC, animated: true)
+                }
+            },
+
+            // Action 2: Discard Draft 🗑️
+
+            SheetAction(title: "Discard Draft ❌", style: .destructive) {
+                // 1. Get the draft details before clearing state
+                if let draft = UploadPersistenceManager.shared.getPendingUpload() {
+                    
+                    // 2. Perform Firebase Cleanup in background
+                    Task {
+                        // Delete Image from Firebase Storage
+                        if let imgURL = draft.existingImageURL, !imgURL.isEmpty {
+                            await FirebaseManager.shared.deleteStorageFileDiscarded(at: imgURL)
+                        }
+                        
+                        // Delete Video from Firebase Storage
+                        if let vidURL = draft.existingVideoURL, !vidURL.isEmpty {
+                            await FirebaseManager.shared.deleteStorageFileDiscarded(at: vidURL)
+                        }
+                        
+                        // Delete PDF from Firebase Storage
+                        if let pdfURL = draft.existingPDFURL, !pdfURL.isEmpty {
+                            await FirebaseManager.shared.deleteStorageFileDiscarded(at: pdfURL)
+                        }
+                        
+                        print("Cleanup: Firebase Storage files deleted.")
+                    }
+                }
+
+                // 3. Clear Local State & Physical Files from Documents Folder
+                // This calls your internal cleanup which removes files from the disk
+                UploadPersistenceManager.shared.clearUploadState()
+                
+                HapticHelper.medium()
+                print("Cleanup: Local Documents folder and Persistence cleared.")
+            },
+        ]
+
+        // 3. Show Action Sheet using your Helper
+        AlertHelper.showActionSheet(
+            on: self,
+            title: "Incomplete Upload Found ⚠️",
+            message: "Last time the upload for '\(draft.name)' was interrupted. Do you want to retry?. Would you like to finish uploading it?",
+            actions: actions
+        )
+    }
+    
     func askUserToUpdateProfile() {
         let alert = UIAlertController(
             title: "👋 Hey Buddy!",
@@ -148,7 +227,7 @@ class HomeVC: UIViewController {
 
     private func setupRefreshControl() {
         // 🔥 Update Selector to loadData
-        refreshControl.addTarget(self, action: #selector(loadData), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(fetchLatestDataApi), for: .valueChanged)
         refreshControl.tintColor = .systemIndigo
         tblTeaPlaces.refreshControl = refreshControl
     }
@@ -176,7 +255,7 @@ class HomeVC: UIViewController {
         print("🚀 Internet Restored! Auto-refreshing Home & User Data...")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.loadData()
+            self.fetchLatestDataApi()
         }
 
         UserDataManager.shared.fetchUserProfileIfNeeded()
@@ -191,13 +270,16 @@ class HomeVC: UIViewController {
         HapticHelper.success()
         let addVC = storyboard?.instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
         addVC.screenMode = .add
-        addVC.onPlaceAdded = { [weak self] _ in self?.loadData() }
+        addVC.onPlaceAdded = { [weak self] _ in
+            guard let self = self else { return }
+            fetchLatestDataApi()
+        }
         navigationController?.pushViewController(addVC, animated: true)
     }
 
     // MARK: - 🔥 API & Data Handling (The Brain)
 
-    @objc private func loadData() {
+    @objc private func fetchLatestDataApi() {
         // 1. UI Loading State
         if !refreshControl.isRefreshing {
             isLoading = true
@@ -311,7 +393,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         let detailVC = storyboard?.instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
         detailVC.place = displayedPlaces[indexPath.row]
         // Reload when coming back to ensure data consistency
-        detailVC.onBackToHome = { [weak self] in self?.loadData() }
+        detailVC.onBackToHome = { [weak self] in self?.fetchLatestDataApi() }
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
@@ -328,7 +410,7 @@ extension HomeVC {
     }
 
     @objc func handleReload() {
-        DispatchQueue.main.async { self.loadData() }
+        DispatchQueue.main.async { self.fetchLatestDataApi() }
     }
 
     private func updateLocalState(from notification: Notification, type: String) {

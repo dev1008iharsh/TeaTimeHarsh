@@ -42,7 +42,7 @@ class UploadProgressHUD: UIView {
 
         // Progress Bar
         progressView.trackTintColor = .systemGray5
-        progressView.progressTintColor = .systemBlue
+        progressView.progressTintColor = .systemIndigo
         progressView.translatesAutoresizingMaskIntoConstraints = false
 
         // Percentage Label

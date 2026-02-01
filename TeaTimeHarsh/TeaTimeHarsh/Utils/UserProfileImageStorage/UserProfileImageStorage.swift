@@ -8,12 +8,10 @@
 import UIKit
 
 final class UserProfileImageStorage {
-
     private static let imageFileName = "userprofileimage.png"
 
     /// Saves user profile image by removing previous image first
     static func saveUserProfileImage(_ image: UIImage) {
-
         // Remove old image if exists
         clearUserProfileImage()
 
@@ -50,5 +48,30 @@ final class UserProfileImageStorage {
         FileManager.default
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(imageFileName)
+    }
+
+    /// MARK: - Global Cleanup (Used for Logout) 🚪
+    /// Wipe every single file from the Documents directory
+    static func clearAllStoredFiles() {
+        let fileManager = FileManager.default
+        // Get the Documents directory URL
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("⚠️ Documents directory not found")
+            return
+        }
+
+        do {
+            // Get all file URLs inside the Documents folder
+            let fileURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil)
+
+            for url in fileURLs {
+                // Remove each file physically from disk
+                try fileManager.removeItem(at: url)
+                print("🧹 Deleted from Documents deleting using loop: \(url.lastPathComponent)")
+            }
+            print("✅ Global Cleanup: Documents folder is now empty.")
+        } catch {
+            print("❌ Global Cleanup Error: \(error.localizedDescription)")
+        }
     }
 }

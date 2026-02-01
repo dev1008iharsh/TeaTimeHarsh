@@ -99,7 +99,7 @@ class TeaListCell: UITableViewCell {
 
         // 2. Set Text Data
         lblRating.text = "⭐️ \(teaPlace.rating?.description ?? "5")"
-        lblLocationTeaPlace.text = teaPlace.location
+        lblLocationTeaPlace.text = teaPlace.city
         lblPhoneTeaPlace.text = teaPlace.phone?.description ?? "N/A"
         lblNameTeaPlace.text = teaPlace.name
 

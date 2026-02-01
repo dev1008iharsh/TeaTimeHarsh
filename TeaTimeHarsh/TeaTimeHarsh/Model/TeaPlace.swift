@@ -17,7 +17,7 @@ struct TeaPlace: Identifiable, Codable {
     let website: String?
 
     let phone: String?
-    let location: String?
+    let city: String?
     let address: String?
 
     let latitude: Double?
@@ -49,7 +49,7 @@ struct TeaPlace: Identifiable, Codable {
 
     // We EXCLUDE 'isVisited' and 'isFav' here so they don't go into the main public list.
     enum CodingKeys: String, CodingKey {
-        case id, name, desc, phone, location, address, latitude, longitude, imageURL, videoURL, videoThumbnailURL, pdfURL, rating, priceRange, openingTime, closingTime, holiday, createdByUserId, createdAt, website
+        case id, name, desc, phone, city, address, latitude, longitude, imageURL, videoURL, videoThumbnailURL, pdfURL, rating, priceRange, openingTime, closingTime, holiday, createdByUserId, createdAt, website
 
         case totalReviewCount = "total_review_count"
     }
