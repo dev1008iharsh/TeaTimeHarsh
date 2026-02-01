@@ -14,7 +14,7 @@ class UploadProgressHUD: UIView {
     // MARK: - UI Components
 
     private let containerView = UIView()
-    private let titleLabel = UILabel()
+    var titleLabel = UILabel()
     private let progressView = UIProgressView(progressViewStyle: .default)
     private let percentLabel = UILabel()
 
@@ -32,11 +32,13 @@ class UploadProgressHUD: UIView {
         containerView.backgroundColor = .systemBackground
         containerView.layer.cornerRadius = 12
         containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.clipsToBounds = true
         addSubview(containerView)
 
         // Title Label
         titleLabel.text = "Uploading Media... ☁️"
-        titleLabel.font = .boldSystemFont(ofSize: 16)
+        titleLabel.numberOfLines = 2
+        titleLabel.font = .boldSystemFont(ofSize: 15)
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -64,14 +66,15 @@ class UploadProgressHUD: UIView {
             containerView.heightAnchor.constraint(equalToConstant: 140),
 
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
 
-            progressView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            progressView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor,constant: 10),
             progressView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            progressView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            progressView.heightAnchor.constraint(equalToConstant: 4),
+            progressView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -30),
+            progressView.heightAnchor.constraint(equalToConstant: 10),
 
-            percentLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 10),
+            percentLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 5),
             percentLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
         ])
     }

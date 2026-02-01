@@ -303,18 +303,22 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     /// 2. Heavy Lifting: Image -> Video -> PDF Uploads
     private func uploadAllMedia() async throws -> (image: String, video: String?, thumb: String?, pdf: String?) {
-        // A. Image
+        // A. Image (20%)
+        UploadProgressHUD.shared.titleLabel.text = "Uploading place cover image... 📸"
         var finalImageURL = existingImageURL ?? ""
         if hasSelectedNewImage, let image = imgPlace.image {
             UploadProgressHUD.shared.updateProgress(0.05)
-            finalImageURL = try await FirebaseManager.shared.uploadImage(image) { p in
-                UploadProgressHUD.shared.updateProgress(0.0 + (p * 0.2))
-            }
+            finalImageURL = try await FirebaseManager.shared
+                .uploadImage(image, folderName: "place_cover") { progress in
+                    UploadProgressHUD.shared.updateProgress(0.0 + (progress * 0.2))
+                }
+            UploadPersistenceManager.shared.addUploadedDraftURLs(finalImageURL)
         } else {
             UploadProgressHUD.shared.updateProgress(0.2)
         }
 
-        // B. Video
+        // B. Video (60%)
+        UploadProgressHUD.shared.titleLabel.text = "Optimising video quality for faster upload... ⚙️🎥"
         var finalVideoURL = existingVideoURL
         var finalThumbURL = existingVideoThumbURL
 
@@ -329,27 +333,32 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
             if let compressed = compressedURL {
                 print("☁️⬆️ Uploading Video...")
-                let result = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressed) { p in
-                    UploadProgressHUD.shared.updateProgress(0.2 + (p * 0.6))
+                UploadProgressHUD.shared.titleLabel.text = "Optimising video and uploading to the cloud...🎥"
+                let result = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressed) { progress in
+                    UploadProgressHUD.shared.updateProgress(0.2 + (progress * 0.6))
                 }
                 finalVideoURL = result.videoUrl
                 finalThumbURL = result.thumbUrl
+                UploadPersistenceManager.shared.addUploadedDraftURLs(result.videoUrl)
+                UploadPersistenceManager.shared.addUploadedDraftURLs(result.thumbUrl)
             }
         } else {
             UploadProgressHUD.shared.updateProgress(0.8)
         }
 
-        // C. PDF
+        // C. PDF (20%)
         var finalPDFURL = existingPDFURL
         if let pdfURL = selectedPDFURL {
             print("☁️⬆️ Uploading PDF...")
-            finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL) { p in
-                UploadProgressHUD.shared.updateProgress(0.8 + (p * 0.2))
+            UploadProgressHUD.shared.titleLabel.text = "Uploading attached pdf document... 📄"
+            finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL) { progress in
+                UploadProgressHUD.shared.updateProgress(0.8 + (progress * 0.2))
             }
+            UploadPersistenceManager.shared.addUploadedDraftURLs(finalPDFURL ?? "")
         } else {
             UploadProgressHUD.shared.updateProgress(1.0)
         }
-
+        UploadProgressHUD.shared.titleLabel.text = "Saving place to server... 🥳🎉"
         return (finalImageURL, finalVideoURL, finalThumbURL, finalPDFURL)
     }
 

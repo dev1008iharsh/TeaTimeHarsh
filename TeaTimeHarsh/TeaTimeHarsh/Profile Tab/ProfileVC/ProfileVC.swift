@@ -295,7 +295,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 from: self,
                 recipients: [Constants.Strings.developerEmail],
                 subject: "Help & Support Request from \(UtilsProject.getAppName) - Profile Screen",
-                body: "Tell us more about the problem you're facing here...\n\n\n\n\n" +  EmailMetaData.supportInfo
+                body: "Tell us more about the problem you're facing here...\n\n\n\n\n" + EmailMetaData.supportInfo
             )
 
         case .share:
@@ -612,9 +612,7 @@ extension ProfileVC {
             message: "Your account has been permanently deleted. See you soon! 👋",
             vc: self
         ) { _ in
-            if AuthManager.shared.signOut() {
-                UtilsProject.logoutAndNavigateToLoginVC()
-            }
+            UtilsProject.logoutAndNavigateToLoginVC()
         }
     }
 

@@ -100,12 +100,11 @@ class HomeVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        // 1. Ensure Internet Connection
         if AppNetworkManager.shared.isConnected {
             // Priority 1: Check for interrupted uploads first
             if let draft = UploadPersistenceManager.shared.getPendingUpload() {
                 // If a draft is found, show the resume action sheet
-                checkPendingUploads()
+                checkPendingUploads(draft: draft)
                 return // 🛑 Stop here to avoid multiple alerts appearing at once
             }
 
@@ -117,9 +116,8 @@ class HomeVC: UIViewController {
         }
     }
 
-    private func checkPendingUploads() {
-        guard let draft = UploadPersistenceManager.shared.getPendingUpload() else { return }
-
+    private func checkPendingUploads(draft: PendingUploadModel) {
+        print("getUploadedDraftMediaURLs",UploadPersistenceManager.shared.getUploadedDraftMediaURLs())
         let actions = [
             // Action 1: Resume Upload 🚀
 
@@ -141,36 +139,23 @@ class HomeVC: UIViewController {
             // Action 2: Discard Draft 🗑️
 
             SheetAction(title: "Discard Draft ❌", style: .destructive) {
-                // 1. Get the draft details before clearing state
-                if let draft = UploadPersistenceManager.shared.getPendingUpload() {
-                    
-                    // 2. Perform Firebase Cleanup in background
-                    Task {
-                        // Delete Image from Firebase Storage
-                        if let imgURL = draft.existingImageURL, !imgURL.isEmpty {
-                            await FirebaseManager.shared.deleteStorageFileDiscarded(at: imgURL)
-                        }
-                        
-                        // Delete Video from Firebase Storage
-                        if let vidURL = draft.existingVideoURL, !vidURL.isEmpty {
-                            await FirebaseManager.shared.deleteStorageFileDiscarded(at: vidURL)
-                        }
-                        
-                        // Delete PDF from Firebase Storage
-                        if let pdfURL = draft.existingPDFURL, !pdfURL.isEmpty {
-                            await FirebaseManager.shared.deleteStorageFileDiscarded(at: pdfURL)
-                        }
-                        
-                        print("Cleanup: Firebase Storage files deleted.")
+                // 1. Get the links before starting the Task
+                let linksToDelete = UploadPersistenceManager.shared.getUploadedDraftMediaURLs()
+
+                Task {
+                    // 2. Loop through and delete from Firebase
+                    // We do this BEFORE clearing persistence
+                    for urlString in linksToDelete {
+                        print("❌ Attempting to remove firebase cloud storage URL : \(urlString)")
+                        await FirebaseManager.shared.deleteStorageFileDraftDiscarded(at: urlString)
+                    }
+                    await MainActor.run {
+                        HapticHelper.medium()
+                        // 3. ONLY after all Firebase files are deleted, clear local state
+                        // This ensures the URLs are available for the loop above
+                        UploadPersistenceManager.shared.clearUploadState()
                     }
                 }
-
-                // 3. Clear Local State & Physical Files from Documents Folder
-                // This calls your internal cleanup which removes files from the disk
-                UploadPersistenceManager.shared.clearUploadState()
-                
-                HapticHelper.medium()
-                print("Cleanup: Local Documents folder and Persistence cleared.")
             },
         ]
 
@@ -182,7 +167,7 @@ class HomeVC: UIViewController {
             actions: actions
         )
     }
-    
+
     func askUserToUpdateProfile() {
         let alert = UIAlertController(
             title: "👋 Hey Buddy!",

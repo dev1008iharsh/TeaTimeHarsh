@@ -113,12 +113,12 @@ class FirebaseManager {
 
     // MARK: - Image Upload 📸
 
-    func uploadImage(_ image: UIImage, onProgress: @escaping (Double) -> Void) async throws -> String {
+    func uploadImage(_ image: UIImage, folderName: String, onProgress: @escaping (Double) -> Void) async throws -> String {
         print("\n╔════════════ [ START: uploadImage ] ════════════╗")
-        print("📸 Step 1: Preparing image for upload...")
+        print("📸 Step 1: Preparing \(folderName) image for upload...")
 
         let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("place_images/\(filename)")
+        let storageRef = storage.reference().child("\(folderName)/\(filename)")
 
         // Compress image to save bandwidth
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
@@ -187,9 +187,9 @@ class FirebaseManager {
 
         print("⏳ Uploading thumbnail image...")
         // Thumbnail contributes very little to progress, so we just await it.
-        let thumbUrlString = try await uploadImage(thumbImage, onProgress: { _ in })
+        let thumbUrlString = try await uploadImage(thumbImage, folderName: "place_Thumbnails", onProgress: { _ in })
         print("✅ Thumbnail Uploaded: \(thumbUrlString)")
-
+        UploadPersistenceManager.shared.addUploadedDraftURLs(thumbUrlString)
         // 2. Upload Video File
         let filename = UUID().uuidString + ".mp4"
         let videoRef = storage.reference().child("place_videos/\(filename)")
@@ -1045,7 +1045,7 @@ class FirebaseManager {
 
     // MARK: - Firebase Storage Cleanup Helper
 
-    func deleteStorageFileDiscarded(at urlString: String) async {
+    func deleteStorageFileDraftDiscarded(at urlString: String) async {
         print("\n╔════════════ [ START: deleteStorageFileDiscarded ] ════════════╗")
         // Basic check to ensure it's a valid URL
         guard !urlString.isEmpty, urlString.contains("firebase") else { return }
@@ -1053,7 +1053,7 @@ class FirebaseManager {
         let storageRef = Storage.storage().reference(forURL: urlString)
         do {
             try await storageRef.delete()
-            print("🗑️ Successfully deleted file from Firebase Storage")
+            print("✅ Successfully deleted file from Firebase Storage")
         } catch {
             print("❌ Failed to delete file: \(error.localizedDescription)")
         }
