@@ -397,6 +397,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 }
             } catch {
                 HapticHelper.error()
+                ToastManager.shared.show(message: "Error fetching user places: \(error.localizedDescription)")
                 print("Error fetching user places: \(error.localizedDescription)")
             }
         }

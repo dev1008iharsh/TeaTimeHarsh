@@ -205,13 +205,10 @@ class DetailStaticCell: UITableViewCell {
                 // Generate Thumbnail using your PDFHelper
                 if let thumbnail = PDFHelper.generateTwoPageThumbnail(of: targetSize, for: url) {
                     DispatchQueue.main.async {
-                        // 3. Update UI on Main Thread
-                        HapticHelper.light()
                         self.imgMenuImage.image = thumbnail
                     }
                 } else {
                     DispatchQueue.main.async {
-                        HapticHelper.error()
                         LoaderManager.shared.stopLoading()
                         print("❌ Failed to generate PDF thumbnail")
                     }

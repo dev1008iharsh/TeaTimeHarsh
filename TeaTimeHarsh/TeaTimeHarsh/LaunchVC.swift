@@ -76,7 +76,7 @@ class LaunchVC: UIViewController {
 
     private func handleOffline() {
         print("🔌 Offline Launch")
-
+        ToastManager.shared.show(message: "You’re Offline ❌.\n 🌐 Connect to the internet to unlock all features.")
         HapticHelper.error()
         UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
 

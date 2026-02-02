@@ -49,6 +49,7 @@ class VideoHelper {
             return UIImage(cgImage: cgImage)
         } catch {
             HapticHelper.error()
+            ToastManager.shared.show(message: "❌ Thumbnail Generation Error: \(error.localizedDescription)")
             print("❌ Thumbnail Generation Error: \(error.localizedDescription)")
             return nil
         }
@@ -107,9 +108,10 @@ class VideoHelper {
                             completion(outputURL, seconds)
                         }
                     } catch {
-                        HapticHelper.error()
                         print("⚠️ Failed to load duration: \(error)")
                         DispatchQueue.main.async {
+                            HapticHelper.error()
+                            ToastManager.shared.show(message: "⚠️ Failed to load duration: \(error)")
                             completion(outputURL, 0)
                         }
                     }

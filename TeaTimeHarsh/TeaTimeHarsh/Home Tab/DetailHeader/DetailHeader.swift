@@ -109,6 +109,7 @@ class DetailHeader: UIView {
     // MARK: - 🔔 Notification Actions (Fav / Visit)
 
     @IBAction func visitButtonTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
         if !AppNetworkManager.shared.isConnected {
             return
         }
@@ -117,8 +118,7 @@ class DetailHeader: UIView {
         // 1. Optimistic UI Update (Visual Only)
         isVisitState.toggle()
         updateVisitedButton(isVisited: isVisitState)
-        HapticHelper.heavy()
-
+         
         // 2. Post Notification - update backend using api
         NotificationCenter.default.post(
             name: .teaPlaceDidTapVisit,
@@ -128,6 +128,7 @@ class DetailHeader: UIView {
     }
 
     @IBAction func favouriteButtonTapped(_ sender: UIButton) {
+        HapticHelper.heavy()
         if !AppNetworkManager.shared.isConnected {
             return
         }
@@ -136,8 +137,7 @@ class DetailHeader: UIView {
         // 1. Optimistic UI Update (Visual Only)
         isFavState.toggle()
         updateFavouriteButton(isFavourite: isFavState)
-        HapticHelper.heavy()
-
+         
         // 2. Post Notification - update backend using api
         NotificationCenter.default.post(
             name: .teaPlaceDidTapFav,
@@ -150,6 +150,7 @@ class DetailHeader: UIView {
 
     @objc func handleAPIFailure(_ notification: Notification) {
         HapticHelper.error()
+        ToastManager.shared.show(message: "Failed to change status")
         guard let failedID = notification.userInfo?["placeID"] as? String,
               failedID == currentPlaceID,
               let actionType = notification.userInfo?["actionType"] as? String else { return }

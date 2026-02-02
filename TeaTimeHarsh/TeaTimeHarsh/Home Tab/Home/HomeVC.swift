@@ -330,9 +330,12 @@ class HomeVC: UIViewController {
 
         // 2. Check Connection using your AppNetworkManager
         if AppNetworkManager.shared.isConnected {
+            ToastManager.shared.show(message: "✅ You're online! 🥳 \n📱offline mode is also available anytime 😊✨")
+                                     
             print("🌍 Internet Available for that fetching data from firebase")
             fetchFromFirebaseAndSync()
         } else {
+            ToastManager.shared.show(message: "🔌 No Internet Available \n for that fetching from Local Database" )
             print("🔌 No Internet Available - for that fetching from CoreData")
             fetchFromCoreData()
         }
@@ -375,6 +378,7 @@ class HomeVC: UIViewController {
         if localPlaces.isEmpty {
             // Only show alert if screen is totally empty
             print("🔴 Offline - No internet and no saved data found.")
+            ToastManager.shared.show(message: "🔴 Offline \n No internet and no saved data found.")
             HapticHelper.error()
         }else{
             HapticHelper.success()
@@ -591,8 +595,8 @@ extension HomeVC {
                             self.arrTeaPlaces[index].isVisited.toggle()
                         }
 
-                        // Show Dynamic Toast (60 padding from bottom)
-                        ToastManager.shared.show(message: "⚠️ Connection error. Changes reverted.", vc: self)
+                        // Show Dynamic Toast
+                        ToastManager.shared.show(message: "⚠️ Connection error. Changes reverted.")
 
                         // Haptic feedback for error
                         HapticHelper.error()

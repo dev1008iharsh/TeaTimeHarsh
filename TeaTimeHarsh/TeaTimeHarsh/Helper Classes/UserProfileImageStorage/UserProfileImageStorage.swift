@@ -23,6 +23,7 @@ final class UserProfileImageStorage {
             print("📸 User profile image saved successfully to local document-directory saved ✅")
         } catch {
             HapticHelper.error()
+            ToastManager.shared.show(message: "⚠️ Failed to save profile image: \(error.localizedDescription)")
             print("⚠️ Failed to save profile image: \(error.localizedDescription)")
         }
     }
@@ -73,6 +74,7 @@ final class UserProfileImageStorage {
             print("✅ Global Cleanup: Documents folder is now empty.")
         } catch {
             HapticHelper.error()
+            ToastManager.shared.show(message: "❌ Global Cleanup Error: \(error.localizedDescription)")
             print("❌ Global Cleanup Error: \(error.localizedDescription)")
         }
     }

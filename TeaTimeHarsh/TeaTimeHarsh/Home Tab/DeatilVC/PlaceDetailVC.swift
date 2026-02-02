@@ -77,10 +77,10 @@ class PlaceDetailVC: UIViewController {
                 self.placeOwnerUser = try await FirebaseManager.shared.fetchUserPersonalDetails(userID: idPlaceOwner)
                 print("setupFetchPlaceOwnerPersonalDetails", placeOwnerUser as Any)
                 self.tblPlaceDetail.reloadData()
-                HapticHelper.success()
             } catch {
                 HapticHelper.error()
                 LoaderManager.shared.stopLoading()
+                ToastManager.shared.show(message: "Error fetching user: \(error.localizedDescription)")
                 print("Error fetching user: \(error.localizedDescription)")
             }
         }

@@ -184,6 +184,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     // 🛠️ Debug Helper (Restored)
     private func seedSimulatorDataIfNeeded() {
+        ToastManager.shared.show(message: "Pre-load data for better testing...")
         txtName.text = "Cafe at midnight ok to go"
         txtDesc.text = "Cafe Despotic is a casual café known for its great coffee, tea selection, and nice, cozy atmosphere. Located in Rajkot, it offers table service, takeout, and delivery with free street parking. It is a popular spot for quick bites like samosas, with an average cost of ₹100-2000"
 
@@ -866,6 +867,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 print("🧹 File deleted from Documents: \(url.lastPathComponent)")
             } catch {
                 HapticHelper.error()
+                ToastManager.shared.show(message: "❌ Error: Failed to delete stored file: \(error.localizedDescription)")
                 print("❌ Error: Failed to delete stored file: \(error.localizedDescription)")
             }
         } else {
@@ -913,6 +915,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             } else {
                 DispatchQueue.main.async {
                     LoaderManager.shared.stopLoading()
+                    ToastManager.shared.show(message: "❌ Failed to generate PDF thumbnail...Please select different pdf.")
                     print("❌ Failed to generate PDF thumbnail")
                 }
             }
@@ -1282,6 +1285,7 @@ extension AddPlaceVC: PHPickerViewControllerDelegate {
 
             } catch {
                 HapticHelper.error()
+                ToastManager.shared.show(message: "❌ Local Disk Copy Error: \(error.localizedDescription)")
                 print("❌ Local Disk Copy Error: \(error.localizedDescription)")
                 DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
             }
@@ -1293,10 +1297,10 @@ extension AddPlaceVC: PHPickerViewControllerDelegate {
     private func processVideo(url: URL) {
         // 1. File Size Validation (Fast Fail)
         if let resources = try? url.resourceValues(forKeys: [.fileSizeKey]),
-           let fileSize = resources.fileSize, fileSize > (1000 * 1024 * 1024) { // 1GB Limit
+           let fileSize = resources.fileSize, fileSize > (500 * 1024 * 1024) { // 0.5 GB Limit
             DispatchQueue.main.async {
                 LoaderManager.shared.stopLoading()
-                AlertHelper.showAlert(title: "Video Too Large 📦", message: "Please select a video smaller than 1 GB.", vc: self)
+                AlertHelper.showAlert(title: "Video Too Large 📦", message: "Please select a video smaller than 500 MB.", vc: self)
                 self.clearStoredFile(at: url) // Clean up if validation fails
             }
             return
@@ -1353,6 +1357,7 @@ extension AddPlaceVC: PHPickerViewControllerDelegate {
                 }
             } catch {
                 HapticHelper.error()
+                ToastManager.shared.show(message: "❌ AVAsset Loading Error: \(error.localizedDescription)")
                 print("❌ AVAsset Loading Error: \(error.localizedDescription)")
                 await MainActor.run { LoaderManager.shared.stopLoading() }
             }
@@ -1390,6 +1395,7 @@ extension AddPlaceVC: UIDocumentPickerDelegate {
             }
         } catch {
             HapticHelper.error()
+            ToastManager.shared.show(message: "❌ Error checking file size: \(error.localizedDescription)")
             print("❌ Error checking file size: \(error.localizedDescription)")
             clearStoredFile(at: url) // Safety cleanup
             return
@@ -1429,6 +1435,7 @@ extension AddPlaceVC: UIDocumentPickerDelegate {
 
         } catch {
             HapticHelper.error()
+            ToastManager.shared.show(message: "❌ Local Permanent Copy Error: \(error.localizedDescription)")
             print("❌ Local Permanent Copy Error: \(error.localizedDescription)")
             // Fallback to original URL if copy fails
             selectedPDFURL = url

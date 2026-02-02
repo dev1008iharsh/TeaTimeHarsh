@@ -379,6 +379,7 @@ extension LoginRegisterVC {
     private func handleSocialError(_ error: Error) {
         LoaderManager.shared.stopLoading()
         HapticHelper.error()
+        ToastManager.shared.show(message: "Social Login Error: \(error.localizedDescription)")
         print("Social Login Error: \(error.localizedDescription)")
 
         // Don't show alert if user just cancelled the popup
