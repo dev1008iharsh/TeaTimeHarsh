@@ -4,7 +4,6 @@
 //
 //  Created by Harsh on 01/02/26.
 //
-
 import UIKit
 
 // MARK: - 1. Data Model (Codable)
@@ -33,21 +32,21 @@ struct PendingUploadModel: Codable {
     let latitude: Double?
     let longitude: Double?
 
-    // Existing Server URLs (For Edit Mode)
+    // Existing Server URLs (Stored to allow skipping upload if already done)
     let existingImageURL: String?
     let existingVideoURL: String?
     let existingThumbURL: String?
     let existingPDFURL: String?
 
     // Local File Paths (Saved in Documents Directory)
-    let localImagePath: String? // We save image as file, not Data in UserDefaults
+    let localImagePath: String?
     let localVideoPath: String?
     let localPDFPath: String?
 
     // State Tracking
     let hasSelectedNewImage: Bool
 
-    // uploaded fiels urls
+    // Track uploaded URLs for cleanup on Discard
     var uploadedDraftURLs: [String] = []
 }
 
@@ -80,28 +79,30 @@ class UploadPersistenceManager {
         existingThumb: String?, existingPDF: String?, newImage: UIImage?,
         newVideoURL: URL?, newPDFURL: URL?, hasSelectedNewImage: Bool
     ) {
-        let id = UUID().uuidString
+        // ✅ OPTIMIZATION: Use the stable PlaceID for local filenames too.
+        // This ensures we overwrite local files instead of creating new UUIDs every save.
+        let stableID = placeID ?? UUID().uuidString
 
-        // 1. Save Image to Disk
+        // 1. Save Image to Disk (Overwrite local file)
         var savedImgPath: String?
         if let img = newImage, let data = img.jpegData(compressionQuality: 0.8) {
-            savedImgPath = "\(id)_draft_img.jpg"
+            savedImgPath = "\(stableID)_local_img.jpg"
             try? data.write(to: documentsDirectory.appendingPathComponent(savedImgPath!))
         }
 
-        // 2. Save Video to Disk (Copy from Tmp to Doc)
+        // 2. Save Video to Disk (Overwrite local file)
         var savedVidPath: String?
         if let vURL = newVideoURL {
-            savedVidPath = "\(id)_draft_vid.mp4"
+            savedVidPath = "\(stableID)_local_vid.mp4"
             let targetURL = documentsDirectory.appendingPathComponent(savedVidPath!)
-            try? FileManager.default.removeItem(at: targetURL) // Clear if exists
+            try? FileManager.default.removeItem(at: targetURL) // Remove old before copy
             try? FileManager.default.copyItem(at: vURL, to: targetURL)
         }
 
-        // 3. Save PDF to Disk
+        // 3. Save PDF to Disk (Overwrite local file)
         var savedPDFPath: String?
         if let pURL = newPDFURL {
-            savedPDFPath = "\(id)_draft.pdf"
+            savedPDFPath = "\(stableID)_local_menu.pdf"
             let targetURL = documentsDirectory.appendingPathComponent(savedPDFPath!)
             try? FileManager.default.removeItem(at: targetURL)
             try? FileManager.default.copyItem(at: pURL, to: targetURL)
@@ -116,10 +117,20 @@ class UploadPersistenceManager {
             existingImageURL: existingImg, existingVideoURL: existingVid, existingThumbURL: existingThumb, existingPDFURL: existingPDF,
             localImagePath: savedImgPath, localVideoPath: savedVidPath, localPDFPath: savedPDFPath,
             hasSelectedNewImage: hasSelectedNewImage
+            // Note: We don't overwrite uploadedDraftURLs here; we keep the existing list if available,
+            // or rely on 'addUploadedDraftURLs' to populate it.
         )
 
-        saveToUserDefaults(model) // Using helper to encode and save
-        print("💾 Draft Saved Successfully in Documents Dir!")
+        // Preserve existing tracked URLs if we are just updating text fields
+        if var existing = getPendingUpload() {
+            var updatedModel = model
+            updatedModel.uploadedDraftURLs = existing.uploadedDraftURLs
+            saveToUserDefaults(updatedModel)
+        } else {
+            saveToUserDefaults(model)
+        }
+        
+        print("💾 Draft Saved Successfully (Local files overwritten)")
     }
 
     // MARK: - Retrieve Draft 🔍
@@ -148,7 +159,6 @@ class UploadPersistenceManager {
 
     // MARK: - Helpers 🛠️
 
-    /// Encodes and saves model to UserDefaults
     private func saveToUserDefaults(_ model: PendingUploadModel) {
         if let encoded = try? JSONEncoder().encode(model) {
             UserDefaults.standard.set(encoded, forKey: kPendingKey)
@@ -163,30 +173,89 @@ class UploadPersistenceManager {
 
     // MARK: - Asset Tracking 🛡️
 
-    /// Returns all global links for deep cleanup across all sessions
     func getUploadedDraftMediaURLs() -> [String] {
         return UserDefaults.standard.stringArray(forKey: kGlobalDraftLinksKey) ?? []
     }
 
-    /// Tracks URLs globally and in current draft using 'uploadedDraftURLs'
     func addUploadedDraftURLs(_ url: String) {
-        // 1. Get current draft model
         guard var currentDraft = getPendingUpload() else { return }
 
-        // 2. Add to current session's array
         if !currentDraft.uploadedDraftURLs.contains(url) {
             currentDraft.uploadedDraftURLs.append(url)
 
-            // 3. Sync with Global Safety List for cross-session cleanup
             var globalList = UserDefaults.standard.stringArray(forKey: kGlobalDraftLinksKey) ?? []
             if !globalList.contains(url) {
                 globalList.append(url)
                 UserDefaults.standard.set(globalList, forKey: kGlobalDraftLinksKey)
             }
-
-            // 4. Persistent save to UserDefaults
             saveToUserDefaults(currentDraft)
-            print("🔗 Draft URL Tracked Globally: \(url)")
+            print("🔗 Draft URL Tracked: \(url)")
         }
+    }
+}
+
+// MARK: - Partial Update Helpers (Crucial for Smart Resume) 🔄
+
+extension UploadPersistenceManager {
+
+    func updateDraftImageURL(_ url: String) {
+        guard var currentDraft = getPendingUpload() else { return }
+        
+        let updatedDraft = PendingUploadModel(
+            isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
+            name: currentDraft.name, desc: currentDraft.desc, website: currentDraft.website, phone: currentDraft.phone, addressLabel: currentDraft.addressLabel, rating: currentDraft.rating,
+            city: currentDraft.city, priceRange: currentDraft.priceRange, openingTime: currentDraft.openingTime, closingTime: currentDraft.closingTime, holiday: currentDraft.holiday,
+            latitude: currentDraft.latitude, longitude: currentDraft.longitude,
+            
+            existingImageURL: url, // ✅ Updated
+            
+            existingVideoURL: currentDraft.existingVideoURL, existingThumbURL: currentDraft.existingThumbURL, existingPDFURL: currentDraft.existingPDFURL,
+            localImagePath: currentDraft.localImagePath, localVideoPath: currentDraft.localVideoPath, localPDFPath: currentDraft.localPDFPath,
+            hasSelectedNewImage: currentDraft.hasSelectedNewImage,
+            uploadedDraftURLs: currentDraft.uploadedDraftURLs
+        )
+        saveToUserDefaults(updatedDraft)
+    }
+
+    func updateDraftVideoURL(videoUrl: String?, thumbUrl: String?) {
+        guard var currentDraft = getPendingUpload() else { return }
+        
+        let updatedDraft = PendingUploadModel(
+            isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
+            name: currentDraft.name, desc: currentDraft.desc, website: currentDraft.website, phone: currentDraft.phone, addressLabel: currentDraft.addressLabel, rating: currentDraft.rating,
+            city: currentDraft.city, priceRange: currentDraft.priceRange, openingTime: currentDraft.openingTime, closingTime: currentDraft.closingTime, holiday: currentDraft.holiday,
+            latitude: currentDraft.latitude, longitude: currentDraft.longitude,
+            
+            existingImageURL: currentDraft.existingImageURL,
+            
+            existingVideoURL: videoUrl ?? currentDraft.existingVideoURL, // ✅ Updated
+            existingThumbURL: thumbUrl ?? currentDraft.existingThumbURL, // ✅ Updated
+            
+            existingPDFURL: currentDraft.existingPDFURL,
+            localImagePath: currentDraft.localImagePath, localVideoPath: currentDraft.localVideoPath, localPDFPath: currentDraft.localPDFPath,
+            hasSelectedNewImage: currentDraft.hasSelectedNewImage,
+            uploadedDraftURLs: currentDraft.uploadedDraftURLs
+        )
+        saveToUserDefaults(updatedDraft)
+    }
+
+    func updateDraftPDFURL(_ url: String) {
+        guard var currentDraft = getPendingUpload() else { return }
+        
+        let updatedDraft = PendingUploadModel(
+            isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
+            name: currentDraft.name, desc: currentDraft.desc, website: currentDraft.website, phone: currentDraft.phone, addressLabel: currentDraft.addressLabel, rating: currentDraft.rating,
+            city: currentDraft.city, priceRange: currentDraft.priceRange, openingTime: currentDraft.openingTime, closingTime: currentDraft.closingTime, holiday: currentDraft.holiday,
+            latitude: currentDraft.latitude, longitude: currentDraft.longitude,
+            
+            existingImageURL: currentDraft.existingImageURL, existingVideoURL: currentDraft.existingVideoURL, existingThumbURL: currentDraft.existingThumbURL,
+            
+            existingPDFURL: url, // ✅ Updated
+            
+            localImagePath: currentDraft.localImagePath, localVideoPath: currentDraft.localVideoPath, localPDFPath: currentDraft.localPDFPath,
+            hasSelectedNewImage: currentDraft.hasSelectedNewImage,
+            uploadedDraftURLs: currentDraft.uploadedDraftURLs
+        )
+        saveToUserDefaults(updatedDraft)
     }
 }

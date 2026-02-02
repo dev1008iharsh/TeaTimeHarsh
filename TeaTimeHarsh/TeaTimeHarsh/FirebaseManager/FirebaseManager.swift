@@ -4,11 +4,11 @@
 //
 //  Created by Harsh on 31/12/25.
 //
-
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 import Foundation
+import UIKit
 
 class FirebaseManager {
     static let shared = FirebaseManager()
@@ -113,12 +113,15 @@ class FirebaseManager {
 
     // MARK: - Image Upload 📸
 
-    func uploadImage(_ image: UIImage, folderName: String, onProgress: @escaping (Double) -> Void) async throws -> String {
+    func uploadImage(_ image: UIImage, folderName: String, customName: String? = nil, onProgress: @escaping (Double) -> Void) async throws -> String {
         print("\n╔════════════ [ START: uploadImage ] ════════════╗")
         print("📸 Step 1: Preparing \(folderName) image for upload...")
 
-        let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("\(folderName)/\(filename)")
+        // ✅ LOGIC CHANGE: Use customName if provided, otherwise random UUID
+        let filename = customName ?? UUID().uuidString
+        let finalFileName = "\(filename).jpg" // Always .jpg
+
+        let storageRef = storage.reference().child("\(folderName)/\(finalFileName)")
 
         // Compress image to save bandwidth
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
@@ -129,7 +132,7 @@ class FirebaseManager {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        print("⏳ Step 2: Starting upload task for \(filename)...")
+        print("⏳ Step 2: Starting upload task for \(finalFileName)...")
 
         // Use 'putData' task to observe progress
         let uploadTask = storageRef.putData(imageData, metadata: metadata)
@@ -171,28 +174,22 @@ class FirebaseManager {
         }
     }
 
-    // MARK: - 🎥 Upload Video (New)
+    // MARK: - 🎥 Upload Video
 
-    /// - Returns: Tuple containing (videoDownloadURL, thumbnailDownloadURL)
-    func uploadVideo(compressedVideoURL: URL, onProgress: @escaping (Double) -> Void) async throws -> (videoUrl: String, thumbUrl: String) {
+    /// Uploads ONLY the video file. Thumbnail handling is moved to the caller (AddPlaceVC) to avoid duplicate generation.
+    /// - Returns: String containing the videoDownloadURL
+    func uploadVideo(compressedVideoURL: URL, customName: String? = nil, onProgress: @escaping (Double) -> Void) async throws -> String {
         print("\n╔════════════ [ START: uploadVideo ] ════════════╗")
         print("🎬 Step 1: Initiating Video Upload process for: \(compressedVideoURL.lastPathComponent)")
 
-        // 1. Generate & Upload Thumbnail first (Quick operation)
-        print("🖼️ Generating video thumbnail...")
-        guard let thumbImage = VideoHelper.generateThumbnail(from: compressedVideoURL) else {
-            print("❌ Error: Could not generate thumbnail from video.")
-            throw NSError(domain: "VideoError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not generate thumbnail"])
-        }
+        // Note: Thumbnail upload logic removed from here as it is now handled in AddPlaceVC.
 
-        print("⏳ Uploading thumbnail image...")
-        // Thumbnail contributes very little to progress, so we just await it.
-        let thumbUrlString = try await uploadImage(thumbImage, folderName: "place_Thumbnails", onProgress: { _ in })
-        print("✅ Thumbnail Uploaded: \(thumbUrlString)")
-        UploadPersistenceManager.shared.addUploadedDraftURLs(thumbUrlString)
-        // 2. Upload Video File
-        let filename = UUID().uuidString + ".mp4"
-        let videoRef = storage.reference().child("place_videos/\(filename)")
+        // 1. Upload Video File
+        // ✅ LOGIC CHANGE: Use customName if provided
+        let filename = customName ?? UUID().uuidString
+        let finalFileName = "\(filename).mp4" // Always .mp4
+
+        let videoRef = storage.reference().child("place_videos/\(finalFileName)")
         let metadata = StorageMetadata()
         metadata.contentType = "video/mp4"
 
@@ -236,8 +233,8 @@ class FirebaseManager {
                 }
             }
 
-            print("🏁 Video Process Complete. Returning URLs.")
-            return (videoUrlString, thumbUrlString)
+            print("🏁 Video Process Complete. Returning Video URL.")
+            return videoUrlString
 
         } catch {
             print("❌ Error: Failed to read local compressed video data: \(error.localizedDescription)")
@@ -247,12 +244,15 @@ class FirebaseManager {
 
     // MARK: - 📄 Upload PDF (New)
 
-    func uploadPDF(pdfURL: URL, onProgress: @escaping (Double) -> Void) async throws -> String {
+    func uploadPDF(pdfURL: URL, customName: String? = nil, onProgress: @escaping (Double) -> Void) async throws -> String {
         print("\n╔════════════ [ START: uploadPDF ] ════════════╗")
         print("📄 Step 1: Initiating PDF upload for file: \(pdfURL.lastPathComponent)")
 
-        let filename = UUID().uuidString + ".pdf"
-        let pdfRef = storage.reference().child("place_docs/\(filename)")
+        // ✅ LOGIC CHANGE: Use customName if provided
+        let filename = customName ?? UUID().uuidString
+        let finalFileName = "\(filename).pdf"
+
+        let pdfRef = storage.reference().child("place_docs/\(finalFileName)")
         let metadata = StorageMetadata()
         metadata.contentType = "application/pdf"
 
@@ -438,35 +438,33 @@ class FirebaseManager {
         }
     }
 
-    // MARK: - 🗑️ Storage Cleanup Helper
+    // MARK: - 🗑️ Global Storage Cleanup Helper (Universal)
 
-    private func deleteFileFromStorage(url: String?) async {
-        print("\n╔════════════ [ START: deleteFileFromStorage ] ════════════╗")
-        // 1. Basic Validation
-        guard let urlString = url, !urlString.isEmpty else {
-            print("⚠️ Cleanup: Provided URL is empty, skipping.")
+    /// Deletes a file from Firebase Storage using its Download URL.
+    /// Used for: Draft Discard AND Delete Place Logic.
+    func deleteStorageFile(at urlString: String) async {
+        print("\n╔════════════ [ START: deleteStorageFile ] ════════════╗")
+
+        // 1. Validation: Ensure it's a valid remote Firebase URL
+        guard !urlString.isEmpty, urlString.contains("firebase") else {
+            print("⚠️ Cleanup: Invalid or Local URL skipped: \(urlString)")
             return
         }
 
+        // 2. Create Reference
+        // Note: storage.reference(forURL:) creates a ref from a full HTTPS URL
+        let storageRef = storage.reference(forURL: urlString)
+
+        // 3. Attempt Delete
         do {
-            // 2. Create Reference from URL
-            // 💡 Senior Developer Tip: storage.reference(forURL:) can throw if the URL is invalid.
-            let storageRef = storage.reference(forURL: urlString)
-
             print("⏳ Storage: Attempting to delete file: \(storageRef.name)")
-
-            // 3. Execute Delete
             try await storageRef.delete()
-
-            print("✅ Storage: File deleted successfully: \(storageRef.name)")
-
+            print("✅ Storage: File deleted successfully.")
         } catch {
-            // 4. Detailed Error Handling
-            // If file doesn't exist, it's often okay to just ignore and skip.
-            print("❌ Storage Error: Failed to delete file at \(urlString)")
-            print("📝 Reason: \(error.localizedDescription)")
-
-            //
+            // 4. Error Handling
+            // If file doesn't exist (already deleted), we just log it as a warning.
+            // We don't throw error because we want the process to continue.
+            print("⚠️ Warning: Failed to delete file (might not exist). Reason: \(error.localizedDescription)")
         }
     }
 
@@ -538,7 +536,8 @@ class FirebaseManager {
             for url in urlsToDelete {
                 group.addTask {
                     print("🗑️ Deleting Storage File: \(url)")
-                    await self.deleteFileFromStorage(url: url)
+                    // ✅ FIXED: Used the consistent helper name
+                    await self.deleteStorageFile(at: url)
                 }
             }
         }
@@ -644,7 +643,8 @@ class FirebaseManager {
             for url in urlsToDelete {
                 group.addTask {
                     print("🗑️ Deleting Storage File: \(url)")
-                    await self.deleteFileFromStorage(url: url)
+                    // ✅ FIXED: Used the consistent helper name
+                    await self.deleteStorageFile(at: url)
                 }
             }
         }
@@ -785,18 +785,14 @@ class FirebaseManager {
             for url in allUrlsToDelete {
                 group.addTask {
                     print("🗑️ Deleting file: \(url)")
-                    await self.deleteFileFromStorage(url: url)
+                    // ✅ FIXED: Used the consistent helper name
+                    await self.deleteStorageFile(at: url)
                 }
             }
         }
         print("✅ Firebase Storage Cleanup Finished.")
 
-        // --- STEP E: Clean Local Phone Storage 🧹 ---
-        print("📱 Step E: Clearing local Documents & Cache...")
-        UserProfileImageStorage.clearAllStoredFiles()
-        print("✅ Local Storage Cleared.")
-
-        // --- STEP F: Delete Auth Account ---
+        // --- STEP E: Delete Auth Account ---
         print("🔐 Step F: Deleting Firebase Auth User...")
         do {
             try await user.delete()
@@ -1041,21 +1037,5 @@ class FirebaseManager {
 
         print("✅ Step 3: Successfully decoded \(reviews.count) reviews for this place.")
         return reviews
-    }
-
-    // MARK: - Firebase Storage Cleanup Helper
-
-    func deleteStorageFileDraftDiscarded(at urlString: String) async {
-        print("\n╔════════════ [ START: deleteStorageFileDiscarded ] ════════════╗")
-        // Basic check to ensure it's a valid URL
-        guard !urlString.isEmpty, urlString.contains("firebase") else { return }
-
-        let storageRef = Storage.storage().reference(forURL: urlString)
-        do {
-            try await storageRef.delete()
-            print("✅ Successfully deleted file from Firebase Storage")
-        } catch {
-            print("❌ Failed to delete file: \(error.localizedDescription)")
-        }
     }
 }

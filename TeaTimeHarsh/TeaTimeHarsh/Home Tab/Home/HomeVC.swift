@@ -116,11 +116,16 @@ class HomeVC: UIViewController {
         setupRefreshControl()
     }
 
-    private func checkPendingUploads(draft: PendingUploadModel) {
-        print("getUploadedDraftMediaURLs", UploadPersistenceManager.shared.getUploadedDraftMediaURLs())
-        let actions = [
-            // Action 1: Resume Upload 🚀
+    // MARK: - Check Pending Uploads (Resume / Discard Logic) 🚀
 
+    private func checkPendingUploads(draft: PendingUploadModel) {
+        // Debug print to see what files are tracked for deletion
+        print("🔍 Found Tracked Media URLs for potential cleanup:", UploadPersistenceManager.shared.getUploadedDraftMediaURLs())
+
+        let actions = [
+            // ---------------------------------------------------------
+            // Action 1: Resume Upload 🚀
+            // ---------------------------------------------------------
             SheetAction(title: "Resume Place Upload 🚀", style: .default) {
                 // A. Initialize AddPlaceVC
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -128,7 +133,7 @@ class HomeVC: UIViewController {
                     // B. Force Load UI (Important: outlets will be nil otherwise)
                     addVC.loadViewIfNeeded()
 
-                    // C. Restore Data form Draft
+                    // C. Restore Data from Draft
                     addVC.restoreFromDraft(model: draft)
 
                     // D. Push to Screen
@@ -136,24 +141,54 @@ class HomeVC: UIViewController {
                 }
             },
 
-            // Action 2: Discard Draft 🗑️
-
+            // ---------------------------------------------------------
+            // Action 2: Discard Draft 🗑️ (With Smart Safety Check)
+            // ---------------------------------------------------------
             SheetAction(title: "Discard Draft ❌", style: .destructive) {
-                // 1. Get the links before starting the Task
+                // ⚠️ SAFETY CHECK FOR EDIT MODE
+                // Since we use 'Overwrite Strategy', uploading a file in Edit mode replaces the live file immediately.
+                // If user discards now, we MUST NOT delete the file, otherwise the Live Place will have a broken link.
+                // We simply clear the local draft state.
+                if draft.isEditMode {
+                    print("🛡️ Edit Mode detected: Skipping server file deletion to prevent broken links.")
+                    UploadPersistenceManager.shared.clearUploadState()
+                    return
+                }
+
+                // --- ADD MODE DELETION LOGIC BELOW ---
+                // For New Places, if we discard, the files are orphans. So we MUST delete them.
+
+                // 1. Get ALL tracked links globally (Safety net)
                 let linksToDelete = UploadPersistenceManager.shared.getUploadedDraftMediaURLs()
 
+                // If no files were uploaded, just clear local state and exit
+                if linksToDelete.isEmpty {
+                    UploadPersistenceManager.shared.clearUploadState()
+                    print("🧹 No remote files found. Local draft cleared.")
+                    return
+                }
+
+                // 2. Start Async Cleanup Task
                 Task {
-                    // 2. Loop through and delete from Firebase
-                    // We do this BEFORE clearing persistence
+                    print("🗑️ Discarding Draft (Add Mode): Found \(linksToDelete.count) orphan files to delete from Server.")
+
+                    // Loop through and delete from Firebase Storage
                     for urlString in linksToDelete {
-                        print("❌ Attempting to remove firebase cloud storage URL : \(urlString)")
-                        await FirebaseManager.shared.deleteStorageFileDraftDiscarded(at: urlString)
+                        // Safety Check: Only delete if it looks like a Firebase URL
+                        if urlString.contains("firebase") {
+                            print("🔥 Deleting file from cloud: \(urlString)")
+                            await FirebaseManager.shared.deleteStorageFile(at: urlString)
+                        }
                     }
+
+                    // 3. Update UI on Main Thread after cleanup
                     await MainActor.run {
                         HapticHelper.medium()
-                        // 3. ONLY after all Firebase files are deleted, clear local state
-                        // This ensures the URLs are available for the loop above
+
+                        // ONLY after all Firebase files are deleted, clear local state.
                         UploadPersistenceManager.shared.clearUploadState()
+
+                        print("✅ Draft Discarded & All Orphan Files Cleaned Successfully.")
                     }
                 }
             },
@@ -163,7 +198,7 @@ class HomeVC: UIViewController {
         AlertHelper.showActionSheet(
             on: self,
             title: "Incomplete Upload Found ⚠️",
-            message: "Last time the upload for '\(draft.name)' was interrupted. Do you want to retry?. Would you like to finish uploading it?",
+            message: "Last time the upload for '\(draft.name)' was interrupted. Would you like to finish uploading it?",
             actions: actions
         )
     }

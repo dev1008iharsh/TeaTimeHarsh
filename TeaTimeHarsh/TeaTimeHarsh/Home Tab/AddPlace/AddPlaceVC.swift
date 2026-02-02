@@ -9,7 +9,6 @@ import AVFoundation // ✅ Required for Video Thumbnail
 import AVKit // 🎥 For Video Player
 import GoogleMaps
 import Kingfisher
-// import PDFKit // 📄 For PDF Thumbnail inside View
 import PhotosUI // ✅ Required for Video Picker
 import QuickLook // 👁️ For Local PDF Preview
 import SafariServices // 🌍 For Remote PDF URL
@@ -53,6 +52,9 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     // MARK: - Properties
 
+    // ⚠️ NEW: We store ID here to ensure filenames are fixed
+    private var currentPlaceID: String!
+
     // Public: Set this before pushing VC
     var screenMode: PlaceScreenMode = .add
 
@@ -91,6 +93,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // ✅ CRITICAL: Set the ID immediately when screen loads
+        configurePlaceID()
+
         setupUI()
         setupNavBar()
         setupMenuSelection()
@@ -106,6 +112,19 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     deinit {
         print("💀 deinit AddPlaceVC is dead. Memory Free & Temp Files Cleaned!")
+    }
+
+    // ✅ Helper to set ID
+    private func configurePlaceID() {
+        switch screenMode {
+        case .add:
+            // Create a NEW Fixed ID immediately (Will stay same even if user retries)
+            currentPlaceID = UUID().uuidString
+        case let .edit(place):
+            // Use EXISTING ID (So we overwrite existing files on edit)
+            currentPlaceID = place.id
+        }
+        print("🆔 Current Place ID set to: \(currentPlaceID ?? "N/A")")
     }
 
     private func setupUI() {
@@ -133,6 +152,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             btnSubmit.setTitle("Submit", for: .normal)
             // mapContainerView remains hidden
 
+            #if DEBUG
+                seedSimulatorDataIfNeeded()
+            #endif
+
         case let .edit(place):
             title = "Edit Place"
             btnSubmit.setTitle("Update", for: .normal)
@@ -156,6 +179,30 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             // Fill Data
             setupDataForEditMode(place: place)
         }
+    }
+
+    // 🛠️ Debug Helper (Restored)
+    private func seedSimulatorDataIfNeeded() {
+        txtName.text = "Cafe at midnight ok to go"
+        txtDesc.text = "Cafe Despotic is a casual café known for its great coffee, tea selection, and nice, cozy atmosphere. Located in Rajkot, it offers table service, takeout, and delivery with free street parking. It is a popular spot for quick bites like samosas, with an average cost of ₹100-2000"
+
+        txtWebsite.text = "www.youtube.com"
+        txtPhone.text = "9662108047"
+
+        selectedCity = "Ahmedabad"
+        txtCity.text = "Ahmedabad"
+
+        selectedPriceRange = "100-200"
+        txtPriceRange.text = "100-200"
+
+        selectedOpeningTime = "08:00"
+        txtOpeningTime.text = "08:00"
+
+        selectedClosingTime = "22:00"
+        txtClosingTime.text = "22:00"
+
+        selectedHoliday = "None"
+        txtHoliday.text = "None"
     }
 
     private func setupDataForEditMode(place: TeaPlace) {
@@ -262,13 +309,14 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     /// 1. Save current state to disk so we can resume if app crashes
     private func saveDraftState() {
-        var placeIDValue: String?
+        // ✅ OPTIMIZATION: Always use the fixed ID.
+        let placeIDValue = currentPlaceID
+
         var isEdit = false
         let currentRating: Double
         if case let .edit(cPlace) = screenMode {
             currentRating = cPlace.rating ?? 0.0
             isEdit = true
-            placeIDValue = cPlace.id
         } else {
             currentRating = 0.0
             isEdit = false
@@ -276,7 +324,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         UploadPersistenceManager.shared.saveUploadState(
             isEditMode: isEdit,
-            placeID: placeIDValue,
+            placeID: placeIDValue, // ✅ Passing Fixed ID
             name: txtName.text?.trimmed ?? "",
             desc: txtDesc.text?.trimmed ?? "",
             website: txtWebsite.text?.removeAllSpaces ?? "",
@@ -301,63 +349,148 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         )
     }
 
+    // MARK: - Upload Workers (Duplicate Proof + Overwrite Logic) 🛡️
+
     /// 2. Heavy Lifting: Image -> Video -> PDF Uploads
     private func uploadAllMedia() async throws -> (image: String, video: String?, thumb: String?, pdf: String?) {
-        // A. Image (20%)
-        UploadProgressHUD.shared.titleLabel.text = "Uploading place cover image... 📸"
+        // 1. Fetch FRESH draft state.
+        let savedDraft = UploadPersistenceManager.shared.getPendingUpload()
+
+        // ---------------------------------------------------------
+        // A. Image Upload (20%)
+        // ---------------------------------------------------------
+        UploadProgressHUD.shared.titleLabel.text = "Checking image status... 📸"
         var finalImageURL = existingImageURL ?? ""
-        if hasSelectedNewImage, let image = imgPlace.image {
+
+        // 🛡️ Smart Skip: Don't re-upload if already done (Saves Bandwidth)
+        if let persistedImg = savedDraft?.existingImageURL, !persistedImg.isEmpty, persistedImg.contains("firebase") {
+            print("⏭️ Smart Skip: Image already uploaded -> \(persistedImg)")
+            finalImageURL = persistedImg
+            UploadProgressHUD.shared.updateProgress(0.2)
+        } else if hasSelectedNewImage, let image = imgPlace.image {
+            UploadProgressHUD.shared.titleLabel.text = "Uploading place cover image... 📸"
             UploadProgressHUD.shared.updateProgress(0.05)
+
+            // ✅ FIX: Use Deterministic Name (PLACE_ID_cover_image.jpg)
+            let fixedName = "\(currentPlaceID!)_cover_image"
+
             finalImageURL = try await FirebaseManager.shared
-                .uploadImage(image, folderName: "place_cover") { progress in
+                .uploadImage(image, folderName: "place_cover", customName: fixedName) { progress in
                     UploadProgressHUD.shared.updateProgress(0.0 + (progress * 0.2))
                 }
+
+            // ✅ CRITICAL: Save IMMEDIATELY
             UploadPersistenceManager.shared.addUploadedDraftURLs(finalImageURL)
+            UploadPersistenceManager.shared.updateDraftImageURL(finalImageURL)
+            existingImageURL = finalImageURL
         } else {
             UploadProgressHUD.shared.updateProgress(0.2)
         }
 
-        // B. Video (60%)
-        UploadProgressHUD.shared.titleLabel.text = "Optimising video quality for faster upload... ⚙️🎥"
+        // ---------------------------------------------------------
+        // B. Video Upload (60%)
+        // ---------------------------------------------------------
+        UploadProgressHUD.shared.titleLabel.text = "Checking video status... 🎥"
         var finalVideoURL = existingVideoURL
         var finalThumbURL = existingVideoThumbURL
 
-        if let rawVideoURL = selectedVideoURL {
-            print("🎥😬 Compressing Video...")
-            // Compression
-            let compressedURL = await withCheckedContinuation { continuation in
-                VideoHelper.compressTo720p(inputURL: rawVideoURL) { url, _ in
-                    continuation.resume(returning: url)
+        // 🛡️ Smart Skip: Check if Video & Thumb are done
+        if let persistedVid = savedDraft?.existingVideoURL, !persistedVid.isEmpty, persistedVid.contains("firebase"),
+           let persistedThumb = savedDraft?.existingThumbURL, !persistedThumb.isEmpty {
+            print("⏭️ Smart Skip: Video & Thumb already uploaded")
+            finalVideoURL = persistedVid
+            finalThumbURL = persistedThumb
+            UploadProgressHUD.shared.updateProgress(0.8)
+
+        } else if let rawVideoURL = selectedVideoURL {
+            // --- Step B1: Upload Thumbnail ---
+            if let persistedThumb = savedDraft?.existingThumbURL, !persistedThumb.isEmpty {
+                print("⏭️ Smart Skip: Thumbnail already uploaded.")
+                finalThumbURL = persistedThumb
+            } else {
+                print("🖼️ Uploading Thumbnail from UI...")
+                let thumbImageToUpload = imgSelectedVideoThumbnail.image ?? VideoHelper.generateThumbnail(from: rawVideoURL)
+
+                if let thumb = thumbImageToUpload {
+                    // ✅ FIX: Use Deterministic Name (PLACE_ID_video_thumb.jpg)
+                    let fixedThumbName = "\(currentPlaceID!)_video_thumb"
+
+                    finalThumbURL = try await FirebaseManager.shared.uploadImage(thumb, folderName: "place_Thumbnails", customName: fixedThumbName) { _ in }
+
+                    // ✅ TRACK IMMEDIATELY
+                    UploadPersistenceManager.shared.addUploadedDraftURLs(finalThumbURL ?? "")
                 }
             }
 
-            if let compressed = compressedURL {
-                print("☁️⬆️ Uploading Video...")
-                UploadProgressHUD.shared.titleLabel.text = "Optimising video and uploading to the cloud...🎥"
-                let result = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressed) { progress in
-                    UploadProgressHUD.shared.updateProgress(0.2 + (progress * 0.6))
+            // --- Step B2: Upload Video ---
+            if let persistedVid = savedDraft?.existingVideoURL, !persistedVid.isEmpty {
+                print("⏭️ Smart Skip: Video File already uploaded.")
+                finalVideoURL = persistedVid
+            } else {
+                print("🎥😬 Compressing Video...")
+                let compressedURL = await withCheckedContinuation { continuation in
+                    VideoHelper.compressTo720p(inputURL: rawVideoURL) { url, _ in
+                        continuation.resume(returning: url)
+                    }
                 }
-                finalVideoURL = result.videoUrl
-                finalThumbURL = result.thumbUrl
-                UploadPersistenceManager.shared.addUploadedDraftURLs(result.videoUrl)
-                UploadPersistenceManager.shared.addUploadedDraftURLs(result.thumbUrl)
+
+                if let compressed = compressedURL {
+                    print("☁️⬆️ Uploading Video...")
+                    UploadProgressHUD.shared.titleLabel.text = "Optimising video and uploading to the cloud...🎥"
+
+                    // ✅ FIX: Use Deterministic Name (PLACE_ID_video.mp4)
+                    let fixedVideoName = "\(currentPlaceID!)_video"
+
+                    let videoUrlString = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressed, customName: fixedVideoName) { progress in
+                        UploadProgressHUD.shared.updateProgress(0.2 + (progress * 0.6))
+                    }
+                    finalVideoURL = videoUrlString
+                    // ✅ TRACK IMMEDIATELY
+                    UploadPersistenceManager.shared.addUploadedDraftURLs(videoUrlString)
+                }
             }
+
+            // Final Save: Update Persistence
+            if let vid = finalVideoURL, let thm = finalThumbURL {
+                UploadPersistenceManager.shared.updateDraftVideoURL(videoUrl: vid, thumbUrl: thm)
+                existingVideoURL = vid
+                existingVideoThumbURL = thm
+            }
+
         } else {
             UploadProgressHUD.shared.updateProgress(0.8)
         }
 
-        // C. PDF (20%)
+        // ---------------------------------------------------------
+        // C. PDF Upload (20%)
+        // ---------------------------------------------------------
+        UploadProgressHUD.shared.titleLabel.text = "Checking PDF status... 📄"
         var finalPDFURL = existingPDFURL
-        if let pdfURL = selectedPDFURL {
+
+        // 🛡️ Smart Skip
+        if let persistedPDF = savedDraft?.existingPDFURL, !persistedPDF.isEmpty, persistedPDF.contains("firebase") {
+            print("⏭️ Smart Skip: PDF already uploaded")
+            finalPDFURL = persistedPDF
+            UploadProgressHUD.shared.updateProgress(1.0)
+        } else if let pdfURL = selectedPDFURL {
             print("☁️⬆️ Uploading PDF...")
             UploadProgressHUD.shared.titleLabel.text = "Uploading attached pdf document... 📄"
-            finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL) { progress in
+
+            // ✅ FIX: Use Deterministic Name (PLACE_ID_menu.pdf)
+            let fixedPDFName = "\(currentPlaceID!)_menu"
+
+            finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL, customName: fixedPDFName) { progress in
                 UploadProgressHUD.shared.updateProgress(0.8 + (progress * 0.2))
             }
+
+            // ✅ TRACK IMMEDIATELY
             UploadPersistenceManager.shared.addUploadedDraftURLs(finalPDFURL ?? "")
+            UploadPersistenceManager.shared.updateDraftPDFURL(finalPDFURL ?? "")
+            existingPDFURL = finalPDFURL
         } else {
             UploadProgressHUD.shared.updateProgress(1.0)
         }
+
         UploadProgressHUD.shared.titleLabel.text = "Saving place to server... 🥳🎉"
         return (finalImageURL, finalVideoURL, finalThumbURL, finalPDFURL)
     }
@@ -441,6 +574,12 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // MARK: - Public: Restore from Draft
 
     func restoreFromDraft(model: PendingUploadModel) {
+        // ✅ CRITICAL: Restore the ID from draft so filenames match
+        if let savedID = model.placeID {
+            currentPlaceID = savedID
+            print("♻️ Restored Place ID from Draft: \(savedID)")
+        }
+
         // 1. Restore Mode 🚩
         if model.isEditMode, let id = model.placeID {
             // Create a dummy TeaPlace object to satisfy the .edit enum case.
@@ -587,7 +726,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         switch screenMode {
         case .add:
             var newPlace = TeaPlace(
-                id: UUID().uuidString,
+                // ✅ OPTIMIZATION: Use the fixed currentPlaceID instead of creating new UUID
+                id: currentPlaceID,
                 name: nameTrimmed,
                 desc: descTrimmed,
                 website: website,
@@ -617,7 +757,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         case let .edit(existingPlace):
             // Update existing object (Keep ID & Owner same)
             return TeaPlace(
-                id: existingPlace.id, // KEEP ID
+                id: existingPlace.id, // KEEP ID (matches currentPlaceID)
                 name: nameTrimmed,
                 desc: descTrimmed,
                 website: website,
@@ -654,6 +794,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         }
     }
 
+    // ✅ Restored Function: getSuccessMessage
     private func getSuccessMessage() -> String {
         let isUpdate = btnSubmit.title(for: .normal) == "Update"
         let action = isUpdate ? "Updated" : "Added"
@@ -665,8 +806,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         """
     }
 
-    // MARK: - UI & Validation 🛡️
-
+    // ✅ Restored Function: validateFields
     private func validateFields() -> String? {
         // 1. 🖼️ Image Validation (Moved Here)
         // Add Mode: User MUST select a new image.
@@ -776,7 +916,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // MARK: - Actions
 
     @IBAction func btnSubmitTapped(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.success()
         view.endEditing(true)
         if let errorMsg = validateFields() {
@@ -791,7 +931,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnSelectLocationMap(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.medium()
         guard AppNetworkManager.shared.isConnected else {
             AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to open map screen and select location from map 📍.", vc: self)
@@ -809,7 +949,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnSelectVideo(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.light()
         var config = PHPickerConfiguration()
         config.filter = .videos
@@ -823,7 +963,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // MARK: - PDF Selection Action
 
     @IBAction func btnSelectMenu(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.light()
 
         // Strictly allow only PDF
@@ -840,7 +980,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnRemoveSelectVideo(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.medium()
 
         AlertHelper.showConfirmationAlert(
@@ -861,7 +1001,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnRemoveSelectMenu(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.medium()
 
         AlertHelper.showConfirmationAlert(
@@ -924,7 +1064,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapVideoPreview() {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.light()
 
         // 1. Check if we have a NEW local video selected
@@ -938,7 +1078,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapPDFPreview() {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.light()
 
         // 1. Check if New Local PDF
@@ -974,7 +1114,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapCancelBarButton() {
-        self.view.endEditing(true)
+        view.endEditing(true)
         showDiscardAlert()
     }
 
@@ -995,7 +1135,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapPlaceImage() {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.light()
         ImagePickerManager.shared.pickSingleImage(from: self) { [weak self] selectedImage in
             guard let self = self, let image = selectedImage else { return }
