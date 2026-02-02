@@ -50,6 +50,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         case .authorizedWhenInUse, .authorizedAlways:
             locationManager.startUpdatingLocation()
         case .denied:
+            HapticHelper.warning()
             showPermissionDeniedAlert()
         case .restricted:
             showPermissionRestrictedAlert()

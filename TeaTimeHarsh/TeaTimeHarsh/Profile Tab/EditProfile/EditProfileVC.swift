@@ -136,10 +136,11 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
     @IBAction func btnUpdateTapped(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.heavy()
+        HapticHelper.light()
 
         // 1. 🛡️ Run Validation
         if let errorMessage = validateInput() {
+            HapticHelper.error()
             AlertHelper
                 .showAlert(
                     title: "Data validation Error",
@@ -188,7 +189,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                 try await UserDataManager.shared.updateUserProfile(user: userToUpdate)
                 LoaderManager.shared.stopLoading()
                 // C. Success!
-
+                HapticHelper.success()
                 UserProfileImageStorage.saveUserProfileImage(profileImage)
                 AlertHelper
                     .showAlertHandler(
@@ -201,6 +202,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
                     }
 
             } catch {
+                HapticHelper.error()
                 LoaderManager.shared.stopLoading()
                 AlertHelper.showAlert(
                     title: "Failed to update",
@@ -245,6 +247,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
 
     @objc func doneDateTapped() {
         // Dismiss the picker
+        HapticHelper.light()
         txtBirthDate.resignFirstResponder()
     }
 
@@ -347,7 +350,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     }
 
     @objc private func didTapCancelBarButton() {
-        HapticHelper.error()
+        HapticHelper.warning()
 
         AlertHelper.showConfirmationAlert(
             title: "Discard Changes?",

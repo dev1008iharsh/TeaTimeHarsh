@@ -64,10 +64,11 @@ class DetailHeader: UIView {
     }
 
     @objc private func didTapReviewLabel() {
+        HapticHelper.light()
         onReviewTapped?()
     }
     @objc private func didTapPlaceImage() {
-        HapticHelper.medium()
+        HapticHelper.light()
         if imgPlace.image != nil {
             ImageZoomViewer.shared.showFullScreen(from: imgPlace, backgroundColor: .black)
         }
@@ -148,6 +149,7 @@ class DetailHeader: UIView {
     // MARK: - ⚠️ Revert Logic (If API Fails)
 
     @objc func handleAPIFailure(_ notification: Notification) {
+        HapticHelper.error()
         guard let failedID = notification.userInfo?["placeID"] as? String,
               failedID == currentPlaceID,
               let actionType = notification.userInfo?["actionType"] as? String else { return }

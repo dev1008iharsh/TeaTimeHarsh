@@ -38,7 +38,7 @@ class FirebaseManager {
         print("📦 Found \(globalPlaces.count) global places.")
 
         // 2. Fetch User Specific Actions (Fav/Visited)
-        let userID = Constants.Strings.currentUserID
+        let userID = AppConstants.Strings.currentUserID
         print("👤 Step 2: Fetching user actions for: \(userID)")
 
         let userSnapshot = try await db.collection("users")
@@ -77,7 +77,7 @@ class FirebaseManager {
 
     func updateUserAction(placeId: String, isFav: Bool, isVisited: Bool) async throws {
         print("\n╔════════════ [ START: updateUserAction ] ════════════╗")
-        let userID = Constants.Strings.currentUserID
+        let userID = AppConstants.Strings.currentUserID
         print("🔄 Step 1: Updating User Action for PlaceID: \(placeId) (User: \(userID))")
 
         let userActionRef = db.collection("users")
@@ -189,7 +189,7 @@ class FirebaseManager {
         let filename = customName ?? UUID().uuidString
         let finalFileName = "\(filename).mp4" // Always .mp4
 
-        let videoRef = storage.reference().child("place_videos/\(finalFileName)")
+        let videoRef = storage.reference().child("place_video/\(finalFileName)")
         let metadata = StorageMetadata()
         metadata.contentType = "video/mp4"
 
@@ -252,7 +252,7 @@ class FirebaseManager {
         let filename = customName ?? UUID().uuidString
         let finalFileName = "\(filename).pdf"
 
-        let pdfRef = storage.reference().child("place_docs/\(finalFileName)")
+        let pdfRef = storage.reference().child("place_menu/\(finalFileName)")
         let metadata = StorageMetadata()
         metadata.contentType = "application/pdf"
 
@@ -310,7 +310,7 @@ class FirebaseManager {
         print("🚀 Step 1: Initiating 'Add New Place' for: [\(place.name)]")
 
         let batch = db.batch()
-        let userID = Constants.Strings.currentUserID
+        let userID = AppConstants.Strings.currentUserID
 
         // Path definitions
         let placesRef = db.collection("places").document(place.id)
@@ -397,7 +397,7 @@ class FirebaseManager {
 
             // Unique name apiye image ne
             let filename = UUID().uuidString
-            let storageRef = storage.reference().child("bug_images/\(filename).jpg")
+            let storageRef = storage.reference().child("place_bug_images/\(filename).jpg")
 
             do {
                 // Upload Data
@@ -419,7 +419,7 @@ class FirebaseManager {
         // 2️⃣ Have badho data Firestore ma 'bugs' collection ma save karo
         print("📝 Step 2: Preparing Firestore document for 'bugs' collection...")
         let bugData: [String: Any] = [
-            "userId": Constants.Strings.currentUserID, // Tamo pass karelu ID
+            "userId": AppConstants.Strings.currentUserID, // Tamo pass karelu ID
             "email": email,
             "description": desc,
             "imageUrl": imageUrlString, // Image URL (kholi hoy to empty)
@@ -516,7 +516,7 @@ class FirebaseManager {
         batch.deleteDocument(db.collection("places").document(place.id))
 
         // Delete User Action (Visited/Fav status)
-        let userActionRef = db.collection("users").document(Constants.Strings.currentUserID)
+        let userActionRef = db.collection("users").document(AppConstants.Strings.currentUserID)
             .collection("user_actions").document(place.id)
         batch.deleteDocument(userActionRef)
 
@@ -609,7 +609,7 @@ class FirebaseManager {
 
     func deleteAllPlacesCreatedByUser() async throws {
         print("\n╔════════════ [ START: deleteAllPlacesCreatedByUser ] ════════════╗")
-        print("🧨 Step 1: Initiating 'Delete All Places' for User: \(Constants.Strings.currentUserID)")
+        print("🧨 Step 1: Initiating 'Delete All Places' for User: \(AppConstants.Strings.currentUserID)")
 
         // 1. Create Batch
         let batch = db.batch()
@@ -617,7 +617,7 @@ class FirebaseManager {
         // 2. Use Helper to queue deletions and get URLs 🤝
         // This handles Places, User Actions, Sub-reviews, and all their Images/Videos
         print("⏳ Step 2: Queuing documents for deletion via helper...")
-        let urlsToDelete = try await queuePlacesDeletion(for: Constants.Strings.currentUserID, in: batch)
+        let urlsToDelete = try await queuePlacesDeletion(for: AppConstants.Strings.currentUserID, in: batch)
 
         // If no data found, just return
         guard !urlsToDelete.isEmpty else {
@@ -708,7 +708,7 @@ class FirebaseManager {
             return
         }
 
-        let userID = Constants.Strings.currentUserID
+        let userID = AppConstants.Strings.currentUserID
         print("👤 Deleting data for User ID: \(userID)")
 
         let batch = db.batch()
@@ -829,7 +829,7 @@ class FirebaseManager {
         print("📦 Step 2: Successfully decoded \(allPlaces.count) out of \(snapshot.documents.count) places.")
 
         // 3. Filter manually using Swift
-        let currentUserID = Constants.Strings.currentUserID
+        let currentUserID = AppConstants.Strings.currentUserID
         let myPlaces = allPlaces.filter { place in
             place.createdByUserId == currentUserID
         }
@@ -881,9 +881,10 @@ class FirebaseManager {
     // 1. Upload Review Image
     func uploadReviewImage(_ image: UIImage) async throws -> String {
         print("\n╔════════════ [ START: uploadReviewImage ] ════════════╗")
+        //Every user can upload one review to particular place
         print("📸 Step 1: Starting Review Image Upload...")
         let filename = UUID().uuidString + ".jpg"
-        let storageRef = storage.reference().child("review_images/\(filename)")
+        let storageRef = storage.reference().child("place_review_images/\(filename)")
 
         // Compress image to save bandwidth
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {

@@ -21,6 +21,7 @@ class ContactHelper: NSObject, CNContactViewControllerDelegate {
 
     static func showContactMenu(on vc: UIViewController, phoneNumber: String, name: String) {
         guard isValidPhone(phone: phoneNumber) else {
+            HapticHelper.error()
             AlertHelper.showAlertHandler(title: "Invalid Number", message: "This phone number is not valid.", vc: vc) { _ in }
             return
         }

@@ -61,17 +61,21 @@ class ProfileHeaderCell: UIView {
                         // Checking if image has valid CGImage or CIImage data
                         if downloadedImage.size.width > 0 && downloadedImage.size.height > 0 {
                             // Valid image found, now safe to save
+                            HapticHelper.light()
                             UserProfileImageStorage.saveUserProfileImage(downloadedImage)
                         } else {
+                            HapticHelper.error()
                             print("🌐❌ Online but Downloaded image is empty or invalid size.")
                         }
 
                     case .failure(let error):
+                        HapticHelper.error()
                         print("🌐❌ Online but Kingfisher Error: \(error.localizedDescription)")
                     }
                 })
                 
             } else {
+                HapticHelper.error()
                 print("🌐❌ Online but url from api server is nil (empty)")
                 imgProfile.image = UIImage(systemName: "person.circle.fill")
             }
@@ -82,6 +86,7 @@ class ProfileHeaderCell: UIView {
             if let offlineImage = UserProfileImageStorage.loadUserProfileImage() {
                 imgProfile.image = offlineImage
             } else {
+                HapticHelper.error()
                 print("❌Offline but url from userdefault is nil (empty)")
                 imgProfile.image = UIImage(systemName: "person.circle.fill")
             }
@@ -90,6 +95,7 @@ class ProfileHeaderCell: UIView {
 
     @objc func handleTap() {
         // 4. Ring the phone! (Trigger the action)
+        HapticHelper.light()
         didTapProfileImage?()
     }
 }

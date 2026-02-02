@@ -19,7 +19,7 @@ class TeaActionManager {
 
     static func canModify(place: TeaPlace) -> Bool {
         // Ensure Constants.Strings.currentUserID exists in your project
-        return place.createdByUserId == Constants.Strings.currentUserID
+        return place.createdByUserId == AppConstants.Strings.currentUserID
     }
 
     // MARK: - 1. Share Logic 📤
@@ -71,7 +71,8 @@ class TeaActionManager {
         guard let vc = viewController else { return }
 
         // Ensure "AddPlaceVC" exists in your Storyboard
-        let addVC = vc.storyboard?.instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
+        let addVC = vc.storyboard?.instantiateViewController(
+            withIdentifier: AppConstants.ViewControllers.AddPlaceVC) as! AddPlaceVC
         addVC.screenMode = .edit(place)
 
         // 👇 Handle what happens after saving
@@ -159,9 +160,9 @@ class TeaActionManager {
             timingText = "Opens at \(open)"
         }
 
-        // 🛠️ Correct Google Maps Link Generation
         var mapLink = "Link Not Available"
         if let lat = place.latitude, let long = place.longitude {
+            // Standard Google Maps URL for both Web and App
             mapLink = "https://www.google.com/maps/search/?api=1&query=\(lat),\(long)"
         }
 
@@ -178,7 +179,7 @@ class TeaActionManager {
 
         🌏 Map View: \(mapLink)
 
-        _Shared via \(UtilsProject.getAppName) App \(Constants.Strings.developerEmail)_
+        _Shared via \(UtilsProject.getAppName) App \(AppConstants.Strings.developerEmail)_
         """
     }
 }

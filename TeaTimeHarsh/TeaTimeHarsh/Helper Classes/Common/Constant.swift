@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct Constants {
+struct AppConstants {
     struct Strings {
         static var currentUserID = ""
         static let appName = "TeaPlace"
@@ -17,11 +17,47 @@ struct Constants {
         static let cancel = "Cancel"
     }
 
-    struct URLs {
-        static let baseURL = "https://api.myserver.com"
-        static let login = "/auth/login"
-        static let register = "/auth/register"
+    struct Storyboards {
+        static let Main = "Main"
+        static let Profile = "Profile"
+        static let Auth = "Auth"
     }
+
+    struct ViewControllers {
+        static let LoginRegisterVC = "LoginRegisterVC"
+        
+        static let HomeVC = "HomeVC"
+        static let HomeListingTipVC = "HomeListingTipVC"
+        
+        static let AddPlaceVC = "AddPlaceVC"
+        static let SelectPlaceOnMapVC = "SelectPlaceOnMapVC"
+        
+        static let PlaceDetailVC = "PlaceDetailVC"
+        static let PlaceOwnerDetailsVC = "PlaceOwnerDetailsVC"
+        static let PlaceReviewVC = "PlaceReviewVC"
+        
+        static let UserPlacesListVC = "UserPlacesListVC"
+         
+        static let ProfileVC = "ProfileVC"
+        static let EditProfileVC = "EditProfileVC"
+        static let ReportBugVC = "ReportBugVC"
+        
+        static let MainTabBarVC = "MainTabBarVC"
+         
+    }
+
+    struct Cells {
+        static let TeaListCell = "TeaListCell"
+        
+        static let DetailStaticCell = "DetailStaticCell"
+        static let DetailHeader = "DetailHeader"
+        
+        static let ProfileHeaderCell = "ProfileHeaderCell"
+        
+        static let UserPlacesListTableCell = "UserPlacesListTableCell"
+         
+    }
+ 
 }
 
 final class UtilsProject {
@@ -44,8 +80,10 @@ final class UtilsProject {
     @MainActor
     static func logoutAndNavigateToLoginVC() {
         // 1. Get the Main Storyboard and Login VC
-        let storyboard = UIStoryboard(name: "Auth", bundle: nil)
-        let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginRegisterVC")
+        let storyboard = UIStoryboard(name: AppConstants.Storyboards.Auth, bundle: nil)
+        let loginVC = storyboard.instantiateViewController(
+            withIdentifier: AppConstants
+                .ViewControllers.LoginRegisterVC)
         let navVC = UINavigationController(rootViewController: loginVC)
 
         // 2. Find the active Window safely (Works from anywhere!)

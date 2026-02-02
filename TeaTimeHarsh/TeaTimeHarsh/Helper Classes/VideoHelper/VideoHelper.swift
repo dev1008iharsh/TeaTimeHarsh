@@ -48,6 +48,7 @@ class VideoHelper {
             let cgImage = try imageGenerator.copyCGImage(at: .zero, actualTime: nil)
             return UIImage(cgImage: cgImage)
         } catch {
+            HapticHelper.error()
             print("❌ Thumbnail Generation Error: \(error.localizedDescription)")
             return nil
         }
@@ -106,6 +107,7 @@ class VideoHelper {
                             completion(outputURL, seconds)
                         }
                     } catch {
+                        HapticHelper.error()
                         print("⚠️ Failed to load duration: \(error)")
                         DispatchQueue.main.async {
                             completion(outputURL, 0)

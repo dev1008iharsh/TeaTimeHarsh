@@ -55,7 +55,7 @@ class HomeVC: UIViewController {
         case 2: // Visited
             return filtered.filter { $0.isVisited }
         case 3: // Mine
-            return filtered.filter { $0.createdByUserId == Constants.Strings.currentUserID }
+            return filtered.filter { $0.createdByUserId == AppConstants.Strings.currentUserID }
         default: // All
             return filtered
         }
@@ -98,7 +98,11 @@ class HomeVC: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         // Refresh if returning from detail (Local update check)
-        if !arrTeaPlaces.isEmpty { tblTeaPlaces.reloadData() }
+        /*
+        if !arrTeaPlaces.isEmpty {
+            HapticHelper.success()
+            tblTeaPlaces.reloadData()
+        }*/
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -128,10 +132,17 @@ class HomeVC: UIViewController {
             // ---------------------------------------------------------
             SheetAction(title: "Resume Place Upload 🚀", style: .default) {
                 // A. Initialize AddPlaceVC
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                if let addVC = storyboard.instantiateViewController(withIdentifier: "AddPlaceVC") as? AddPlaceVC {
+                let storyboard = UIStoryboard(name: AppConstants.Storyboards.Main, bundle: nil)
+                if let addVC = storyboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.AddPlaceVC) as? AddPlaceVC {
                     // B. Force Load UI (Important: outlets will be nil otherwise)
                     addVC.loadViewIfNeeded()
+                    addVC.onPlaceAdded = { [weak self] _ in
+                        guard let self = self else { return }
+                        DispatchQueue.main.async { [weak self] in
+                            guard let self = self else { return }
+                            fetchLatestDataApi()
+                        }
+                    }
 
                     // C. Restore Data from Draft
                     addVC.restoreFromDraft(model: draft)
@@ -219,7 +230,11 @@ class HomeVC: UIViewController {
     }
 
     private func setupTableView() {
-        tblTeaPlaces.register(UINib(nibName: "TeaListCell", bundle: nil), forCellReuseIdentifier: "TeaListCell")
+        tblTeaPlaces
+            .register(
+                UINib(nibName: AppConstants.Cells.TeaListCell, bundle: nil),
+                forCellReuseIdentifier: AppConstants.Cells.TeaListCell
+            )
         tblTeaPlaces.delegate = self
         tblTeaPlaces.dataSource = self
         tblTeaPlaces.contentInset = UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0)
@@ -264,6 +279,7 @@ class HomeVC: UIViewController {
 
     @IBAction func didChangeSegmentFilter(_ sender: UISegmentedControl) {
         tblTeaPlaces.reloadData()
+        HapticHelper.light()
         if !displayedPlaces.isEmpty {
             tblTeaPlaces.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
         }
@@ -273,7 +289,7 @@ class HomeVC: UIViewController {
 
     @objc func handleConnectionRestored() {
         print("🚀 Internet Restored! Auto-refreshing Home & User Data...")
-
+        HapticHelper.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.fetchLatestDataApi()
         }
@@ -282,17 +298,21 @@ class HomeVC: UIViewController {
     }
 
     @objc private func didTapAddNavBar() {
+        HapticHelper.light()
+        
         guard AppNetworkManager.shared.isConnected else {
             showOfflineAlertAtHome()
             return
         }
-
-        HapticHelper.success()
-        let addVC = storyboard?.instantiateViewController(withIdentifier: "AddPlaceVC") as! AddPlaceVC
+        
+        let addVC = storyboard?.instantiateViewController(withIdentifier: AppConstants.ViewControllers.AddPlaceVC) as! AddPlaceVC
         addVC.screenMode = .add
         addVC.onPlaceAdded = { [weak self] _ in
             guard let self = self else { return }
-            fetchLatestDataApi()
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                fetchLatestDataApi()
+            }
         }
         navigationController?.pushViewController(addVC, animated: true)
     }
@@ -301,6 +321,8 @@ class HomeVC: UIViewController {
 
     @objc private func fetchLatestDataApi() {
         // 1. UI Loading State
+        HapticHelper.light()
+        
         if !refreshControl.isRefreshing {
             isLoading = true
             LoaderManager.shared.startLoading()
@@ -325,7 +347,7 @@ class HomeVC: UIViewController {
                 stopLoadingUI()
                 // Sync in background
                 CoreDataManager.shared.syncPlacesToLocalDB(places: places)
-
+                HapticHelper.success()
             } catch {
                 await MainActor.run {
                     // Fallback to local if API fails
@@ -349,10 +371,13 @@ class HomeVC: UIViewController {
         let localPlaces = CoreDataManager.shared.fetchLocalPlaces()
         arrTeaPlaces = localPlaces
         stopLoadingUI()
-
+        
         if localPlaces.isEmpty {
             // Only show alert if screen is totally empty
             print("🔴 Offline - No internet and no saved data found.")
+            HapticHelper.error()
+        }else{
+            HapticHelper.success()
         }
     }
 
@@ -366,7 +391,9 @@ class HomeVC: UIViewController {
 
     private func presentTipIfNeeded() {
         guard HomeListingTipManager.shouldShowTip() else { return }
-        let tipVC = storyboard?.instantiateViewController(withIdentifier: "HomeListingTipVC") as! HomeListingTipVC
+        let tipVC = storyboard?.instantiateViewController(
+            withIdentifier: AppConstants
+                .ViewControllers.HomeListingTipVC) as! HomeListingTipVC
         tipVC.modalPresentationStyle = .overFullScreen
         tipVC.modalTransitionStyle = .crossDissolve
         present(tipVC, animated: true)
@@ -374,17 +401,39 @@ class HomeVC: UIViewController {
 
     // Helper for repetitive alerts
     private func showOfflineAlertAtHome() {
+        HapticHelper.warning()
         AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this home screen action.", vc: self)
     }
 }
-
-// MARK: - Search Delegate
+ 
+// MARK: - Search Delegate (Optimized with Debouncing) 🔍
 
 extension HomeVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+        
+        // 1. Cancel the previous pending search request
+        // This stops multiple reloads if the user is typing fast
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(performDebouncedSearch), object: nil)
+        
+        // 2. Update the search text immediately
         currentSearchText = searchController.searchBar.text ?? ""
+        
+        // 3. Schedule the actual search/reload after 0.3 seconds delay
+        self.perform(#selector(performDebouncedSearch), with: nil, afterDelay: 0.3)
+    }
+    
+    @objc private func performDebouncedSearch() {
+        // Finally reload the table once user stops typing
+        print("🔍 Searching for: \(currentSearchText)")
+        
         tblTeaPlaces.reloadData()
+        HapticHelper.success()
         setNeedsUpdateContentUnavailableConfiguration()
+        
+        // Bonus: Success haptic if search yields results
+        if !displayedPlaces.isEmpty && !currentSearchText.isEmpty {
+            HapticHelper.light()
+        }
     }
 }
 
@@ -396,7 +445,10 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TeaListCell", for: indexPath) as! TeaListCell
+        // Double Safety check
+        if indexPath.row >= displayedPlaces.count { return UITableViewCell() }
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Cells.TeaListCell, for: indexPath) as! TeaListCell
         cell.configure(teaPlace: displayedPlaces[indexPath.row])
 
         cell.onFavTapped = { [weak self] in
@@ -414,7 +466,8 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let detailVC = storyboard?.instantiateViewController(withIdentifier: "PlaceDetailVC") as! PlaceDetailVC
+        let detailVC = storyboard?.instantiateViewController(
+            withIdentifier: AppConstants.ViewControllers.PlaceDetailVC) as! PlaceDetailVC
         detailVC.place = displayedPlaces[indexPath.row]
         // Reload when coming back to ensure data consistency
         detailVC.onBackToHome = { [weak self] in self?.fetchLatestDataApi() }
@@ -452,48 +505,99 @@ extension HomeVC {
         else { arrTeaPlaces[index].isVisited = status }
 
         tblTeaPlaces.reloadData()
+        HapticHelper.success()
         callApiToToggleStatus(place: arrTeaPlaces[index], type: type)
     }
 
-    // Centralized Swipe/Context/Notification Helper
+    // MARK: - Centralized Swipe/Context/Notification Helper 🛠️
+
     private func performSwipeToggle(at indexPath: IndexPath, type: String) {
-        //  Internet Check
+        // 1. Safety Check: Index Out of Range Guard 🛡️
+        // Check if the indexPath is still valid for current displayedPlaces
+        guard indexPath.row < displayedPlaces.count else {
+            print("⚠️ Index out of range: Table state might have changed.")
+            return
+        }
+
+        // 2. Internet Check 🛜
         guard AppNetworkManager.shared.isConnected else {
             showOfflineAlertAtHome()
             return
         }
 
         let selectedPlace = displayedPlaces[indexPath.row]
+
+        // Find original index in master array safely
         guard let originalIndex = arrTeaPlaces.firstIndex(where: { $0.id == selectedPlace.id }) else { return }
 
-        // 1. Toggle Local
-        if type == "fav" { arrTeaPlaces[originalIndex].isFav.toggle() }
-        if type == "visit" { arrTeaPlaces[originalIndex].isVisited.toggle() }
+        // 3. Toggle Local Data State 🔄
+        if type == "fav" {
+            arrTeaPlaces[originalIndex].isFav.toggle()
+            HapticHelper.medium()
+        } else if type == "visit" {
+            arrTeaPlaces[originalIndex].isVisited.toggle()
+            HapticHelper.medium()
+        }
 
-        // 2. Animation
+        // 4. Safe Animation Logic ✨
+        // We use reloadRows to ensure the cell is properly reconfigured by the system,
+        // which avoids 'Cell Reuse' glitches.
+        HapticHelper.heavy()
+
+        // Get the specific cell to apply a quick scale effect safely
         if let cell = tblTeaPlaces.cellForRow(at: indexPath) as? TeaListCell {
-            cell.configure(teaPlace: displayedPlaces[indexPath.row])
-            UIView.animate(withDuration: 0.1, animations: { cell.transform = CGAffineTransform(scaleX: 1.1, y: 1.1) }) { _ in
-                UIView.animate(withDuration: 0.3) { cell.transform = .identity }
+            // Update UI immediately for smooth feel
+            cell.configure(teaPlace: arrTeaPlaces[originalIndex])
+
+            // Subtle bounce animation
+            UIView.animate(withDuration: 0.1, animations: {
+                cell.transform = CGAffineTransform(scaleX: 1.12, y: 1.12)
+            }) { _ in
+                UIView.animate(withDuration: 0.2) {
+                    cell.transform = .identity
+                }
             }
         }
 
-        // 3. API
+        // 5. API Sync 🌐
         callApiToToggleStatus(place: arrTeaPlaces[originalIndex], type: type)
     }
+
+    // MARK: - Update Action API (Optimistic UI with Safety) 🔄
 
     private func callApiToToggleStatus(place: TeaPlace, type: String) {
         Task {
             do {
-                try await FirebaseManager.shared.updateUserAction(placeId: place.id, isFav: place.isFav, isVisited: place.isVisited)
-            } catch {
-                await MainActor.run {
-                    // Revert Logic on Failure
+                // Step 1: Fire Firebase API call
+                try await FirebaseManager.shared.updateUserAction(
+                    placeId: place.id,
+                    isFav: place.isFav,
+                    isVisited: place.isVisited
+                )
+                // Note: We don't need reloadData here because didSet handles it
+                // and the local state was already updated before calling this function.
+
+            } catch { 
+                // Step 2: Handle Failure & Revert State
+                await MainActor.run { [weak self] in
+                    guard let self = self else { return }
+
+                    // ID based search is much safer than passing index directly
                     if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
-                        if type == "fav" { self.arrTeaPlaces[index].isFav.toggle() }
-                        if type == "visit" { self.arrTeaPlaces[index].isVisited.toggle() }
-                        self.tblTeaPlaces.reloadData()
-                        AlertHelper.showAlert(title: "Connection Error", message: "Changes reverted.", vc: self)
+                        // Revert local data based on type
+                        if type == "fav" {
+                            self.arrTeaPlaces[index].isFav.toggle()
+                        } else if type == "visit" {
+                            self.arrTeaPlaces[index].isVisited.toggle()
+                        }
+
+                        // Show Dynamic Toast (60 padding from bottom)
+                        ToastManager.shared.show(message: "⚠️ Connection error. Changes reverted.", vc: self)
+
+                        // Haptic feedback for error
+                        HapticHelper.error()
+
+                        print("❌ API Failed: State reverted for Place ID: \(place.id)")
                     }
                 }
             }
@@ -612,6 +716,7 @@ extension HomeVC {
     private func makeDeleteAction(indexPath: IndexPath) -> UIContextualAction {
         return UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
             guard let self = self else { return }
+            HapticHelper.error()
             // ✨ UPDATED: Use displayedPlaces
             let place = self.displayedPlaces[indexPath.row]
 
@@ -622,6 +727,7 @@ extension HomeVC {
                 }
                 // Reload to update filtered view
                 self.tblTeaPlaces.reloadData()
+                HapticHelper.success()
                 completion(true)
             }
         }
@@ -630,6 +736,7 @@ extension HomeVC {
     private func makeShareAction(indexPath: IndexPath) -> UIContextualAction {
         return UIContextualAction(style: .normal, title: "Share") { [weak self] _, _, completion in
             guard let self = self else { return }
+            HapticHelper.light()
             let cell = self.tblTeaPlaces.cellForRow(at: indexPath)
             // ✨ UPDATED: Use displayedPlaces
             self.actionManager.performShare(place: self.displayedPlaces[indexPath.row], sourceView: cell ?? self.view)
@@ -640,6 +747,7 @@ extension HomeVC {
     private func makeEditAction(indexPath: IndexPath) -> UIContextualAction {
         let action = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
             guard let self = self else { return }
+            HapticHelper.medium()
             // ✨ UPDATED: Use displayedPlaces
             let place = self.displayedPlaces[indexPath.row]
             self.actionManager.performEdit(place: place) {

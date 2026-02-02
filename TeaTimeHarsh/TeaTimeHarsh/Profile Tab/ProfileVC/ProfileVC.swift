@@ -100,7 +100,7 @@ class ProfileVC: UIViewController {
     @IBOutlet var tblProfile: UITableView!
     lazy var profileHeader: ProfileHeaderCell = {
         // A. Load the XIB
-        guard let header = Bundle.main.loadNibNamed("ProfileHeaderCell", owner: nil)?.first as? ProfileHeaderCell else {
+        guard let header = Bundle.main.loadNibNamed(AppConstants.Cells.ProfileHeaderCell, owner: nil)?.first as? ProfileHeaderCell else {
             fatalError("❌ Could not load ProfileHeaderCell XIB file")
         }
 
@@ -124,6 +124,7 @@ class ProfileVC: UIViewController {
         if #available(iOS 17.0, *) {
             registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
                 self.tblProfile.reloadData()
+                HapticHelper.success()
             }
         }
     }
@@ -228,6 +229,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
     @objc private func notificationToggled(_ sender: UISwitch) {
         // Save the new value using Utility
+        HapticHelper.success()
         UtilsProject.setNotificationState(sender.isOn)
 
         print(sender.isOn ? "🔔 Notification preference : On" : "🔕 Saved: Off")
@@ -245,9 +247,15 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         switch item {
         // Personal
         case .editProfile:
+            HapticHelper.light()
             print("👤 Edit Profile Tapped")
-            let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
-            guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "EditProfileVC") as? EditProfileVC else { return }
+            let mainStoryboard = UIStoryboard(
+                name: AppConstants.Storyboards.Profile,
+                bundle: nil
+            )
+            guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.EditProfileVC) as? EditProfileVC else {
+                return
+            }
             editVC.onProfileUpdated = { [weak self] in
                 self?.profileHeader.setProfileImage()
             }
@@ -270,13 +278,16 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 return
             }
             print("🌍 Change Language")
+            HapticHelper.light()
         case .notification:
+            HapticHelper.light()
             print("🔔 Notification Settings")
             guard AppNetworkManager.shared.isConnected else {
                 showOfflineAlertAtProfile()
                 return
             }
         case .appearance:
+            HapticHelper.light()
             print("🌗 Appearance Settings")
             showAppearanceOptions()
 
@@ -291,9 +302,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.heavy()
             EmailHelper.shared.sendEmail(
                 from: self,
-                recipients: [Constants.Strings.developerEmail],
+                recipients: [AppConstants.Strings.developerEmail],
                 subject: "Help & Support Request from \(UtilsProject.getAppName) - Profile Screen",
                 body: "Tell us more about the problem you're facing here...\n\n\n\n\n" + EmailMetaData.supportInfo
             )
@@ -304,6 +316,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.light()
             openShareSheetShareApp()
         case .rate:
             print("⭐️ Rate App")
@@ -311,6 +324,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.light()
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/")
         case .bug:
             print("🐜 Report Bug")
@@ -321,6 +335,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.success()
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
         case .terms:
             print("📄 Terms & Conditions")
@@ -328,6 +343,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.success()
             openSafari(url: "https://github.com/dev1008iharsh/TeaTimeHarsh/blob/main/PRIVACY_POLICY.md")
             // Account
 
@@ -337,6 +353,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.warning()
             loadUserData()
 
         case .deleteAccount:
@@ -345,10 +362,12 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 showOfflineAlertAtProfile()
                 return
             }
+            HapticHelper.warning()
             performDeleteAccount()
 
         case .logout:
             print("🚪 Logout Logic")
+            HapticHelper.warning()
             confirmLogout()
         }
     }
@@ -377,12 +396,14 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                     present(vc, animated: true)
                 }
             } catch {
+                HapticHelper.error()
                 print("Error fetching user places: \(error.localizedDescription)")
             }
         }
     }
 
     func showOfflineAlertAtProfile() {
+        HapticHelper.warning()
         AlertHelper
             .showAlert(
                 title: "No Internet 🛜",
@@ -419,14 +440,14 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     private func navigateToChangeAppIcon() {
-        let mainStoryboard = UIStoryboard(name: "Profile", bundle: nil)
+        let mainStoryboard = UIStoryboard(name: AppConstants.Storyboards.Profile, bundle: nil)
         guard let editVC = mainStoryboard.instantiateViewController(withIdentifier: "ChangeAppIconVC") as? ChangeAppIconVC else { return }
         navigationController?.pushViewController(editVC, animated: true)
     }
 
     private func presentReportBugVC() {
-        let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-        if let reportVC = storyboard.instantiateViewController(withIdentifier: "ReportBugVC") as? ReportBugVC {
+        let storyboard = UIStoryboard(name: AppConstants.Storyboards.Profile, bundle: nil)
+        if let reportVC = storyboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.ReportBugVC) as? ReportBugVC {
             reportVC.modalPresentationStyle = .pageSheet
             present(reportVC, animated: true, completion: nil)
         }
@@ -474,6 +495,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
 
             // 🚀 THIS IS THE KEY: Force the table to refresh the text
             self.tblProfile.reloadData()
+            HapticHelper.success()
         }
 
         alert.addAction(UIAlertAction(title: "System Default", style: .default, handler: { _ in
@@ -588,12 +610,14 @@ extension ProfileVC {
                 // STEP C: Success UI
                 await MainActor.run {
                     LoaderManager.shared.stopLoading()
+                    HapticHelper.success()
                     self.handleDeleteSuccess()
                 }
 
             } catch {
                 // Failure (Wrong password, etc.)
                 await MainActor.run {
+                    HapticHelper.error()
                     LoaderManager.shared.stopLoading()
                     // Show a helpful error message
                     self.showErrorAlert(message: "Incorrect password or network error. Please try again.")
@@ -606,7 +630,6 @@ extension ProfileVC {
 
     // 4. Success Handler
     private func handleDeleteSuccess() {
-        HapticHelper.success()
         AlertHelper.showAlertHandler(
             title: "Account Deleted ✅",
             message: "Your account has been permanently deleted. See you soon! 👋",
@@ -617,8 +640,7 @@ extension ProfileVC {
     }
 
     // 5. Error Handler
-    private func showErrorAlert(message: String) {
-        HapticHelper.error()
+    private func showErrorAlert(message: String) { 
         AlertHelper.showAlert(
             title: "Error",
             message: message,

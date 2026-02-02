@@ -138,12 +138,13 @@ class UserPlacesListVC: UIViewController {
     // MARK: - Actions
 
     @objc private func didTapCancel() {
+        HapticHelper.light()
         dismiss(animated: true)
     }
 
     @objc private func didTapDeleteAction() {
         // Refactored: Now handles both cases correctly
-
+        HapticHelper.warning()
         performDeleteAllPlaces()
     }
 

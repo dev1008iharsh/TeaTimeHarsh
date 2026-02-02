@@ -22,6 +22,7 @@ final class UserProfileImageStorage {
             try data.write(to: url, options: .atomic)
             print("📸 User profile image saved successfully to local document-directory saved ✅")
         } catch {
+            HapticHelper.error()
             print("⚠️ Failed to save profile image: \(error.localizedDescription)")
         }
     }
@@ -71,6 +72,7 @@ final class UserProfileImageStorage {
             }
             print("✅ Global Cleanup: Documents folder is now empty.")
         } catch {
+            HapticHelper.error()
             print("❌ Global Cleanup Error: \(error.localizedDescription)")
         }
     }

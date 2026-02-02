@@ -70,6 +70,7 @@ class TeaListCell: UITableViewCell {
     }
 
     @objc private func didTapFavPlace() {
+        HapticHelper.light()
         onFavTapped?()
         if !AppNetworkManager.shared.isConnected {
             return
@@ -109,7 +110,7 @@ class TeaListCell: UITableViewCell {
         imgFav.image = UIImage(systemName: heartIcon)
     }
     @objc private func didTapPlaceImage() {
-        HapticHelper.medium()
+        HapticHelper.light()
         if imgTeaPlace.image != nil {
             ImageZoomViewer.shared.showFullScreen(from: imgTeaPlace, backgroundColor: .black)
         }

@@ -226,12 +226,14 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     // Show/Hide buttons on tap
     @objc private func handleSingleTap() {
+        HapticHelper.light()
         isControlHidden.toggle()
         toggleControlsVisibility(isHidden: isControlHidden, animated: true)
     }
     
     // Handle Double Tap Zoom logic
     @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+        HapticHelper.medium()
         guard let scrollView = scrollView else { return }
         
         if scrollView.zoomScale > 1.0 {
@@ -283,6 +285,7 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     // Close the viewer with animation
     @objc private func dismissFullScreen() {
+        HapticHelper.heavy()
         guard let _ = getWindow() else { return }
         
         // Hide controls and disable touch
@@ -306,6 +309,7 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     // Save button action
     @objc private func handleSave() {
+        HapticHelper.success()
         guard let image = zoomImageView?.image else { return }
         // Save image to Photos Library
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)

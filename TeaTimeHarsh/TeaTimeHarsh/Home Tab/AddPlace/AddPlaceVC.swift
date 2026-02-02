@@ -166,7 +166,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             }
 
             // 🔒 Security Check
-            if place.createdByUserId != Constants.Strings.currentUserID {
+            if place.createdByUserId != AppConstants.Strings.currentUserID {
+                HapticHelper.error()
                 AlertHelper.showAlertHandler(
                     title: "Access Denied 🔴",
                     message: "You can only edit places created by you. This place is not created by you ❌",
@@ -368,14 +369,15 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             finalImageURL = persistedImg
             UploadProgressHUD.shared.updateProgress(0.2)
         } else if hasSelectedNewImage, let image = imgPlace.image {
+            HapticHelper.light()
             UploadProgressHUD.shared.titleLabel.text = "Uploading place cover image... 📸"
             UploadProgressHUD.shared.updateProgress(0.05)
 
             // ✅ FIX: Use Deterministic Name (PLACE_ID_cover_image.jpg)
-            let fixedName = "\(currentPlaceID!)_cover_image"
+            let fixedName = "\(currentPlaceID!)_place_cover_image"
 
             finalImageURL = try await FirebaseManager.shared
-                .uploadImage(image, folderName: "place_cover", customName: fixedName) { progress in
+                .uploadImage(image, folderName: "place_cover_image", customName: fixedName) { progress in
                     UploadProgressHUD.shared.updateProgress(0.0 + (progress * 0.2))
                 }
 
@@ -390,6 +392,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         // ---------------------------------------------------------
         // B. Video Upload (60%)
         // ---------------------------------------------------------
+        HapticHelper.light()
         UploadProgressHUD.shared.titleLabel.text = "Checking video status... 🎥"
         var finalVideoURL = existingVideoURL
         var finalThumbURL = existingVideoThumbURL
@@ -412,10 +415,10 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 let thumbImageToUpload = imgSelectedVideoThumbnail.image ?? VideoHelper.generateThumbnail(from: rawVideoURL)
 
                 if let thumb = thumbImageToUpload {
-                    // ✅ FIX: Use Deterministic Name (PLACE_ID_video_thumb.jpg)
-                    let fixedThumbName = "\(currentPlaceID!)_video_thumb"
+                    //   Use Deterministic Name (PLACE_ID_video_thumb.jpg)
+                    let fixedThumbName = "\(currentPlaceID!)_place_video_thumb"
 
-                    finalThumbURL = try await FirebaseManager.shared.uploadImage(thumb, folderName: "place_Thumbnails", customName: fixedThumbName) { _ in }
+                    finalThumbURL = try await FirebaseManager.shared.uploadImage(thumb, folderName: "place_video_thumb", customName: fixedThumbName) { _ in }
 
                     // ✅ TRACK IMMEDIATELY
                     UploadPersistenceManager.shared.addUploadedDraftURLs(finalThumbURL ?? "")
@@ -436,10 +439,11 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
                 if let compressed = compressedURL {
                     print("☁️⬆️ Uploading Video...")
+                    HapticHelper.light()
                     UploadProgressHUD.shared.titleLabel.text = "Optimising video and uploading to the cloud...🎥"
 
                     // ✅ FIX: Use Deterministic Name (PLACE_ID_video.mp4)
-                    let fixedVideoName = "\(currentPlaceID!)_video"
+                    let fixedVideoName = "\(currentPlaceID!)_place_video"
 
                     let videoUrlString = try await FirebaseManager.shared.uploadVideo(compressedVideoURL: compressed, customName: fixedVideoName) { progress in
                         UploadProgressHUD.shared.updateProgress(0.2 + (progress * 0.6))
@@ -464,6 +468,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         // ---------------------------------------------------------
         // C. PDF Upload (20%)
         // ---------------------------------------------------------
+        HapticHelper.light()
         UploadProgressHUD.shared.titleLabel.text = "Checking PDF status... 📄"
         var finalPDFURL = existingPDFURL
 
@@ -477,7 +482,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.titleLabel.text = "Uploading attached pdf document... 📄"
 
             // ✅ FIX: Use Deterministic Name (PLACE_ID_menu.pdf)
-            let fixedPDFName = "\(currentPlaceID!)_menu"
+            let fixedPDFName = "\(currentPlaceID!)_place_menu"
 
             finalPDFURL = try await FirebaseManager.shared.uploadPDF(pdfURL: pdfURL, customName: fixedPDFName) { progress in
                 UploadProgressHUD.shared.updateProgress(0.8 + (progress * 0.2))
@@ -490,7 +495,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         } else {
             UploadProgressHUD.shared.updateProgress(1.0)
         }
-
+        HapticHelper.light()
         UploadProgressHUD.shared.titleLabel.text = "Saving place to server... 🥳🎉"
         return (finalImageURL, finalVideoURL, finalThumbURL, finalPDFURL)
     }
@@ -604,7 +609,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 openingTime: model.openingTime,
                 closingTime: model.closingTime,
                 holiday: model.holiday,
-                createdByUserId: Constants.Strings.currentUserID,
+                createdByUserId: AppConstants.Strings.currentUserID,
                 createdAt: Date()
             )
             screenMode = .edit(dummyPlace)
@@ -746,7 +751,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 openingTime: selectedOpeningTime,
                 closingTime: selectedClosingTime,
                 holiday: selectedHoliday,
-                createdByUserId: Constants.Strings.currentUserID,
+                createdByUserId: AppConstants.Strings.currentUserID,
                 createdAt: Date()
             )
             // Set Defaults
@@ -860,6 +865,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 try FileManager.default.removeItem(at: url)
                 print("🧹 File deleted from Documents: \(url.lastPathComponent)")
             } catch {
+                HapticHelper.error()
                 print("❌ Error: Failed to delete stored file: \(error.localizedDescription)")
             }
         } else {
@@ -917,7 +923,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSubmitTapped(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.success()
+        HapticHelper.heavy()
         view.endEditing(true)
         if let errorMsg = validateFields() {
             AlertHelper.showAlert(title: "Invalid Data", message: errorMsg, vc: self)
@@ -932,13 +938,18 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSelectLocationMap(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.medium()
+        HapticHelper.heavy()
         guard AppNetworkManager.shared.isConnected else {
             AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to open map screen and select location from map 📍.", vc: self)
             return
         }
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let mapVC = storyboard.instantiateViewController(withIdentifier: "SelectPlaceOnMapVC") as? SelectPlaceOnMapVC else { return }
+        let storyboard = UIStoryboard(
+            name: AppConstants.Storyboards.Main,
+            bundle: nil
+        )
+        guard let mapVC = storyboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.SelectPlaceOnMapVC) as? SelectPlaceOnMapVC else {
+            return
+        }
 
         if let lat = selectedLatitude, let long = selectedLongitude {
             mapVC.alreadySelectedLatitude = lat
@@ -950,7 +961,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSelectVideo(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.light()
+        HapticHelper.heavy()
         var config = PHPickerConfiguration()
         config.filter = .videos
         config.selectionLimit = 1
@@ -964,7 +975,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnSelectMenu(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.light()
+        HapticHelper.heavy()
 
         // Strictly allow only PDF
         let supportedTypes: [UTType] = [.pdf]
@@ -981,7 +992,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnRemoveSelectVideo(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.medium()
+        HapticHelper.warning()
 
         AlertHelper.showConfirmationAlert(
             title: "Remove Video? 🎥",
@@ -1002,7 +1013,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @IBAction func btnRemoveSelectMenu(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.medium()
+        HapticHelper.warning()
 
         AlertHelper.showConfirmationAlert(
             title: "Remove PDF? 📄",
@@ -1115,6 +1126,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     @objc private func didTapCancelBarButton() {
         view.endEditing(true)
+        HapticHelper.warning()
         showDiscardAlert()
     }
 
@@ -1269,6 +1281,7 @@ extension AddPlaceVC: PHPickerViewControllerDelegate {
                 self.processVideo(url: permanentURL)
 
             } catch {
+                HapticHelper.error()
                 print("❌ Local Disk Copy Error: \(error.localizedDescription)")
                 DispatchQueue.main.async { LoaderManager.shared.stopLoading() }
             }
@@ -1339,6 +1352,7 @@ extension AddPlaceVC: PHPickerViewControllerDelegate {
                     }
                 }
             } catch {
+                HapticHelper.error()
                 print("❌ AVAsset Loading Error: \(error.localizedDescription)")
                 await MainActor.run { LoaderManager.shared.stopLoading() }
             }
@@ -1375,6 +1389,7 @@ extension AddPlaceVC: UIDocumentPickerDelegate {
                 }
             }
         } catch {
+            HapticHelper.error()
             print("❌ Error checking file size: \(error.localizedDescription)")
             clearStoredFile(at: url) // Safety cleanup
             return
@@ -1413,6 +1428,7 @@ extension AddPlaceVC: UIDocumentPickerDelegate {
             print("✅ PDF Selected & Validated (Copied to Documents): \(permanentURL.lastPathComponent)")
 
         } catch {
+            HapticHelper.error()
             print("❌ Local Permanent Copy Error: \(error.localizedDescription)")
             // Fallback to original URL if copy fails
             selectedPDFURL = url

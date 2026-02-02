@@ -80,32 +80,51 @@ class UploadPersistenceManager {
         newVideoURL: URL?, newPDFURL: URL?, hasSelectedNewImage: Bool
     ) {
         // ✅ OPTIMIZATION: Use the stable PlaceID for local filenames too.
-        // This ensures we overwrite local files instead of creating new UUIDs every save.
         let stableID = placeID ?? UUID().uuidString
 
         // 1. Save Image to Disk (Overwrite local file)
         var savedImgPath: String?
+        
+        // Logic: If user selected NEW image, save it.
         if let img = newImage, let data = img.jpegData(compressionQuality: 0.8) {
             savedImgPath = "\(stableID)_local_img.jpg"
             try? data.write(to: documentsDirectory.appendingPathComponent(savedImgPath!))
         }
+        // Logic: If NO new image, keep the old local path from previous draft (if exists)
+        else if let oldDraft = getPendingUpload(), let oldPath = oldDraft.localImagePath {
+            savedImgPath = oldPath
+        }
 
-        // 2. Save Video to Disk (Overwrite local file)
+        // 2. Save Video to Disk (Smart Copy) 🧠
         var savedVidPath: String?
         if let vURL = newVideoURL {
             savedVidPath = "\(stableID)_local_vid.mp4"
             let targetURL = documentsDirectory.appendingPathComponent(savedVidPath!)
-            try? FileManager.default.removeItem(at: targetURL) // Remove old before copy
-            try? FileManager.default.copyItem(at: vURL, to: targetURL)
+            
+            // 🛑 SAFETY CHECK: Don't delete/copy if Source == Target (Fixes "File Not Found" bug on Resume)
+            if vURL.absoluteString != targetURL.absoluteString {
+                try? FileManager.default.removeItem(at: targetURL) // Remove old before copy
+                try? FileManager.default.copyItem(at: vURL, to: targetURL)
+                print("💾 Video copied to draft storage.")
+            } else {
+                print("⏭️ Video already in draft storage. Skipping copy.")
+            }
         }
 
-        // 3. Save PDF to Disk (Overwrite local file)
+        // 3. Save PDF to Disk (Smart Copy) 🧠
         var savedPDFPath: String?
         if let pURL = newPDFURL {
             savedPDFPath = "\(stableID)_local_menu.pdf"
             let targetURL = documentsDirectory.appendingPathComponent(savedPDFPath!)
-            try? FileManager.default.removeItem(at: targetURL)
-            try? FileManager.default.copyItem(at: pURL, to: targetURL)
+            
+            // 🛑 SAFETY CHECK: Don't delete/copy if Source == Target
+            if pURL.absoluteString != targetURL.absoluteString {
+                try? FileManager.default.removeItem(at: targetURL)
+                try? FileManager.default.copyItem(at: pURL, to: targetURL)
+                print("💾 PDF copied to draft storage.")
+            } else {
+                print("⏭️ PDF already in draft storage. Skipping copy.")
+            }
         }
 
         // 4. Create Model
@@ -114,15 +133,19 @@ class UploadPersistenceManager {
             name: name, desc: desc, website: website, phone: phone, addressLabel: address, rating: rating,
             city: location, priceRange: price, openingTime: open, closingTime: close, holiday: holiday,
             latitude: lat, longitude: long,
-            existingImageURL: existingImg, existingVideoURL: existingVid, existingThumbURL: existingThumb, existingPDFURL: existingPDF,
+            
+            // ✅ FIX HERE: The parameter name is 'existingThumbURL', NOT 'existingThumb'
+            existingImageURL: existingImg,
+            existingVideoURL: existingVid,
+            existingThumbURL: existingThumb, // <-- This was the fix
+            existingPDFURL: existingPDF,
+            
             localImagePath: savedImgPath, localVideoPath: savedVidPath, localPDFPath: savedPDFPath,
             hasSelectedNewImage: hasSelectedNewImage
-            // Note: We don't overwrite uploadedDraftURLs here; we keep the existing list if available,
-            // or rely on 'addUploadedDraftURLs' to populate it.
         )
 
         // Preserve existing tracked URLs if we are just updating text fields
-        if var existing = getPendingUpload() {
+        if let existing = getPendingUpload() {
             var updatedModel = model
             updatedModel.uploadedDraftURLs = existing.uploadedDraftURLs
             saveToUserDefaults(updatedModel)
@@ -130,7 +153,7 @@ class UploadPersistenceManager {
             saveToUserDefaults(model)
         }
         
-        print("💾 Draft Saved Successfully (Local files overwritten)")
+        print("💾 Draft Saved Successfully (Local files overwritten safely)")
     }
 
     // MARK: - Retrieve Draft 🔍
@@ -199,7 +222,7 @@ class UploadPersistenceManager {
 extension UploadPersistenceManager {
 
     func updateDraftImageURL(_ url: String) {
-        guard var currentDraft = getPendingUpload() else { return }
+        guard let currentDraft = getPendingUpload() else { return }
         
         let updatedDraft = PendingUploadModel(
             isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
@@ -218,7 +241,7 @@ extension UploadPersistenceManager {
     }
 
     func updateDraftVideoURL(videoUrl: String?, thumbUrl: String?) {
-        guard var currentDraft = getPendingUpload() else { return }
+        guard let currentDraft = getPendingUpload() else { return }
         
         let updatedDraft = PendingUploadModel(
             isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
@@ -240,7 +263,7 @@ extension UploadPersistenceManager {
     }
 
     func updateDraftPDFURL(_ url: String) {
-        guard var currentDraft = getPendingUpload() else { return }
+        guard let currentDraft = getPendingUpload() else { return }
         
         let updatedDraft = PendingUploadModel(
             isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,

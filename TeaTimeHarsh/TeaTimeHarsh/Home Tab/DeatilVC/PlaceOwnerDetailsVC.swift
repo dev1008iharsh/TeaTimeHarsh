@@ -38,10 +38,11 @@ class PlaceOwnerDetailsVC: UIViewController {
     }
 
     @objc private func didTapEmailLabel() {
+        HapticHelper.success()
         if let ownerEmail = placeOwnerUser?.email {
             EmailHelper.shared.sendEmail(
                 from: self,
-                recipients: [ownerEmail, Constants.Strings.developerEmail],
+                recipients: [ownerEmail, AppConstants.Strings.developerEmail],
                 subject: "Support Request from \(UtilsProject.getAppName) - Owner Profile Screen",
                 body: createdBodyForMail()
             )
@@ -68,6 +69,7 @@ class PlaceOwnerDetailsVC: UIViewController {
     }
 
     @objc private func didTapContactLabel() {
+        HapticHelper.light()
         guard let ownerUser = placeOwnerUser else { return }
         if let phoneNumber = ownerUser.phoneNumber, let ownerName = ownerUser.fullName {
             ContactHelper.showContactMenu(on: self, phoneNumber: "91\(phoneNumber)", name: ownerName)
@@ -113,7 +115,7 @@ class PlaceOwnerDetailsVC: UIViewController {
     }
 
     @objc private func didTapProfileImage() {
-        HapticHelper.medium()
+        HapticHelper.light()
 
         ImageZoomViewer.shared
             .showFullScreen(

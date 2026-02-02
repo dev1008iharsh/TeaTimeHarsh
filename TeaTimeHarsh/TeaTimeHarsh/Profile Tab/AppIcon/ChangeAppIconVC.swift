@@ -15,18 +15,23 @@ class ChangeAppIconVC: UIViewController {
     }
     
     @IBAction func didTapDefaultIcon(_ sender: UIButton) {
+        HapticHelper.heavy()
         changeAppIcon(to: nil)
     }
     @IBAction func didTapIcon1(_ sender: UIButton) {
+        HapticHelper.heavy()
         changeAppIcon(to: "icon1")
     }
     @IBAction func didTapIcon2(_ sender: UIButton) {
+        HapticHelper.heavy()
         changeAppIcon(to: "icon2")
     }
     @IBAction func didTapIcon3(_ sender: UIButton) {
+        HapticHelper.heavy()
         changeAppIcon(to: "icon3")
     }
     @IBAction func didTapIcon4(_ sender: UIButton) {
+        HapticHelper.heavy()
         changeAppIcon(to: "icon4")
     }
     

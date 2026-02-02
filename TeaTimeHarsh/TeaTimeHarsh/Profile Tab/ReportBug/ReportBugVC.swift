@@ -30,7 +30,7 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
     // 🔘 Submit Button Action
     @IBAction func submitTapped(_ sender: UIButton) {
         view.endEditing(true)
-        HapticHelper.medium()
+        HapticHelper.light()
         guard let email = txtEmail.text, !email.isEmpty, Utility.isValidEmail(email) else {
             AlertHelper
                 .showAlert(
@@ -93,6 +93,7 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
     }
 
     @IBAction func btnCloseSheet(_ sender: UIButton) {
+        HapticHelper.light()
         dismiss(animated: true, completion: nil)
     }
 

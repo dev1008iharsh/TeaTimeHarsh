@@ -62,8 +62,8 @@ class PlaceDetailVC: UIViewController {
         tblPlaceDetail.dataSource = self
         tblPlaceDetail.tableFooterView = UIView()
         tblPlaceDetail.register(
-            UINib(nibName: "DetailStaticCell", bundle: nil),
-            forCellReuseIdentifier: "DetailStaticCell"
+            UINib(nibName: AppConstants.Cells.DetailStaticCell, bundle: nil),
+            forCellReuseIdentifier: AppConstants.Cells.DetailStaticCell
         )
     }
 
@@ -77,8 +77,9 @@ class PlaceDetailVC: UIViewController {
                 self.placeOwnerUser = try await FirebaseManager.shared.fetchUserPersonalDetails(userID: idPlaceOwner)
                 print("setupFetchPlaceOwnerPersonalDetails", placeOwnerUser as Any)
                 self.tblPlaceDetail.reloadData()
-
+                HapticHelper.success()
             } catch {
+                HapticHelper.error()
                 LoaderManager.shared.stopLoading()
                 print("Error fetching user: \(error.localizedDescription)")
             }
@@ -95,6 +96,7 @@ class PlaceDetailVC: UIViewController {
                 self.arrReviews = fetchedReviews
                 print("✅ Got \(fetchedReviews.count) reviews!")
             } catch {
+                HapticHelper.error()
                 LoaderManager.shared.stopLoading()
                 print("❌ Failed to fetch reviews: \(error.localizedDescription)")
                 AlertHelper
@@ -109,7 +111,10 @@ class PlaceDetailVC: UIViewController {
 private extension PlaceDetailVC {
     func setupTableHeader() {
         guard let place = place,
-              let header = Bundle.main.loadNibNamed("DetailHeader", owner: nil)?.first as? DetailHeader
+              let header = Bundle.main.loadNibNamed(
+                AppConstants.Cells.DetailHeader,
+                owner: nil
+              )?.first as? DetailHeader
         else { return }
 
         // Configure with data (Header now handles its own NotificationsCenter post Notification)
@@ -147,8 +152,10 @@ private extension PlaceDetailVC {
     }
 
     private func presentBottomSheetPlaceReviews() {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let reviewVC = storyboard.instantiateViewController(withIdentifier: "PlaceReviewVC") as? PlaceReviewVC else { return }
+        let storyboard = UIStoryboard(name: AppConstants.Storyboards.Main, bundle: nil)
+        guard let reviewVC = storyboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.PlaceReviewVC) as? PlaceReviewVC else {
+            return
+        }
         reviewVC.place = place
         reviewVC.arrReviews = arrReviews
         reviewVC.reloadRating = { [weak self] in
@@ -177,7 +184,7 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "DetailStaticCell", for: indexPath) as! DetailStaticCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Cells.DetailStaticCell, for: indexPath) as! DetailStaticCell
         if let owner = placeOwnerUser {
             cell.placeOwnerUser = owner
         }
@@ -313,8 +320,8 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
 
     func presentBottomSheetOwnerDetails() {
         guard let placeOwnerUser else { return }
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let ownerVC = storyboard.instantiateViewController(withIdentifier: "PlaceOwnerDetailsVC") as? PlaceOwnerDetailsVC else {
+        let storyboard = UIStoryboard(name: AppConstants.Storyboards.Main, bundle: nil)
+        guard let ownerVC = storyboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.PlaceOwnerDetailsVC) as? PlaceOwnerDetailsVC else {
             return
         }
         ownerVC.placeOwnerUser = placeOwnerUser
@@ -328,6 +335,7 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func showOfflineAlertAtDetail() {
+        HapticHelper.warning()
         AlertHelper
             .showAlert(
                 title: "No Internet 🛜",

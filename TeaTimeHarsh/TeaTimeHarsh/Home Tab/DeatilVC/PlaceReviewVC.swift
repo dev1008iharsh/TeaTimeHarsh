@@ -145,7 +145,7 @@ class PlaceReviewVC: UIViewController {
 
     @objc private func didTapSelectReviewImage() {
         view.endEditing(true)
-        HapticHelper.success()
+        HapticHelper.light()
         view.endEditing(true) // Dismiss keyboard
 
         ImagePickerManager.shared.pickSingleImage(from: self) { [weak self] selectedImage in
@@ -158,7 +158,7 @@ class PlaceReviewVC: UIViewController {
     @IBAction func btnSubmitReviewTapped(_ sender: UIButton) {
         view.endEditing(true) // Dismiss keyboard first
 
-        HapticHelper.success()
+        HapticHelper.warning()
         // 1. Validation Logic
         if !validateInput() { return }
 
@@ -387,14 +387,14 @@ class PlaceReviewTableCell: UITableViewCell {
     }
 
     @objc private func didTapReviewImage() {
-        HapticHelper.medium()
+        HapticHelper.light()
         if imgReview.image != nil {
             ImageZoomViewer.shared.showFullScreen(from: imgReview, backgroundColor: .black)
         }
     }
 
     @objc private func didTapUserImage() {
-        HapticHelper.medium()
+        HapticHelper.light()
         if imgUser.image != nil {
             ImageZoomViewer.shared
                 .showFullScreen(from: imgUser, backgroundColor: .black)

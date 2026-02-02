@@ -37,7 +37,7 @@ class AuthManager {
             }
             print(" *✅ register uid", uid)
 
-            Constants.Strings.currentUserID = uid
+            AppConstants.Strings.currentUserID = uid
 
             // Create User Model (Explicitly setting all values)
             let newUser = User(id: uid, username: nil, email: email, bio: nil, phoneNumber: nil, city: nil, profileImageUrl: nil, birthDate: nil, providerID: nil, providerType: .email, isEmailVerified: false, isActive: true, isOnBoardingDone: false, isSubscribed: false, createdAt: Date(), lastLoginAt: Date(), fcmToken: nil)
@@ -72,7 +72,7 @@ class AuthManager {
             // 2. Get UID
             guard let uid = authResult?.user.uid else { completion(false, "User ID not found"); return }
             print("*✅ login uid", uid)
-            Constants.Strings.currentUserID = uid
+            AppConstants.Strings.currentUserID = uid
 
             // 3. Fetch User Profile
             let userRef = Firestore.firestore().collection("users").document(uid)
@@ -130,7 +130,7 @@ class AuthManager {
 
                 resetKeychain()
                 clearAllUserDefaults()
-                Constants.Strings.currentUserID = ""
+                AppConstants.Strings.currentUserID = ""
                 CoreDataManager.shared.clearAllDataOfCoreData()
                 UserDataManager.shared.user = nil
                 UserProfileImageStorage.clearAllStoredFiles()
@@ -174,7 +174,7 @@ class AuthManager {
         let authResult = try await Auth.auth().signIn(with: credential)
         let firebaseUser = authResult.user
         let uid = firebaseUser.uid
-        Constants.Strings.currentUserID = uid
+        AppConstants.Strings.currentUserID = uid
 
         // 2. 🔒 Final Email Check
         guard let email = firebaseUser.email, !email.isEmpty else {

@@ -45,6 +45,7 @@ class HomeListingTipVC: UIViewController {
     }
 
     @objc private func dismissTip() {
+        HapticHelper.light()
         dismiss(animated: true)
     }
 }

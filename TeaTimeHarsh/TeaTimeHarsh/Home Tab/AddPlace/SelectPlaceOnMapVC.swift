@@ -156,7 +156,7 @@ class SelectPlaceOnMapVC: UIViewController {
     // MARK: - Actions
 
     @IBAction func btnSubmitMapTapped(_ sender: UIButton) {
-        HapticHelper.success()
+        HapticHelper.light()
         view.endEditing(true)
         guard AppNetworkManager.shared.isConnected else {
             AlertHelper
@@ -251,6 +251,7 @@ extension SelectPlaceOnMapVC {
                     return result + [component]
                 }.joined(separator: ", ")
 
+                HapticHelper.success()
                 self.lblAddress.text = fullAddress
                 self.currentAddress = fullAddress
                 self.currentLatitude = lat

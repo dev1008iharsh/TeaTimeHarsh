@@ -65,9 +65,11 @@ class LaunchVC: UIViewController {
         guard !(navigationController?.topViewController is HomeVC) else { return }
 
         let homeVC = UIStoryboard(
-            name: "Main",
+            name: AppConstants.Storyboards.Main,
             bundle: nil
-        ).instantiateViewController(withIdentifier: "HomeVC")
+        ).instantiateViewController(
+            withIdentifier: AppConstants.ViewControllers
+                .HomeVC)
 
         navigationController?.setViewControllers([homeVC], animated: true)
     }
@@ -75,6 +77,7 @@ class LaunchVC: UIViewController {
     private func handleOffline() {
         print("🔌 Offline Launch")
 
+        HapticHelper.error()
         UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
 
         AlertHelper.showAlertHandler(

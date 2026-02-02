@@ -108,18 +108,21 @@ class DetailStaticCell: UITableViewCell {
     }
 
     @objc private func didTapWebsite() {
+        HapticHelper.success()
         if let strWebsiteURL = teaPlace?.website {
             onWebsiteTapped?(strWebsiteURL)
         }
     }
 
     @objc private func didTapVideoPreview() {
+        HapticHelper.light()
         if let strVideoURL = teaPlace?.videoURL {
             onVideoThumbTapped?(strVideoURL)
         }
     }
 
     @objc private func didTapPDFPreview() {
+        HapticHelper.light()
         if let strPdfURL = teaPlace?.pdfURL {
             onMenuImageTapped?(strPdfURL)
         }
@@ -203,10 +206,12 @@ class DetailStaticCell: UITableViewCell {
                 if let thumbnail = PDFHelper.generateTwoPageThumbnail(of: targetSize, for: url) {
                     DispatchQueue.main.async {
                         // 3. Update UI on Main Thread
+                        HapticHelper.light()
                         self.imgMenuImage.image = thumbnail
                     }
                 } else {
                     DispatchQueue.main.async {
+                        HapticHelper.error()
                         LoaderManager.shared.stopLoading()
                         print("❌ Failed to generate PDF thumbnail")
                     }
@@ -240,32 +245,37 @@ class DetailStaticCell: UITableViewCell {
     // MARK: - 🆕 IBActions (Triggers)
 
     @IBAction func btnPlaceOwnerTapped(_ sender: UIButton) {
+        HapticHelper.light()
         onPlaceOwnerTapped?()
     }
 
     @IBAction func btnEditTappedDetail(_ sender: UIButton) {
+        HapticHelper.light()
         // Trigger the closure to notify the ViewController
         onEditTapped?()
     }
 
     @IBAction func btnDeleteTappedDetail(_ sender: UIButton) {
+        HapticHelper.light()
         onDeleteTapped?()
     }
 
     @IBAction func btnShareTappedDetail(_ sender: UIButton) {
+        HapticHelper.light()
         onShareTapped?()
     }
 
     @IBAction func btnCallTapped(_ sender: UIButton) {
+        HapticHelper.light()
         onCallTapped?()
     }
 
     @objc private func mapTapped() {
+        HapticHelper.heavy()
         print("📍 Map Tapped! Redirecting...")
         guard AppNetworkManager.shared.isConnected else {
             return
-        }
-        HapticHelper.heavy()
+        } 
         openGoogleMaps(lat: targetLat, long: targetLong)
     }
 

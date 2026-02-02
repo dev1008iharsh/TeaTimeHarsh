@@ -133,6 +133,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 1. Segment Control Changed (Switch Login <-> Register)
     @IBAction func onSegmentChanged(_ sender: UISegmentedControl) {
+        HapticHelper.light()
         if sender.selectedSegmentIndex == 0 {
             updateUI(mode: .login)
         } else {
@@ -143,6 +144,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     // 2. Forgot Password / Back Button Tapped
     @IBAction func onForgotPasswordTapped(_ sender: UIButton) {
         self.view.endEditing(true)
+        HapticHelper.light()
         if currentMode == .login {
             // Go to Forgot Password Screen
             updateUI(mode: .forgotPassword)
@@ -155,7 +157,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
     // 3. Main Action Button Tapped (Handles All 3 Logics)
     @IBAction func btnSubmitLoginRegister(_ sender: UIButton) {
         self.view.endEditing(true)
-        HapticHelper.success()
+        HapticHelper.heavy()
         view.endEditing(true)
 
         guard let email = txtEmail.text?.trimmingCharacters(in: .whitespaces), !email.isEmpty,
@@ -273,8 +275,13 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         if success {
             print("Success! User is in.Successfully passed the auth flow ✅")
 
-            let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
-            let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
+            let mainStoryboard = UIStoryboard(
+                name: AppConstants.Storyboards.Main,
+                bundle: nil
+            )
+            let tabBarVC = mainStoryboard.instantiateViewController(
+                withIdentifier: AppConstants.ViewControllers.MainTabBarVC
+            )
 
             // Swap Root View Controller (Best Practice)
             if let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate,
@@ -305,14 +312,14 @@ extension LoginRegisterVC {
     // 🌍 Google Login
     @IBAction func btnGoogleTapped(_ sender: UIButton) {
         self.view.endEditing(true)
-        HapticHelper.heavy()
+        HapticHelper.light()
         performSocialLogin(provider: .google)
     }
 
     // 📘 Facebook Login
     @IBAction func btnFacebookTapped(_ sender: UIButton) {
         self.view.endEditing(true)
-        HapticHelper.heavy()
+        HapticHelper.light()
         performSocialLogin(provider: .facebook)
     }
 
@@ -335,6 +342,7 @@ extension LoginRegisterVC {
                     self.handleAuthResponse(success: true, error: nil)
 
                 } catch {
+                    HapticHelper.error()
                     self.handleSocialError(error)
                 }
             }
@@ -354,6 +362,7 @@ extension LoginRegisterVC {
                             try await AuthManager.shared.signInWithSocialCredential(credential: credential, userDetails: user)
                             self.handleAuthResponse(success: true, error: nil)
                         } catch {
+                            HapticHelper.error()
                             self.handleSocialError(error)
                         }
                     }
@@ -382,7 +391,7 @@ extension LoginRegisterVC {
 
     @IBAction func btnAppleTapped(_ sender: UIButton) {
         self.view.endEditing(true)
-        HapticHelper.heavy()
+        HapticHelper.light()
         print("🟢 Apple Sign-In Button Tapped")
 
         AlertHelper.showAlert(

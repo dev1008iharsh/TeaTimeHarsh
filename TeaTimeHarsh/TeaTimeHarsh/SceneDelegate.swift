@@ -20,15 +20,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         if let user = Auth.auth().currentUser {
             print("*** ✅ User is Logged In. Going to Home. Current Firebase USER ID: \(user.uid)")
-            Constants.Strings.currentUserID = user.uid
+            AppConstants.Strings.currentUserID = user.uid
 
-            let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
-            let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: "MainTabBarVC")
+            let mainStoryboard = UIStoryboard(name: AppConstants.Storyboards.Main, bundle: nil)
+            let tabBarVC = mainStoryboard.instantiateViewController(withIdentifier: AppConstants.ViewControllers.MainTabBarVC)
             window.rootViewController = tabBarVC
         } else {
             print("*** ❌ User is NOT Logged In. Going to Login.")
-            let authStoryboard = UIStoryboard(name: "Auth", bundle: nil)
-            let loginVC = authStoryboard.instantiateViewController(withIdentifier: "LoginRegisterVC")
+            let authStoryboard = UIStoryboard(
+                name: AppConstants.Storyboards.Auth,
+                bundle: nil
+            )
+            let loginVC = authStoryboard.instantiateViewController(
+                withIdentifier: AppConstants
+                    .ViewControllers.LoginRegisterVC)
             let navVC = UINavigationController(rootViewController: loginVC)
             window.rootViewController = navVC
         }
