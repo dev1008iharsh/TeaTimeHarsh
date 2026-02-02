@@ -93,7 +93,6 @@ class UserPlacesListTableCell: UITableViewCell {
         subtitleLabel.text = place.city
         ImageManagerKF.setImage(
             from: place.imageURL,
-            into: iconImageView,
-            placeholderName: "")
+            into: iconImageView)
     }
 }

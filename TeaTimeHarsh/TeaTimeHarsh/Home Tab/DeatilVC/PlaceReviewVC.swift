@@ -144,6 +144,7 @@ class PlaceReviewVC: UIViewController {
     // MARK: - Actions
 
     @objc private func didTapSelectReviewImage() {
+        view.endEditing(true)
         HapticHelper.success()
         view.endEditing(true) // Dismiss keyboard
 
@@ -377,13 +378,11 @@ class PlaceReviewTableCell: UITableViewCell {
             .setImage(
                 from: review.userImage,
                 into: imgUser,
-                placeholderName: ""
             )
         ImageManagerKF
             .setImage(
                 from: review.reviewImageURL,
                 into: imgReview,
-                placeholderName: ""
             )
     }
 
@@ -393,7 +392,7 @@ class PlaceReviewTableCell: UITableViewCell {
             ImageZoomViewer.shared.showFullScreen(from: imgReview, backgroundColor: .black)
         }
     }
-    
+
     @objc private func didTapUserImage() {
         HapticHelper.medium()
         if imgUser.image != nil {
@@ -401,5 +400,4 @@ class PlaceReviewTableCell: UITableViewCell {
                 .showFullScreen(from: imgUser, backgroundColor: .black)
         }
     }
-     
 }

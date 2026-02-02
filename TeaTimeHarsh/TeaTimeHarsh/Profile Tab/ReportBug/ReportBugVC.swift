@@ -29,6 +29,7 @@ class ReportBugVC: UIViewController, UITextViewDelegate {
 
     // 🔘 Submit Button Action
     @IBAction func submitTapped(_ sender: UIButton) {
+        view.endEditing(true)
         HapticHelper.medium()
         guard let email = txtEmail.text, !email.isEmpty, Utility.isValidEmail(email) else {
             AlertHelper

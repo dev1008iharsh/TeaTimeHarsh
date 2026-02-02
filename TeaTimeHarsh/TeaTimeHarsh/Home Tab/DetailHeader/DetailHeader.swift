@@ -90,8 +90,7 @@ class DetailHeader: UIView {
 
         ImageManagerKF.setImage(
             from: place.imageURL,
-            into: imgPlace,
-            placeholderName: ""
+            into: imgPlace
         )
 
         // Set Initial Button States
@@ -109,6 +108,9 @@ class DetailHeader: UIView {
     // MARK: - 🔔 Notification Actions (Fav / Visit)
 
     @IBAction func visitButtonTapped(_ sender: UIButton) {
+        if !AppNetworkManager.shared.isConnected {
+            return
+        }
         guard let placeID = currentPlaceID else { return }
 
         // 1. Optimistic UI Update (Visual Only)
@@ -125,6 +127,9 @@ class DetailHeader: UIView {
     }
 
     @IBAction func favouriteButtonTapped(_ sender: UIButton) {
+        if !AppNetworkManager.shared.isConnected {
+            return
+        }
         guard let placeID = currentPlaceID else { return }
 
         // 1. Optimistic UI Update (Visual Only)

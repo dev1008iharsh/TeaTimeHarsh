@@ -70,12 +70,12 @@ class TeaListCell: UITableViewCell {
     }
 
     @objc private func didTapFavPlace() {
-        // ✨ Haptic Feedback for better UX
+        onFavTapped?()
+        if !AppNetworkManager.shared.isConnected {
+            return
+        }
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
-
-        // Trigger Action
-        onFavTapped?()
 
         // Optional: Local bounce animation for instant feedback
         UIView.animate(withDuration: 0.1, animations: {
@@ -93,8 +93,7 @@ class TeaListCell: UITableViewCell {
         // 1. Load Image
         ImageManagerKF.setImage(
             from: teaPlace.imageURL,
-            into: imgTeaPlace,
-            placeholderName: ""
+            into: imgTeaPlace
         )
 
         // 2. Set Text Data

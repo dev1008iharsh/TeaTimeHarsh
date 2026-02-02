@@ -69,6 +69,7 @@ class CoreDataManager {
                     entity.id = place.id
                     entity.name = place.name
                     entity.desc = place.desc
+                    entity.website = place.website 
                     entity.phone = place.phone
                     entity.city = place.city
                     entity.address = place.address
@@ -83,6 +84,10 @@ class CoreDataManager {
                     entity.rating = place.rating ?? 0.0
                     entity.latitude = place.latitude ?? 0.0
                     entity.longitude = place.longitude ?? 0.0
+                    entity.imageURL = place.imageURL
+                    entity.videoURL = place.videoURL
+                    entity.videoThumbnailURL = place.videoThumbnailURL
+                    entity.pdfURL = place.pdfURL
                     entity.isFav = place.isFav
                     entity.isVisited = place.isVisited
                 }

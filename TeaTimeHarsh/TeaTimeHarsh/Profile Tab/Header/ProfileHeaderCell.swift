@@ -44,9 +44,15 @@ class ProfileHeaderCell: UIView {
         // 2️⃣ Profile completed → check internet
         if AppNetworkManager.shared.isConnected {
             print("🌐 Online → load image from URL")
-
+            if let offlineImage = UserProfileImageStorage.loadUserProfileImage() {
+                imgProfile.image = offlineImage
+            } // show last saved image until new image is loaded from server
+                 
             if let profileUrl = user.profileImageUrl, !profileUrl.isEmpty {
-                imgProfile.kf.setImage(with: URL(string: profileUrl), placeholder: UIImage(systemName: "person.circle.fill"), options: nil, completionHandler: { result in
+                imgProfile.kf
+                    .setImage(with: URL(string: profileUrl),placeholder: UIImage(named: "placeholder"),
+                        options: nil,
+                        completionHandler: { result in
                     switch result {
                     case .success(let value):
                         // 1️⃣ Extract image and 2️⃣ Validate if it's not empty

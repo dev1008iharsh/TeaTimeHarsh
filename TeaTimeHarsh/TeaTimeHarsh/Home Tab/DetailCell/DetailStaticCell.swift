@@ -12,17 +12,9 @@ class DetailStaticCell: UITableViewCell {
     // MARK: - IBOutlets
 
     // Basic Information
-    @IBOutlet var btnPlaceOwner: UIButton! {
-        didSet {
-            btnPlaceOwner.layer.cornerRadius = btnPhone.bounds.height / 2
-        }
-    }
+    @IBOutlet var btnPlaceOwner: UIButton!
 
-    @IBOutlet var btnPhone: UIButton! {
-        didSet {
-            btnPhone.layer.cornerRadius = btnPhone.bounds.height / 2
-        }
-    }
+    @IBOutlet var btnPhone: UIButton!
 
     @IBOutlet var lblDesc: UILabel!
     @IBOutlet var lblAddress: UILabel!
@@ -32,14 +24,16 @@ class DetailStaticCell: UITableViewCell {
     @IBOutlet var lblPriceRange: UILabel!
     @IBOutlet var lblClosingTime: UILabel!
     @IBOutlet var lblOpeningTime: UILabel!
+    @IBOutlet var lblWebsite: UILabel!
 
-    // Map Container with Corner Radius
-    @IBOutlet var mapContainerView: UIView! {
-        didSet {
-            mapContainerView.layer.cornerRadius = 20
-            mapContainerView.clipsToBounds = true
-        }
-    }
+    @IBOutlet var imgVideoThumb: UIImageView!
+    @IBOutlet var imgMenuImage: UIImageView!
+
+    // Containers
+    @IBOutlet var mapContainerView: UIView!
+
+    @IBOutlet var videoContainerView: UIView!
+    @IBOutlet var pdfContainerView: UIView!
 
     // Action Buttons
     @IBOutlet var btnEdit: UIButton!
@@ -54,6 +48,10 @@ class DetailStaticCell: UITableViewCell {
     var onShareTapped: (() -> Void)?
     var onPlaceOwnerTapped: (() -> Void)?
     var onCallTapped: (() -> Void)?
+    var onWebsiteTapped: ((String) -> Void)?
+
+    var onVideoThumbTapped: ((String) -> Void)?
+    var onMenuImageTapped: ((String) -> Void)?
 
     // MARK: - Properties
 
@@ -73,12 +71,57 @@ class DetailStaticCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        setupUI()
+        setupPreviewGestures()
         if AppNetworkManager.shared.isConnected {
             mapContainerView.isHidden = false
             configureGoogleMap()
             addTapGestureToMap()
         } else {
             mapContainerView.isHidden = true
+        }
+    }
+
+    private func setupUI() {
+        btnPhone.layer.cornerRadius = btnPhone.bounds.height / 2
+        btnPlaceOwner.layer.cornerRadius = btnPhone.bounds.height / 2
+
+        mapContainerView.layer.cornerRadius = 20
+        videoContainerView.layer.cornerRadius = 20
+        pdfContainerView.layer.cornerRadius = 20
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapWebsite))
+        lblWebsite.isUserInteractionEnabled = true
+        lblWebsite.addGestureRecognizer(tap)
+    }
+
+    private func setupPreviewGestures() {
+        // 1. Video Tap Gesture
+        let videoTap = UITapGestureRecognizer(target: self, action: #selector(didTapVideoPreview))
+        imgVideoThumb.isUserInteractionEnabled = true
+        imgVideoThumb.addGestureRecognizer(videoTap)
+
+        // 2. PDF Tap Gesture
+        let pdfTap = UITapGestureRecognizer(target: self, action: #selector(didTapPDFPreview))
+        imgMenuImage.isUserInteractionEnabled = true
+        imgMenuImage.addGestureRecognizer(pdfTap)
+    }
+
+    @objc private func didTapWebsite() {
+        if let strWebsiteURL = teaPlace?.website {
+            onWebsiteTapped?(strWebsiteURL)
+        }
+    }
+
+    @objc private func didTapVideoPreview() {
+        if let strVideoURL = teaPlace?.videoURL {
+            onVideoThumbTapped?(strVideoURL)
+        }
+    }
+
+    @objc private func didTapPDFPreview() {
+        if let strPdfURL = teaPlace?.pdfURL {
+            onMenuImageTapped?(strPdfURL)
         }
     }
 
@@ -118,7 +161,8 @@ class DetailStaticCell: UITableViewCell {
         lblPriceRange.text = "Rs." + (place.priceRange ?? "")
         lblOpeningTime.text = "Open at : " + (place.openingTime ?? "")
         lblClosingTime.text = "Close at : " + (place.closingTime ?? "")
-
+        lblWebsite.text = place.website ?? ""
+ 
         // 3. Calculate and Set Duration
         // This helper calculates how long the place has been serving (e.g., "1 Year, 4 Days")
         let durationString = Utility.getServingDuration(from: place.createdAt)
@@ -139,6 +183,36 @@ class DetailStaticCell: UITableViewCell {
         btnEdit.isHidden = !isOwner
         btnDelete.isHidden = !isOwner
         setOwnerName()
+
+        // 7. set video thumbnail
+        ImageManagerKF.setImage(from: place.videoThumbnailURL, into: imgVideoThumb)
+        //imgMenuImage.image = UIImage(named: "placeholder") // placeholder
+        
+        // 8. set pdf thumbnail
+        if let urlOfPDF = place.pdfURL {
+            setPdfMenuThumbnail(pdfURL: urlOfPDF)
+        }
+    }
+
+    private func setPdfMenuThumbnail(pdfURL: String) {
+        if let url = URL(string: pdfURL) {
+            let targetSize = imgMenuImage.bounds.size
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else { return }
+                // Generate Thumbnail using your PDFHelper
+                if let thumbnail = PDFHelper.generateTwoPageThumbnail(of: targetSize, for: url) {
+                    DispatchQueue.main.async {
+                        // 3. Update UI on Main Thread
+                        self.imgMenuImage.image = thumbnail
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        LoaderManager.shared.stopLoading()
+                        print("❌ Failed to generate PDF thumbnail")
+                    }
+                }
+            }
+        }
     }
 
     private func setOwnerName() {

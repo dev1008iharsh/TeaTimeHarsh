@@ -5,6 +5,9 @@
 //  Created by Harsh on 31/12/25.
 //
 
+import AVFoundation
+import AVKit
+import SafariServices
 import UIKit
 
 class PlaceDetailVC: UIViewController {
@@ -239,8 +242,66 @@ extension PlaceDetailVC: UITableViewDelegate, UITableViewDataSource {
                 guard let self = self else { return }
                 presentContactActions()
             }
+
+            // 6. Action on website tapped
+            cell.onWebsiteTapped = { [weak self] url in
+                guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    showOfflineAlertAtDetail()
+                    return
+                }
+                openSafari(url: url)
+            }
+
+            // 7. Action on video thumbnail tapped
+            cell.onVideoThumbTapped = { [weak self] url in
+                guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    showOfflineAlertAtDetail()
+                    return
+                }
+                didTapVideoPreview(videoURL: url)
+            }
+
+            // 7. Action on pdf menu tapped
+            cell.onMenuImageTapped = { [weak self] url in
+                guard let self = self else { return }
+                guard AppNetworkManager.shared.isConnected else {
+                    showOfflineAlertAtDetail()
+                    return
+                }
+                didTapPDFPreview(pdfURL: url)
+            }
         }
         return cell
+    }
+
+    private func didTapVideoPreview(videoURL: String) {
+        view.endEditing(true)
+        HapticHelper.light()
+        if let url = URL(string: videoURL) {
+            playVideo(url: url)
+        }
+    }
+
+    private func didTapPDFPreview(pdfURL: String) {
+        view.endEditing(true)
+        HapticHelper.light()
+
+        if let remoteURL = URL(string: pdfURL) {
+            let safariVC = SFSafariViewController(url: remoteURL)
+            present(safariVC, animated: true)
+        }
+    }
+
+    private func playVideo(url: URL) {
+        print("▶️ Playing Video: \(url.absoluteString)")
+        let player = AVPlayer(url: url)
+        let playerVC = AVPlayerViewController()
+        playerVC.player = player
+        present(playerVC, animated: true) {
+            player.play()
+        }
     }
 
     private func presentContactActions() {

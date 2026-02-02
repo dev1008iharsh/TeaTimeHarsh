@@ -776,6 +776,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // MARK: - Actions
 
     @IBAction func btnSubmitTapped(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.success()
         view.endEditing(true)
         if let errorMsg = validateFields() {
@@ -790,6 +791,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnSelectLocationMap(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.medium()
         guard AppNetworkManager.shared.isConnected else {
             AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to open map screen and select location from map 📍.", vc: self)
@@ -807,6 +809,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnSelectVideo(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.light()
         var config = PHPickerConfiguration()
         config.filter = .videos
@@ -820,6 +823,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     // MARK: - PDF Selection Action
 
     @IBAction func btnSelectMenu(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.light()
 
         // Strictly allow only PDF
@@ -836,6 +840,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnRemoveSelectVideo(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.medium()
 
         AlertHelper.showConfirmationAlert(
@@ -856,6 +861,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func btnRemoveSelectMenu(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.medium()
 
         AlertHelper.showConfirmationAlert(
@@ -918,6 +924,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapVideoPreview() {
+        self.view.endEditing(true)
         HapticHelper.light()
 
         // 1. Check if we have a NEW local video selected
@@ -931,6 +938,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapPDFPreview() {
+        self.view.endEditing(true)
         HapticHelper.light()
 
         // 1. Check if New Local PDF
@@ -966,6 +974,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapCancelBarButton() {
+        self.view.endEditing(true)
         showDiscardAlert()
     }
 
@@ -986,6 +995,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func didTapPlaceImage() {
+        self.view.endEditing(true)
         HapticHelper.light()
         ImagePickerManager.shared.pickSingleImage(from: self) { [weak self] selectedImage in
             guard let self = self, let image = selectedImage else { return }
@@ -1210,17 +1220,17 @@ extension AddPlaceVC: UIDocumentPickerDelegate {
             return
         }
 
-        // 2. File Size Check (Max 200 MB) 📦
+        // 2. File Size Check (Max 50 MB) 📦
         do {
             let resources = try url.resourceValues(forKeys: [.fileSizeKey])
             if let fileSize = resources.fileSize {
-                let maxSize = 200 * 1024 * 1024 // 200 MB in Bytes
+                let maxSize = 50 * 1024 * 1024 // 50 MB in Bytes
 
                 if fileSize > maxSize {
                     // 🛑 Too Large! Delete this temp file immediately
                     clearStoredFile(at: url)
 
-                    AlertHelper.showAlert(title: "File Too Large ⚠️", message: "PDF size must be less than 200 MB.", vc: self)
+                    AlertHelper.showAlert(title: "File Too Large ⚠️", message: "PDF size must be less than 50 MB.", vc: self)
                     return
                 }
             }

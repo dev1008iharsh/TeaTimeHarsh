@@ -96,8 +96,7 @@ class PlaceOwnerDetailsVC: UIViewController {
         if let value = imgValue, !value.isEmpty {
             ImageManagerKF.setImage(
                 from: ownerUser.profileImageUrl,
-                into: imgOwner,
-                placeholderName: "user_placeholder"
+                into: imgOwner
             )
             imgOwner.isHidden = false
         }else{

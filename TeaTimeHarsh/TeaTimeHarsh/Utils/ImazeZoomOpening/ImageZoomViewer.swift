@@ -201,7 +201,7 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
         doubleTap.numberOfTapsRequired = 2
         zoomImageView.addGestureRecognizer(doubleTap)
-        
+        zoomImageView.tintColor = .systemIndigo
         // Important: Single tap waits to see if user is actually double tapping
         singleTap.require(toFail: doubleTap)
         

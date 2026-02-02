@@ -23,7 +23,7 @@ final class ImageManagerKF {
     ///   - urlString: The string URL of the image.
     ///   - imageView: The UIImageView to display the image.
     ///   - placeholderName: System symbol name to show while loading (default: "photo").
-    static func setImage(from urlString: String?, into imageView: UIImageView, placeholderName: String = "photo") {
+    static func setImage(from urlString: String?, into imageView: UIImageView, placeholderName: String = "placeholder") {
         
         // 1. Validate URL
         guard let urlString = urlString, let url = URL(string: urlString) else {

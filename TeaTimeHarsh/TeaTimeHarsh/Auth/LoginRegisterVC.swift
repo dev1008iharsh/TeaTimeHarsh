@@ -142,6 +142,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 2. Forgot Password / Back Button Tapped
     @IBAction func onForgotPasswordTapped(_ sender: UIButton) {
+        self.view.endEditing(true)
         if currentMode == .login {
             // Go to Forgot Password Screen
             updateUI(mode: .forgotPassword)
@@ -153,6 +154,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 3. Main Action Button Tapped (Handles All 3 Logics)
     @IBAction func btnSubmitLoginRegister(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.success()
         view.endEditing(true)
 
@@ -302,12 +304,14 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 extension LoginRegisterVC {
     // 🌍 Google Login
     @IBAction func btnGoogleTapped(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.heavy()
         performSocialLogin(provider: .google)
     }
 
     // 📘 Facebook Login
     @IBAction func btnFacebookTapped(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.heavy()
         performSocialLogin(provider: .facebook)
     }
@@ -377,6 +381,7 @@ extension LoginRegisterVC {
     }
 
     @IBAction func btnAppleTapped(_ sender: UIButton) {
+        self.view.endEditing(true)
         HapticHelper.heavy()
         print("🟢 Apple Sign-In Button Tapped")
 

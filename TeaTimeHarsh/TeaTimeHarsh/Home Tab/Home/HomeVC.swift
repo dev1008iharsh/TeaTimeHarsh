@@ -75,6 +75,25 @@ class HomeVC: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        if AppNetworkManager.shared.isConnected {
+            // Priority 1: Check for interrupted uploads first
+            if let draft = UploadPersistenceManager.shared.getPendingUpload() {
+                // If a draft is found, show the resume action sheet
+                checkPendingUploads(draft: draft)
+                return // 🛑 Stop here to avoid multiple alerts appearing at once
+            }
+
+            // Priority 2: Check if Profile is incomplete
+            // This will only run if NO pending upload was found
+            if UserDataManager.shared.user?.fullName == nil {
+                askUserToUpdateProfile()
+            }
+        }
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -97,27 +116,8 @@ class HomeVC: UIViewController {
         setupRefreshControl()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-        if AppNetworkManager.shared.isConnected {
-            // Priority 1: Check for interrupted uploads first
-            if let draft = UploadPersistenceManager.shared.getPendingUpload() {
-                // If a draft is found, show the resume action sheet
-                checkPendingUploads(draft: draft)
-                return // 🛑 Stop here to avoid multiple alerts appearing at once
-            }
-
-            // Priority 2: Check if Profile is incomplete
-            // This will only run if NO pending upload was found
-            if UserDataManager.shared.user?.fullName == nil {
-                askUserToUpdateProfile()
-            }
-        }
-    }
-
     private func checkPendingUploads(draft: PendingUploadModel) {
-        print("getUploadedDraftMediaURLs",UploadPersistenceManager.shared.getUploadedDraftMediaURLs())
+        print("getUploadedDraftMediaURLs", UploadPersistenceManager.shared.getUploadedDraftMediaURLs())
         let actions = [
             // Action 1: Resume Upload 🚀
 
@@ -339,7 +339,7 @@ class HomeVC: UIViewController {
 
     // Helper for repetitive alerts
     private func showOfflineAlertAtHome() {
-        AlertHelper.showAlert(title: "No Internet", message: "Please connect to the internet to perform this action.", vc: self)
+        AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this home screen action.", vc: self)
     }
 }
 
@@ -365,7 +365,11 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         cell.configure(teaPlace: displayedPlaces[indexPath.row])
 
         cell.onFavTapped = { [weak self] in
-            self?.performSwipeToggle(at: indexPath, type: "fav")
+            if AppNetworkManager.shared.isConnected {
+                self?.performSwipeToggle(at: indexPath, type: "fav")
+            } else {
+                self?.showOfflineAlertAtHome()
+            }
         }
         return cell
     }
@@ -418,7 +422,7 @@ extension HomeVC {
 
     // Centralized Swipe/Context/Notification Helper
     private func performSwipeToggle(at indexPath: IndexPath, type: String) {
-        // 🔥 GUARD: Internet Check
+        //  Internet Check
         guard AppNetworkManager.shared.isConnected else {
             showOfflineAlertAtHome()
             return
@@ -467,6 +471,10 @@ extension HomeVC {
 extension HomeVC {
     // 1. Trailing Swipe (Right -> Left): Delete, Share, Edit
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        if !AppNetworkManager.shared.isConnected {
+            showOfflineAlertAtHome()
+            return UISwipeActionsConfiguration()
+        }
         let delete = makeDeleteAction(indexPath: indexPath)
         let share = makeShareAction(indexPath: indexPath)
         let edit = makeEditAction(indexPath: indexPath)
@@ -483,6 +491,10 @@ extension HomeVC {
 
     // 2. Leading Swipe (Left -> Right): Visited, Favorite
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        if !AppNetworkManager.shared.isConnected {
+            showOfflineAlertAtHome()
+            return UISwipeActionsConfiguration()
+        }
         let visited = makeVisitAction(indexPath: indexPath)
         let favorite = makeFavAction(indexPath: indexPath)
 

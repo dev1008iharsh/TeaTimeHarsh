@@ -56,11 +56,18 @@ struct PendingUploadModel: Codable {
 class UploadPersistenceManager {
     static let shared = UploadPersistenceManager()
     private let kPendingKey = "kPendingUploadData_V1"
-    private let kGlobalDraftLinksKey = "kGlobalDraftMediaLinks_V1"
+    private(set) var kGlobalDraftLinksKey = "kGlobalDraftMediaLinks_V1"
 
     // Get Documents Directory
     private var documentsDirectory: URL {
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }
+
+    func removeDraftsMediaUserDefaultKey() {
+        if UserDefaults.standard.object(forKey: kGlobalDraftLinksKey) != nil {
+            UserDefaults.standard.removeObject(forKey: kGlobalDraftLinksKey)
+            UserDefaults.standard.synchronize()
+        }
     }
 
     // MARK: - Save Draft 💾
@@ -146,6 +153,7 @@ class UploadPersistenceManager {
         if let encoded = try? JSONEncoder().encode(model) {
             UserDefaults.standard.set(encoded, forKey: kPendingKey)
         }
+        UserDefaults.standard.synchronize()
     }
 
     func getFullURL(for filename: String?) -> URL? {

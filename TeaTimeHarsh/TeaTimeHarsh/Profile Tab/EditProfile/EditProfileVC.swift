@@ -135,6 +135,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     }
 
     @IBAction func btnUpdateTapped(_ sender: UIButton) {
+        view.endEditing(true)
         HapticHelper.heavy()
 
         // 1. 🛡️ Run Validation
@@ -273,8 +274,7 @@ class EditProfileVC: UIViewController, UITextFieldDelegate, UITextViewDelegate {
         if let validUrl = existingImageURL, !validUrl.isEmpty {
             ImageManagerKF.setImage(
                 from: validUrl,
-                into: imgProfile,
-                placeholderName: ""
+                into: imgProfile
             )
             hasSelectedNewImage = true
         } else {
