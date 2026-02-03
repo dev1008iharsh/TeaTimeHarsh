@@ -162,6 +162,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
         guard let email = txtEmail.text?.trimmingCharacters(in: .whitespaces), !email.isEmpty,
               let password = txtPassword.text?.trimmingCharacters(in: .whitespaces), !password.isEmpty else {
+            HapticHelper.warning()
             AlertHelper
                 .showAlert(
                     title: "Missing Input",
@@ -299,6 +300,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
             }
 
         } else {
+            HapticHelper.error()
             // Error handling
             let errorMsg = error ?? "Something went wrong."
             AlertHelper.showAlert(title: "Authentication Failed", message: errorMsg, vc: self)

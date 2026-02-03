@@ -709,8 +709,8 @@
                                     </label>
                                 </subviews>
                             </stackView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Place Owner's Personal Details " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1hx-Ve-k54">
-                                <rect key="frame" x="35.333333333333343" y="138" width="322.33333333333326" height="26.333333333333343"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Place Owner's Personal Details " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1hx-Ve-k54">
+                                <rect key="frame" x="10" y="138" width="373" height="26.333333333333343"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                 <color key="textColor" systemColor="systemIndigoColor"/>
                                 <nil key="highlightedColor"/>
@@ -724,6 +724,7 @@
                             <constraint firstItem="IwN-8o-pKA" firstAttribute="centerX" secondItem="4i4-Ok-qPg" secondAttribute="centerX" id="Oey-38-jNG"/>
                             <constraint firstItem="gTN-w7-1u5" firstAttribute="leading" secondItem="4i4-Ok-qPg" secondAttribute="leading" constant="30" id="Wh2-4l-1WF"/>
                             <constraint firstItem="1hx-Ve-k54" firstAttribute="top" secondItem="4i4-Ok-qPg" secondAttribute="top" constant="20" id="Xme-Pk-XYb"/>
+                            <constraint firstItem="4i4-Ok-qPg" firstAttribute="trailing" secondItem="1hx-Ve-k54" secondAttribute="trailing" constant="10" id="cPs-dv-k3Z"/>
                             <constraint firstItem="4i4-Ok-qPg" firstAttribute="trailing" secondItem="gTN-w7-1u5" secondAttribute="trailing" constant="30" id="g4J-Gm-oOh"/>
                             <constraint firstItem="IwN-8o-pKA" firstAttribute="top" secondItem="1hx-Ve-k54" secondAttribute="bottom" constant="20" id="jM7-Bb-DRa"/>
                         </constraints>
@@ -832,7 +833,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Add your experience as review" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zNq-nv-cKG">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Add your experience as review" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zNq-nv-cKG">
                                 <rect key="frame" x="16" y="148" width="357" height="27.666666666666657"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="23"/>
                                 <color key="textColor" systemColor="systemIndigoColor"/>
@@ -926,6 +927,7 @@
                                                         </imageView>
                                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mci-F1-Rtw">
                                                             <rect key="frame" x="156" y="10" width="50" height="50"/>
+                                                            <color key="tintColor" systemColor="systemIndigoColor"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" secondItem="mci-F1-Rtw" secondAttribute="height" multiplier="1:1" id="AQv-df-f68"/>
                                                                 <constraint firstAttribute="height" constant="50" id="pfA-8i-Jdh"/>
@@ -996,8 +998,8 @@
                                     <outlet property="delegate" destination="sdd-PV-O3p" id="SMQ-OK-gvM"/>
                                 </connections>
                             </tableView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title Place Reviews" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pop-6L-HWM">
-                                <rect key="frame" x="16" y="450.66666666666669" width="196" height="26.333333333333314"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title Place Reviews" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pop-6L-HWM">
+                                <rect key="frame" x="16" y="450.66666666666669" width="357" height="26.333333333333314"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -1012,6 +1014,7 @@
                             <constraint firstItem="chF-bU-1Ir" firstAttribute="leading" secondItem="Dnb-PW-wgE" secondAttribute="leading" id="Fkz-nM-UAq"/>
                             <constraint firstItem="DIv-1e-owT" firstAttribute="top" secondItem="zNq-nv-cKG" secondAttribute="bottom" constant="10" id="I9Z-ZM-LdZ"/>
                             <constraint firstItem="pop-6L-HWM" firstAttribute="leading" secondItem="DIv-1e-owT" secondAttribute="leading" id="TaW-KO-m22"/>
+                            <constraint firstItem="Dnb-PW-wgE" firstAttribute="trailing" secondItem="pop-6L-HWM" secondAttribute="trailing" constant="20" id="WbH-hu-zBY"/>
                             <constraint firstItem="zNq-nv-cKG" firstAttribute="leading" secondItem="DIv-1e-owT" secondAttribute="leading" id="aPa-4u-AQT"/>
                             <constraint firstItem="Dnb-PW-wgE" firstAttribute="trailing" secondItem="DIv-1e-owT" secondAttribute="trailing" constant="16" id="aSJ-QI-aYD"/>
                             <constraint firstItem="Dnb-PW-wgE" firstAttribute="trailing" secondItem="zNq-nv-cKG" secondAttribute="trailing" constant="20" id="mEd-h9-5lO"/>

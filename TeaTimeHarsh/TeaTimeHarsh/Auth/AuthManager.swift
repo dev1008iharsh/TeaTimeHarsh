@@ -49,6 +49,7 @@ class AuthManager {
                     print("❌ Firestore Error: \(error.localizedDescription)")
                     completion(false, "Database save failed")
                 } else {
+                    print("registerUser registerUser registerUser Email : ",newUser.email)
                     UserDataManager.shared.saveUserToUserDefaults(newUser)
                     completion(true, nil)
                 }

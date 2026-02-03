@@ -30,4 +30,16 @@ extension String {
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
         return predicate.evaluate(with: self)
     }
+
+    /// Returns email username by removing '@' and everything after it
+    /// Example: harsh@gmail.com -> "harsh"
+    var convertEmailToUserName: String {
+        // English comment: find position of "@"
+        guard let atIndex = firstIndex(of: "@") else {
+            return self // return original if not email
+        }
+
+        // English comment: slice string safely
+        return String(self[..<atIndex])
+    }
 }

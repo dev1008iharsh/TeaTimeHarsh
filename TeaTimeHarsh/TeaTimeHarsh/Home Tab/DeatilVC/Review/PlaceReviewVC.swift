@@ -109,7 +109,7 @@ class PlaceReviewVC: UIViewController {
 
     private func setupData() {
         if let placeName = place?.name {
-            titleReview.text = "\(placeName) Reviews"
+            titleReview.text = "\(placeName) Reviews\n(Average Rating : \(place?.rating ?? 0.0))"
             lblShareExp.text = "How was your experience at \(placeName)?"
         }
     }
@@ -168,12 +168,24 @@ class PlaceReviewVC: UIViewController {
         if !validateInput() { return }
 
         // 2. Prepare Data
-        guard let currentLoggedInUser = UserDataManager.shared.user,
-              let currentPlaceId = place?.id,
-              let reviewText = txtViewReview.text,
-              let selectedImageReview = imgReview.image else {
-            _ = AuthManager.shared.signOut()
-            UtilsProject.logoutAndNavigateToLoginVC()
+        guard let currentLoggedInUser = UserDataManager.shared.user else {
+            print("❌ currentLoggedInUser - UserDataManager.shared.user is nil")
+            ToastManager.shared.show(message: "Your session has expired. Please login again.")
+            return
+        }
+
+        guard let currentPlaceId = place?.id else {
+            ToastManager.shared.show(message: "Current place do not exist now please try again.")
+            return
+        }
+
+        guard let reviewText = txtViewReview.text, !reviewText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            ToastManager.shared.show(message: "Please tell us a little bit about the place.")
+            return
+        }
+
+        guard let selectedImageReview = imgReview.image else {
+            ToastManager.shared.show(message: "Please attach a photo to make your review authentic.")
             return
         }
 
@@ -209,11 +221,19 @@ class PlaceReviewVC: UIViewController {
 
         // Check User Login
         guard UserDataManager.shared.user != nil else {
-            AlertHelper.showAlert(title: "Login Required 👤",
-                                  message: "Please log in to share your experience.Logout from profile and re-login to continue.",
-                                  vc: self)
-            let _ = AuthManager.shared.signOut()
-            UtilsProject.logoutAndNavigateToLoginVC()
+            print("❌ currentLoggedInUser - UserDataManager.shared.user is nil")
+            print("USER : ",UserDataManager.shared.user ?? User.self)
+            ToastManager.shared.show(message: "Your session has expired. Please login again.")
+
+            AlertHelper
+                .showAlertHandler(
+                    title: "Login Required 👤",
+                    message: "Your session has expired. Please login again.",
+                    vc: self) { _ in
+                        _ = AuthManager.shared.signOut()
+                        UtilsProject.logoutAndNavigateToLoginVC()
+                }
+
             return false
         }
 
@@ -383,6 +403,7 @@ class PlaceReviewTableCell: UITableViewCell {
             .setImage(
                 from: review.userImage,
                 into: imgUser,
+                placeholderName: "person.circle.fill"
             )
         ImageManagerKF
             .setImage(

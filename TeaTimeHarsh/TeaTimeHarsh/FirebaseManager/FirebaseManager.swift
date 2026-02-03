@@ -202,7 +202,12 @@ class FirebaseManager {
             let videoUrlString: String = try await withCheckedThrowingContinuation { continuation in
                 // Observe Progress
                 uploadTask.observe(.progress) { snapshot in
-                    guard let progress = snapshot.progress else { return }
+                    
+                    guard let progress = snapshot.progress, progress.totalUnitCount > 0 else {
+                        onProgress(0) // keep UI alive
+                        return
+                    }
+                    
                     let percent = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
 
                     // Logging progress
@@ -922,7 +927,7 @@ class FirebaseManager {
         // C. Prepare Review Object
         let review = PlaceReview(
             userId: userId,
-            userName: user.fullName ?? "Tea Lover",
+            userName: user.fullName ?? user.email.convertEmailToUserName,
             userImage: user.profileImageUrl,
             rating: rating,
             reviewText: reviewText,
@@ -986,12 +991,13 @@ class FirebaseManager {
             }
 
             let average = totalRating / Double(documents.count)
+            let averageRating = (average * 10).rounded() / 10
             let count = documents.count
             print("📈 Calculation Results -> Average: \(average), Total Reviews: \(count)")
 
             // Update Main Place Document
             try await db.collection("places").document(placeId).updateData([
-                "rating": average,
+                "rating": averageRating,
                 "total_review_count": count,
             ])
             print("✅ Step 6: Average rating updated in main 'places' collection. Done! 🏁")
