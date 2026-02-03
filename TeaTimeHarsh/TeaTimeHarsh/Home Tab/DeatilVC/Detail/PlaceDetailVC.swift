@@ -94,6 +94,7 @@ class PlaceDetailVC: UIViewController {
                 LoaderManager.shared.stopLoading()
                 let fetchedReviews = try await FirebaseManager.shared.fetchPlaceReviews(for: placeId)
                 self.arrReviews = fetchedReviews
+                ToastManager.shared.show(message: "Tap on reviews & share your experience 💬😊")
                 print("✅ Got \(fetchedReviews.count) reviews!")
             } catch {
                 HapticHelper.error()

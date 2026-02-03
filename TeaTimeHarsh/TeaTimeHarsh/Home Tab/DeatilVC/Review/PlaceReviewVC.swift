@@ -126,8 +126,12 @@ class PlaceReviewVC: UIViewController {
         config.text = "No reviews yet. 😬"
         config.secondaryText = "Looks like this place is waiting just for you… go on, make the first move ☺️💬"
         config.image = UIImage(systemName: "bubble.left.and.exclamationmark.bubble.right")
-        config.button.title = "Write a Review"
         config.imageProperties.tintColor = .systemIndigo
+        var btnConfig = UIButton.Configuration.filled()
+        btnConfig.cornerStyle = .capsule
+        btnConfig.baseBackgroundColor = .systemIndigo
+        btnConfig.title = "Write a Review"
+
         config.directionalLayoutMargins = NSDirectionalEdgeInsets(
             top: 350,
             leading: 30,
@@ -138,6 +142,7 @@ class PlaceReviewVC: UIViewController {
             guard let self else { return }
             txtViewReview.becomeFirstResponder()
         }
+        config.button = btnConfig
         contentUnavailableConfiguration = config
     }
 

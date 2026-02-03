@@ -150,7 +150,7 @@ class DetailHeader: UIView {
 
     @objc func handleAPIFailure(_ notification: Notification) {
         HapticHelper.error()
-        ToastManager.shared.show(message: "Failed to change status")
+        ToastManager.shared.show(message: "Failed to change status.Reverting back to actual position.")
         guard let failedID = notification.userInfo?["placeID"] as? String,
               failedID == currentPlaceID,
               let actionType = notification.userInfo?["actionType"] as? String else { return }

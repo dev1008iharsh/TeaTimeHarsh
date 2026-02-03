@@ -371,6 +371,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.updateProgress(0.2)
         } else if hasSelectedNewImage, let image = imgPlace.image {
             HapticHelper.light()
+            ToastManager.shared.show(message: "Uploading place cover image... 📸")
             UploadProgressHUD.shared.titleLabel.text = "Uploading place cover image... 📸"
             UploadProgressHUD.shared.updateProgress(0.05)
 
@@ -441,6 +442,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 if let compressed = compressedURL {
                     print("☁️⬆️ Uploading Video...")
                     HapticHelper.light()
+                    ToastManager.shared.show(message: "Uploading video to the cloud...🎥➡️☁️")
                     UploadProgressHUD.shared.titleLabel.text = "Optimising video and uploading to the cloud...🎥"
 
                     // ✅ FIX: Use Deterministic Name (PLACE_ID_video.mp4)
@@ -480,6 +482,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.updateProgress(1.0)
         } else if let pdfURL = selectedPDFURL {
             print("☁️⬆️ Uploading PDF...")
+            ToastManager.shared.show(message: "Uploading attached pdf document... 📄")
             UploadProgressHUD.shared.titleLabel.text = "Uploading attached pdf document... 📄"
 
             // ✅ FIX: Use Deterministic Name (PLACE_ID_menu.pdf)
@@ -497,6 +500,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.updateProgress(1.0)
         }
         HapticHelper.light()
+        ToastManager.shared.show(message: "Saving place to server... 🥳🎉")
         UploadProgressHUD.shared.titleLabel.text = "Saving place to server... 🥳🎉"
         return (finalImageURL, finalVideoURL, finalThumbURL, finalPDFURL)
     }
@@ -518,7 +522,17 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     private func handleUploadSuccess() async {
         await MainActor.run {
-            // ✅ Success: Clean the draft
+            // 1. 🗑️ Reset all Controller Variables to nil (100% RAM Free)
+            self.selectedVideoURL = nil
+            self.selectedPDFURL = nil
+            self.existingImageURL = nil
+            self.existingVideoURL = nil
+            self.existingVideoThumbURL = nil
+            self.existingPDFURL = nil
+            self.hasSelectedNewImage = false
+
+            // 2. 💾 Trigger 100% Master Cleanup
+            // This will delete ALL local files (Video + PDF + Drafts) from disk and wipe UserDefaults.
             UploadPersistenceManager.shared.clearUploadState()
 
             prepareUIForUpload(isUploading: false)
@@ -581,6 +595,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     func restoreFromDraft(model: PendingUploadModel) {
         // ✅ CRITICAL: Restore the ID from draft so filenames match
+        ToastManager.shared.show(message: "Restoring draft...🤗")
         if let savedID = model.placeID {
             currentPlaceID = savedID
             print("♻️ Restored Place ID from Draft: \(savedID)")
@@ -909,11 +924,13 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
                     UIView.animate(withDuration: 0.3) {
                         self.imgSelectedMenu.alpha = 1
+                        HapticHelper.success()
                     }
                     LoaderManager.shared.stopLoading()
                 }
             } else {
                 DispatchQueue.main.async {
+                    HapticHelper.error()
                     LoaderManager.shared.stopLoading()
                     ToastManager.shared.show(message: "❌ Failed to generate PDF thumbnail...Please select different pdf.")
                     print("❌ Failed to generate PDF thumbnail")
@@ -1347,6 +1364,7 @@ extension AddPlaceVC: PHPickerViewControllerDelegate {
 
                             print("✅ Process Complete: \(finalURL.lastPathComponent)")
                             LoaderManager.shared.stopLoading()
+                            HapticHelper.success()
                         }
                     } else {
                         DispatchQueue.main.async {

@@ -28,14 +28,9 @@ class HomeVC: UIViewController {
     }
 
     // Master Data Source
-    var arrTeaPlaces = [TeaPlace]() {
-        didSet {
-            setNeedsUpdateContentUnavailableConfiguration()
-            tblTeaPlaces.reloadData()
-        }
-    }
+    var arrTeaPlaces = [TeaPlace]()
 
-    // 🔥 COMPUTED PROPERTY: Handles Search + Segment Filters
+    // COMPUTED PROPERTY: Handles Search + Segment Filters
     var displayedPlaces: [TeaPlace] {
         // 1. First, filter by Search Text (Name OR Location)
         var filtered = arrTeaPlaces
@@ -99,10 +94,10 @@ class HomeVC: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         // Refresh if returning from detail (Local update check)
         /*
-        if !arrTeaPlaces.isEmpty {
-            HapticHelper.success()
-            tblTeaPlaces.reloadData()
-        }*/
+         if !arrTeaPlaces.isEmpty {
+             HapticHelper.success()
+             tblTeaPlaces.reloadData()
+         }*/
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -261,7 +256,7 @@ class HomeVC: UIViewController {
     }
 
     private func setupRefreshControl() {
-        // 🔥 Update Selector to loadData
+        // Update Selector to loadData
         refreshControl.addTarget(self, action: #selector(fetchLatestDataApi), for: .valueChanged)
         refreshControl.tintColor = .systemIndigo
         tblTeaPlaces.refreshControl = refreshControl
@@ -271,7 +266,7 @@ class HomeVC: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(handleFavNotification(_:)), name: .teaPlaceDidTapFav, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleVisitNotification(_:)), name: .teaPlaceDidTapVisit, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleReload), name: .teaPlacesShouldReload, object: nil)
-        // 🔥 Connection Restored Observer
+        // Connection Restored Observer
         NotificationCenter.default.addObserver(self, selector: #selector(handleConnectionRestored), name: .connectionRestored, object: nil)
     }
 
@@ -289,6 +284,7 @@ class HomeVC: UIViewController {
 
     @objc func handleConnectionRestored() {
         print("🚀 Internet Restored! Auto-refreshing Home & User Data...")
+        ToastManager.shared.show(message: "🚀 Internet Restored! Auto-refreshing Home and User Data...🥳")
         HapticHelper.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.fetchLatestDataApi()
@@ -299,12 +295,12 @@ class HomeVC: UIViewController {
 
     @objc private func didTapAddNavBar() {
         HapticHelper.light()
-        
+
         guard AppNetworkManager.shared.isConnected else {
             showOfflineAlertAtHome()
             return
         }
-        
+
         let addVC = storyboard?.instantiateViewController(withIdentifier: AppConstants.ViewControllers.AddPlaceVC) as! AddPlaceVC
         addVC.screenMode = .add
         addVC.onPlaceAdded = { [weak self] _ in
@@ -322,7 +318,7 @@ class HomeVC: UIViewController {
     @objc private func fetchLatestDataApi() {
         // 1. UI Loading State
         HapticHelper.light()
-        
+
         if !refreshControl.isRefreshing {
             isLoading = true
             LoaderManager.shared.startLoading()
@@ -330,12 +326,12 @@ class HomeVC: UIViewController {
 
         // 2. Check Connection using your AppNetworkManager
         if AppNetworkManager.shared.isConnected {
-            ToastManager.shared.show(message: "✅ You're online! 🥳 \n📱offline mode is also available anytime 😊✨")
-                                     
+            ToastManager.shared.show(message: "Fetching latest places from server...🥳")
+
             print("🌍 Internet Available for that fetching data from firebase")
             fetchFromFirebaseAndSync()
         } else {
-            ToastManager.shared.show(message: "🔌 No Internet Available \n for that fetching from Local Database" )
+            ToastManager.shared.show(message: "🔌 No Internet. \n Fetching places from Local Database")
             print("🔌 No Internet Available - for that fetching from CoreData")
             fetchFromCoreData()
         }
@@ -346,7 +342,11 @@ class HomeVC: UIViewController {
         Task {
             do {
                 let places = try await FirebaseManager.shared.fetchAllPlaces()
-                await MainActor.run { self.arrTeaPlaces = places }
+                await MainActor.run {
+                    self.arrTeaPlaces = places
+                    self.tblTeaPlaces.reloadData()
+                    setNeedsUpdateContentUnavailableConfiguration()
+                }
                 stopLoadingUI()
                 // Sync in background
                 CoreDataManager.shared.syncPlacesToLocalDB(places: places)
@@ -373,14 +373,15 @@ class HomeVC: UIViewController {
     private func fetchFromCoreData() {
         let localPlaces = CoreDataManager.shared.fetchLocalPlaces()
         arrTeaPlaces = localPlaces
+        tblTeaPlaces.reloadData()
         stopLoadingUI()
-        
+
         if localPlaces.isEmpty {
             // Only show alert if screen is totally empty
             print("🔴 Offline - No internet and no saved data found.")
             ToastManager.shared.show(message: "🔴 Offline \n No internet and no saved data found.")
             HapticHelper.error()
-        }else{
+        } else {
             HapticHelper.success()
         }
     }
@@ -409,31 +410,30 @@ class HomeVC: UIViewController {
         AlertHelper.showAlert(title: "No Internet 🛜", message: "Please connect to the internet to perform this home screen action.", vc: self)
     }
 }
- 
+
 // MARK: - Search Delegate (Optimized with Debouncing) 🔍
 
 extension HomeVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        
         // 1. Cancel the previous pending search request
         // This stops multiple reloads if the user is typing fast
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(performDebouncedSearch), object: nil)
-        
+
         // 2. Update the search text immediately
         currentSearchText = searchController.searchBar.text ?? ""
-        
+
         // 3. Schedule the actual search/reload after 0.3 seconds delay
-        self.perform(#selector(performDebouncedSearch), with: nil, afterDelay: 0.3)
+        perform(#selector(performDebouncedSearch), with: nil, afterDelay: 0.3)
     }
-    
+
     @objc private func performDebouncedSearch() {
         // Finally reload the table once user stops typing
         print("🔍 Searching for: \(currentSearchText)")
-        
+
         tblTeaPlaces.reloadData()
         HapticHelper.success()
         setNeedsUpdateContentUnavailableConfiguration()
-        
+
         // Bonus: Success haptic if search yields results
         if !displayedPlaces.isEmpty && !currentSearchText.isEmpty {
             HapticHelper.light()
@@ -451,7 +451,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // Double Safety check
         if indexPath.row >= displayedPlaces.count { return UITableViewCell() }
-        
+
         let cell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Cells.TeaListCell, for: indexPath) as! TeaListCell
         cell.configure(teaPlace: displayedPlaces[indexPath.row])
 
@@ -508,7 +508,11 @@ extension HomeVC {
         if type == "fav" { arrTeaPlaces[index].isFav = status }
         else { arrTeaPlaces[index].isVisited = status }
 
-        tblTeaPlaces.reloadData()
+        // OPTIMIZATION: Instead of full reloadData, just reload the specific row if visible
+        if let displayIndex = displayedPlaces.firstIndex(where: { $0.id == placeID }) {
+            let indexPath = IndexPath(row: displayIndex, section: 0)
+            tblTeaPlaces.reloadRows(at: [indexPath], with: .none)
+        }
         HapticHelper.success()
         callApiToToggleStatus(place: arrTeaPlaces[index], type: type)
     }
@@ -546,6 +550,8 @@ extension HomeVC {
         // 4. Safe Animation Logic ✨
         // We use reloadRows to ensure the cell is properly reconfigured by the system,
         // which avoids 'Cell Reuse' glitches.
+        tblTeaPlaces.setEditing(false, animated: true)
+
         HapticHelper.heavy()
 
         // Get the specific cell to apply a quick scale effect safely
@@ -555,7 +561,7 @@ extension HomeVC {
 
             // Subtle bounce animation
             UIView.animate(withDuration: 0.1, animations: {
-                cell.transform = CGAffineTransform(scaleX: 1.12, y: 1.12)
+                cell.transform = CGAffineTransform(scaleX: 1.15, y: 1.15)
             }) { _ in
                 UIView.animate(withDuration: 0.2) {
                     cell.transform = .identity
@@ -581,7 +587,7 @@ extension HomeVC {
                 // Note: We don't need reloadData here because didSet handles it
                 // and the local state was already updated before calling this function.
 
-            } catch { 
+            } catch {
                 // Step 2: Handle Failure & Revert State
                 await MainActor.run { [weak self] in
                     guard let self = self else { return }
@@ -729,8 +735,10 @@ extension HomeVC {
                 if let index = self.arrTeaPlaces.firstIndex(where: { $0.id == place.id }) {
                     self.arrTeaPlaces.remove(at: index)
                 }
-                // Reload to update filtered view
-                self.tblTeaPlaces.reloadData()
+
+                // OPTIMIZATION: Animate deletion instead of full reloadData
+                self.tblTeaPlaces.deleteRows(at: [indexPath], with: .left)
+
                 HapticHelper.success()
                 completion(true)
             }

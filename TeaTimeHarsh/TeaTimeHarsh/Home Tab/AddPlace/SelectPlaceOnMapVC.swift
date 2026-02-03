@@ -73,6 +73,10 @@ class SelectPlaceOnMapVC: UIViewController {
             showUserLocation: true
         )
         googleMapView?.delegate = self
+        // Run code after 0.5 seconds on main thread
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            ToastManager.shared.show(message: "Drag map to choose location 📍")
+        }
     }
 
     func determineInitialState() {
@@ -251,7 +255,6 @@ extension SelectPlaceOnMapVC {
                     return result + [component]
                 }.joined(separator: ", ")
 
-                HapticHelper.success()
                 self.lblAddress.text = fullAddress
                 self.currentAddress = fullAddress
                 self.currentLatitude = lat

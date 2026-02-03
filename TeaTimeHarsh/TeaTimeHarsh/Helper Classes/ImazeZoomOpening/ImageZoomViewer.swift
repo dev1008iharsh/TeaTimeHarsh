@@ -4,33 +4,26 @@
 //
 //  Created by Harsh on 07/01/26.
 //
-
-//
-//  ImageZoomViewer.swift
-//  TeaTimeHarsh
-//
-//  Created by Harsh on 07/01/26.
-//
-
+ 
 import UIKit
 import Photos
 
 // MARK: - ImageZoomViewer Class
-// Allows viewing an image in full screen with Zoom, Pan, and Share features.
+// Allows viewing an image in full screen with Zoom, Pan, Rotate, and Share features.
+// Built for iOS 17+ with production-grade memory safety.
 class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelegate {
     
-    // Singleton instance to access this class from anywhere
+    // Singleton instance for global access
     static let shared = ImageZoomViewer()
     
     // MARK: - Private Properties
-    // Stores the original position/style of the image to animate back later
     private var originalFrame: CGRect = .zero
     private var originalCornerRadius: CGFloat = 0
     
     // Core UI Elements
     private var zoomImageView: UIImageView?
-    private var backgroundView: UIView? // Black background dimming layer
-    private var scrollView: UIScrollView? // container for zooming
+    private var backgroundView: UIView? // Dimming layer
+    private var scrollView: UIScrollView? // Container for zooming
     
     // Floating Buttons
     private var closeButton: UIButton?
@@ -38,20 +31,22 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     private var saveButton: UIButton?
     
     // State Variables
-    private var isControlHidden = false // Tracks if buttons are visible or hidden
-    private var customPanGesture: UIPanGestureRecognizer? // Reference to the swipe-down gesture
+    private var isControlHidden = false
+    private var customPanGesture: UIPanGestureRecognizer?
+    private var customRotationGesture: UIRotationGestureRecognizer? // Added for rotation
+    private var initialRotation: CGFloat = 0.0 // Tracks rotation state
     
     // MARK: - Public Methods
     
-    /// Call this function to show the image viewer
+    /// Call this function to show the image viewer from any view
     /// - Parameter sourceImageView: The UIImageView user tapped on
+    /// - Parameter backgroundColor: Background color (default is black)
     func showFullScreen(from sourceImageView: UIImageView, backgroundColor: UIColor = .black) {
         
-        // Safety check: Ensure we have a valid window and image
+        // Safety check: Ensure valid window and image. Prevents crash if image is nil.
         guard let window = getWindow(), let image = sourceImageView.image else { return }
         
-        // 1. Save Original Position
-        // Converting frame to window coordinates so we know where to start animation
+        // 1. Save Original Position for dismiss animation
         originalFrame = sourceImageView.superview?.convert(sourceImageView.frame, to: nil) ?? .zero
         originalCornerRadius = sourceImageView.layer.cornerRadius
         
@@ -62,19 +57,19 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         window.addSubview(bgView)
         self.backgroundView = bgView
         
-        // 3. Setup ScrollView (For Zooming support)
+        // 3. Setup ScrollView
         let scView = UIScrollView(frame: window.bounds)
         scView.delegate = self
         scView.minimumZoomScale = 1.0
-        scView.maximumZoomScale = 4.0 // Max zoom level (4x)
+        scView.maximumZoomScale = 4.0 // Max zoom 4x
         scView.showsVerticalScrollIndicator = false
         scView.showsHorizontalScrollIndicator = false
         scView.backgroundColor = .clear
-        scView.contentInsetAdjustmentBehavior = .never // Fullscreen content
+        scView.contentInsetAdjustmentBehavior = .never
         window.addSubview(scView)
         self.scrollView = scView
         
-        // 4. Setup Image View inside ScrollView
+        // 4. Setup Image View
         let imgView = UIImageView(frame: originalFrame)
         imgView.image = image
         imgView.contentMode = .scaleAspectFit
@@ -84,31 +79,30 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         scView.addSubview(imgView)
         self.zoomImageView = imgView
         
-        // 5. Create Buttons (Close, Save, Share)
+        // 5. Setup Controls & Gestures
         setupFloatingControls(in: window)
-        
-        // 6. Add Gestures (Tap, Double Tap, Swipe)
         setupGestures()
         
-        // 7. Animate Opening 🚀
-        // using [weak self] to avoid memory leaks
+        // Haptic Feedback on Open
+        HapticHelper.medium()
+        
+        // 6. Animate Opening 🚀
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5, options: .curveEaseInOut) { [weak self] in
             guard let self = self else { return }
             
             self.backgroundView?.alpha = 1
             self.toggleControlsVisibility(isHidden: false, animated: false)
             
-            // Calculate final frame to center the image on screen
+            // Calculate final frame maintaining aspect ratio
             let width = window.frame.width
             let height = image.size.height * (width / image.size.width)
             let yPosition = max(0, (window.frame.height - height) / 2)
             
             self.zoomImageView?.frame = CGRect(x: 0, y: yPosition, width: width, height: height)
-            self.zoomImageView?.layer.cornerRadius = 0
+            self.zoomImageView?.layer.cornerRadius = 0 // Sharp corners in full screen
             
         } completion: { [weak self] _ in
             guard let self = self else { return }
-            // Set scrollable area size equal to image size
             self.scrollView?.contentSize = self.zoomImageView?.frame.size ?? .zero
             self.centerImage()
         }
@@ -119,12 +113,11 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     private func setupFloatingControls(in window: UIWindow) {
         let safeArea = window.safeAreaLayoutGuide
         
-        // A. Close Button (Top Right)
+        // Close Button
         let closeBtn = createButton(iconName: "xmark", action: #selector(dismissFullScreen))
         window.addSubview(closeBtn)
         self.closeButton = closeBtn
         
-        // Layout Constraints for Close Button
         NSLayoutConstraint.activate([
             closeBtn.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10),
             closeBtn.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -20),
@@ -132,12 +125,11 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
             closeBtn.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        // B. Share Button (Bottom Left)
+        // Share Button
         let shareBtn = createButton(iconName: "square.and.arrow.up", action: #selector(handleShare))
         window.addSubview(shareBtn)
         self.shareButton = shareBtn
         
-        // Layout Constraints for Share Button
         NSLayoutConstraint.activate([
             shareBtn.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -20),
             shareBtn.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: 20),
@@ -145,12 +137,11 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
             shareBtn.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        // C. Save Button (Bottom Right)
+        // Save Button
         let saveBtn = createButton(iconName: "arrow.down.to.line", action: #selector(handleSave))
         window.addSubview(saveBtn)
         self.saveButton = saveBtn
         
-        // Layout Constraints for Save Button
         NSLayoutConstraint.activate([
             saveBtn.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -20),
             saveBtn.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -20),
@@ -158,27 +149,23 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
             saveBtn.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        // Start with buttons hidden (they animate in later)
         closeButton?.alpha = 0
         shareButton?.alpha = 0
         saveButton?.alpha = 0
     }
     
-    // Helper function to create styled buttons
     private func createButton(iconName: String, action: Selector) -> UIButton {
         var config = UIButton.Configuration.filled()
         config.image = UIImage(systemName: iconName)
-        
-        // Style: White background with Black icon
         config.baseBackgroundColor = .white.withAlphaComponent(0.9)
         config.baseForegroundColor = .black
-        config.cornerStyle = .capsule // Rounded shape
+        config.cornerStyle = .capsule
         
         let button = UIButton(configuration: config)
         button.addTarget(self, action: action, for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false // Enable Auto Layout
+        button.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add shadow for better visibility on white images
+        // Shadow for premium look
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOpacity = 0.2
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -192,31 +179,38 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     private func setupGestures() {
         guard let scrollView = scrollView, let zoomImageView = zoomImageView else { return }
         
-        // 1. Single Tap: Toggle Controls (Show/Hide)
+        // 1. Single Tap
         let singleTap = UITapGestureRecognizer(target: self, action: #selector(handleSingleTap))
         singleTap.numberOfTapsRequired = 1
         scrollView.addGestureRecognizer(singleTap)
         
-        // 2. Double Tap: Zoom In/Out
+        // 2. Double Tap
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
         doubleTap.numberOfTapsRequired = 2
         zoomImageView.addGestureRecognizer(doubleTap)
-        zoomImageView.tintColor = .systemIndigo
-        // Important: Single tap waits to see if user is actually double tapping
         singleTap.require(toFail: doubleTap)
         
-        // 3. Pan: Swipe Down to Dismiss
+        // 3. Pan Gesture (Swipe down to dismiss)
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-        panGesture.delegate = self // Needed for conflict resolution
+        panGesture.delegate = self
         scrollView.addGestureRecognizer(panGesture)
         self.customPanGesture = panGesture
+        
+        // 4. Rotation Gesture (Pinch to rotate) 🔄
+        let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation(_:)))
+        rotationGesture.delegate = self
+        scrollView.addGestureRecognizer(rotationGesture)
+        self.customRotationGesture = rotationGesture
     }
     
-    // 🔥 Critical Fix: Resolves conflict between Zooming and Swipe-to-Dismiss
+    // Allows Pan and Rotation to work together
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer == customPanGesture {
-            // Only allow 'Swipe Down' if image is NOT zoomed in (scale is 1.0)
-            // If zoomed in, this returns false, so ScrollView handles the touch (panning around the image)
+        if gestureRecognizer == customPanGesture || gestureRecognizer == customRotationGesture {
+            // Only allow Pan & Rotation if NOT zoomed in
             return scrollView?.zoomScale == 1.0
         }
         return true
@@ -224,57 +218,83 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     // MARK: - Action Handlers
     
-    // Show/Hide buttons on tap
     @objc private func handleSingleTap() {
         HapticHelper.light()
         isControlHidden.toggle()
         toggleControlsVisibility(isHidden: isControlHidden, animated: true)
     }
     
-    // Handle Double Tap Zoom logic
     @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
-        HapticHelper.medium()
         guard let scrollView = scrollView else { return }
         
         if scrollView.zoomScale > 1.0 {
-            // If already zoomed, go back to normal
+            HapticHelper.light()
             scrollView.setZoomScale(1.0, animated: true)
         } else {
-            // If normal, zoom in to where user tapped
+            HapticHelper.medium()
             let point = sender.location(in: zoomImageView)
             let zoomRect = zoomRectForScale(scale: scrollView.maximumZoomScale, center: point)
             scrollView.zoom(to: zoomRect, animated: true)
         }
     }
     
-    // Handle Dragging (Pan)
-    @objc private func handlePan(_ sender: UIPanGestureRecognizer) {
-        guard let scrollView = scrollView, let zoomImageView = zoomImageView, let window = getWindow() else { return }
+    // MARK: - Premium: Pan & Rotate Logic 🔄
+    
+    @objc private func handleRotation(_ sender: UIRotationGestureRecognizer) {
+        guard let zoomImageView = zoomImageView, let window = getWindow() else { return }
         
-        // Note: gestureRecognizerShouldBegin ensures this only runs when zoomScale is 1.0
+        switch sender.state {
+        case .began:
+            toggleControlsVisibility(isHidden: true, animated: true)
+            initialRotation = atan2(zoomImageView.transform.b, zoomImageView.transform.a)
+        case .changed:
+            zoomImageView.transform = CGAffineTransform(rotationAngle: initialRotation + sender.rotation)
+        case .ended, .cancelled:
+            // Snap back to normal with Spring animation
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: .curveEaseOut) {
+                zoomImageView.transform = .identity
+                self.toggleControlsVisibility(isHidden: false, animated: true)
+            }
+        default: break
+        }
+    }
+    
+    @objc private func handlePan(_ sender: UIPanGestureRecognizer) {
+        guard let zoomImageView = zoomImageView, let window = getWindow() else { return }
         
         let translation = sender.translation(in: window)
         let velocity = sender.velocity(in: window)
         
         switch sender.state {
         case .began:
-            // Hide buttons when dragging starts
             toggleControlsVisibility(isHidden: true, animated: true)
         case .changed:
-            // Move image with finger
-            zoomImageView.center = CGPoint(x: window.center.x + translation.x, y: window.center.y + translation.y)
-            
-            // Fade background based on drag distance
             let verticalDist = abs(translation.y)
+            
+            // 1. Scale Down (Rubber-band effect)
+            let scale = max(0.8, 1.0 - (verticalDist / 1000.0))
+            
+            // 2. Dynamic Corner Radius (Smooth rounding as you drag)
+            let newCornerRadius = min(originalCornerRadius, (verticalDist / 100) * originalCornerRadius)
+            zoomImageView.layer.cornerRadius = newCornerRadius
+            
+            // Combine scale and position
+            zoomImageView.center = CGPoint(x: window.center.x + translation.x, y: window.center.y + translation.y)
+            zoomImageView.transform = CGAffineTransform(scaleX: scale, y: scale)
+            
+            // 3. Fade background
             backgroundView?.alpha = max(0, 1.0 - (verticalDist / 400.0))
+            
         case .ended:
-            // If dragged far enough or fast enough, dismiss
-            if abs(translation.y) > 100 || abs(velocity.y) > 800 {
+            // "Flick to dismiss" logic: Distance > 120 OR Velocity > 1000
+            if abs(translation.y) > 120 || abs(velocity.y) > 1000 {
                 dismissFullScreen()
             } else {
-                // Otherwise, snap back to center
-                UIView.animate(withDuration: 0.3) {
+                // Snap back to center
+                UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: .curveEaseOut) {
                     zoomImageView.center = window.center
+                    zoomImageView.transform = .identity
+                    zoomImageView.layer.cornerRadius = 0
                     self.backgroundView?.alpha = 1.0
                     self.toggleControlsVisibility(isHidden: false, animated: true)
                 }
@@ -283,92 +303,72 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    // Close the viewer with animation
     @objc private func dismissFullScreen() {
-        HapticHelper.heavy()
+        HapticHelper.medium()
         guard let _ = getWindow() else { return }
         
-        // Hide controls and disable touch
         toggleControlsVisibility(isHidden: true, animated: true)
         scrollView?.isUserInteractionEnabled = false
         
-        UIView.animate(withDuration: 0.4, animations: { [weak self] in
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5, options: .curveEaseInOut) { [weak self] in
             guard let self = self else { return }
-            // Animate back to original position
+            self.zoomImageView?.transform = .identity
             self.zoomImageView?.frame = self.originalFrame
             self.zoomImageView?.layer.cornerRadius = self.originalCornerRadius
             self.zoomImageView?.contentMode = .scaleAspectFill
             self.backgroundView?.alpha = 0
-        }) { [weak self] _ in
-            // Clean up memory after animation finishes
+        } completion: { [weak self] _ in
             self?.cleanup()
         }
     }
     
     // MARK: - Save & Share Features
     
-    // Save button action
     @objc private func handleSave() {
-        HapticHelper.success()
+        ToastManager.shared.show(message: "Saving image....")
         guard let image = zoomImageView?.image else { return }
-        // Save image to Photos Library
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
     }
     
-    // Completion Handler for Save Action (Shows Alert)
     @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        
-        let title: String
-        let message: String
-        
         if let error = error {
-            // Case: Error Saving
-            title = "Error ❌"
-            message = error.localizedDescription
+            HapticHelper.error() // Needs to be implemented in your HapticHelper
+            showAlert(title: "Error ❌", message: error.localizedDescription)
         } else {
-            // Case: Success
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-            
-            title = "Saved! ✅"
-            message = "Your image has been saved to Photos."
-        }
-        
-        // Show Alert to User
-        if let window = getWindow() {
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            window.rootViewController?.present(alert, animated: true, completion: nil)
+            HapticHelper.success()
+            showAlert(title: "Saved! ✅", message: "Your image has been saved to Photos.")
         }
     }
     
-    // Share button action
+    // 🚀 Share : Always finds the top-most view controller
     @objc private func handleShare() {
-        guard let image = zoomImageView?.image, let window = getWindow() else { return }
+        ToastManager.shared.show(message: "Sharing image....")
+        HapticHelper.light()
+        guard let image = zoomImageView?.image, let topVC = getTopViewController() else { return }
+        
         let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         
-        // Fix for iPad crash (Anchor popover to the button)
+        // iPad Fix: Anchors to the share button
         if let popover = activityVC.popoverPresentationController {
             popover.sourceView = shareButton
+            popover.sourceRect = shareButton?.bounds ?? .zero
         }
-        window.rootViewController?.present(activityVC, animated: true)
+        
+        topVC.present(activityVC, animated: true)
     }
     
     // MARK: - Utilities & Cleanup
     
-    // Fade buttons in or out
     private func toggleControlsVisibility(isHidden: Bool, animated: Bool) {
         let alpha: CGFloat = isHidden ? 0 : 1
-        let duration = animated ? 0.2 : 0.0
-        
-        UIView.animate(withDuration: duration) {
+        UIView.animate(withDuration: animated ? 0.2 : 0) {
             self.closeButton?.alpha = alpha
             self.shareButton?.alpha = alpha
             self.saveButton?.alpha = alpha
         }
     }
     
-    // Remove everything from memory (Prevent Leaks)
+    // 🛡️ 100% Memory Safe Cleanup
     private func cleanup() {
         zoomImageView?.removeFromSuperview()
         scrollView?.removeFromSuperview()
@@ -384,9 +384,10 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         shareButton = nil
         saveButton = nil
         customPanGesture = nil
+        customRotationGesture = nil
     }
     
-    // Calculate rect to zoom into specific point
+    // Calculates rect to zoom into specific tapped point
     private func zoomRectForScale(scale: CGFloat, center: CGPoint) -> CGRect {
         guard let scrollView = scrollView else { return .zero }
         var zoomRect = CGRect.zero
@@ -398,16 +399,20 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         return zoomRect
     }
     
-    // Keeps image in center of screen
+    // Improved Pro Centering Logic
     private func centerImage() {
-        guard let scrollView = scrollView, let image = zoomImageView else { return }
-        let offsetX = max((scrollView.bounds.width - scrollView.contentSize.width) * 0.5, 0)
-        let offsetY = max((scrollView.bounds.height - scrollView.contentSize.height) * 0.5, 0)
-        image.center = CGPoint(x: scrollView.contentSize.width * 0.5 + offsetX,
-                               y: scrollView.contentSize.height * 0.5 + offsetY)
+        guard let scrollView = scrollView, let zoomImageView = zoomImageView else { return }
+        let boundsSize = scrollView.bounds.size
+        var frameToCenter = zoomImageView.frame
+        
+        frameToCenter.origin.x = frameToCenter.size.width < boundsSize.width ? (boundsSize.width - frameToCenter.size.width) / 2 : 0
+        frameToCenter.origin.y = frameToCenter.size.height < boundsSize.height ? (boundsSize.height - frameToCenter.size.height) / 2 : 0
+        
+        zoomImageView.frame = frameToCenter
     }
     
-    // UIScrollViewDelegate Methods
+    // MARK: - UIScrollView Delegate
+    
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return zoomImageView
     }
@@ -416,12 +421,38 @@ class ImageZoomViewer: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelega
         centerImage()
     }
     
-    // Helper to get the current active Window
+    // MARK: - Helpers
+    
     private func getWindow() -> UIWindow? {
         return UIApplication.shared.connectedScenes
             .filter { $0.activationState == .foregroundActive }
             .compactMap { $0 as? UIWindowScene }
             .first?.windows
             .filter { $0.isKeyWindow }.first
+    }
+    
+    // 🚀 Critical Helper: Finds the currently active ViewController recursively
+    private func getTopViewController(base: UIViewController? = nil) -> UIViewController? {
+        let baseVC = base ?? getWindow()?.rootViewController
+        
+        if let nav = baseVC as? UINavigationController {
+            return getTopViewController(base: nav.visibleViewController)
+        }
+        if let tab = baseVC as? UITabBarController {
+            if let selected = tab.selectedViewController {
+                return getTopViewController(base: selected)
+            }
+        }
+        if let presented = baseVC?.presentedViewController {
+            return getTopViewController(base: presented)
+        }
+        return baseVC
+    }
+    
+    private func showAlert(title: String, message: String) {
+        guard let topVC = getTopViewController() else { return }
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        topVC.present(alert, animated: true)
     }
 }

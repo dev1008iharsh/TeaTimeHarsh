@@ -84,7 +84,7 @@ class UploadPersistenceManager {
 
         // 1. Save Image to Disk (Overwrite local file)
         var savedImgPath: String?
-        
+
         // Logic: If user selected NEW image, save it.
         if let img = newImage, let data = img.jpegData(compressionQuality: 0.8) {
             savedImgPath = "\(stableID)_local_img.jpg"
@@ -100,7 +100,7 @@ class UploadPersistenceManager {
         if let vURL = newVideoURL {
             savedVidPath = "\(stableID)_local_vid.mp4"
             let targetURL = documentsDirectory.appendingPathComponent(savedVidPath!)
-            
+
             // 🛑 SAFETY CHECK: Don't delete/copy if Source == Target (Fixes "File Not Found" bug on Resume)
             if vURL.absoluteString != targetURL.absoluteString {
                 try? FileManager.default.removeItem(at: targetURL) // Remove old before copy
@@ -116,7 +116,7 @@ class UploadPersistenceManager {
         if let pURL = newPDFURL {
             savedPDFPath = "\(stableID)_local_menu.pdf"
             let targetURL = documentsDirectory.appendingPathComponent(savedPDFPath!)
-            
+
             // 🛑 SAFETY CHECK: Don't delete/copy if Source == Target
             if pURL.absoluteString != targetURL.absoluteString {
                 try? FileManager.default.removeItem(at: targetURL)
@@ -133,13 +133,13 @@ class UploadPersistenceManager {
             name: name, desc: desc, website: website, phone: phone, addressLabel: address, rating: rating,
             city: location, priceRange: price, openingTime: open, closingTime: close, holiday: holiday,
             latitude: lat, longitude: long,
-            
+
             // ✅ FIX HERE: The parameter name is 'existingThumbURL', NOT 'existingThumb'
             existingImageURL: existingImg,
             existingVideoURL: existingVid,
             existingThumbURL: existingThumb, // <-- This was the fix
             existingPDFURL: existingPDF,
-            
+
             localImagePath: savedImgPath, localVideoPath: savedVidPath, localPDFPath: savedPDFPath,
             hasSelectedNewImage: hasSelectedNewImage
         )
@@ -152,7 +152,7 @@ class UploadPersistenceManager {
         } else {
             saveToUserDefaults(model)
         }
-        
+
         print("💾 Draft Saved Successfully (Local files overwritten safely)")
     }
 
@@ -163,21 +163,50 @@ class UploadPersistenceManager {
         return try? JSONDecoder().decode(PendingUploadModel.self, from: data)
     }
 
-    // MARK: - Clear Draft 🧹
+    // MARK: - Clear Draft 🧹 (100% MASTER CLEANUP)
 
-    /// Clears local files, current draft, and global tracking lists
+    /// Clears ALL local files (Videos, PDFs, Images, Drafts), current draft, and global tracking lists.
+    /// Ensures 0% memory leakage after Success or Discard.
     func clearUploadState() {
-        guard let model = getPendingUpload() else { return }
+        // 1. 🧹 MASTER LOCAL STORAGE CLEANUP LOOP (The "Nuke" Approach)
+        // No nitpicking. We find and destroy EVERYTHING created by AddPlaceVC.
+        let fileManager = FileManager.default
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(at: documentsDirectory, includingPropertiesForKeys: nil)
 
-        // Delete Local Files
-        if let p = model.localImagePath { try? FileManager.default.removeItem(at: documentsDirectory.appendingPathComponent(p)) }
-        if let p = model.localVideoPath { try? FileManager.default.removeItem(at: documentsDirectory.appendingPathComponent(p)) }
-        if let p = model.localPDFPath { try? FileManager.default.removeItem(at: documentsDirectory.appendingPathComponent(p)) }
+            var deletedCount = 0
+            for fileURL in fileURLs {
+                let fileName = fileURL.lastPathComponent
 
-        // Remove Keys
+                // Match 1: Picker Temp Files (Handles BOTH Video and PDF prefixes explicitly)
+                let isPickerFile = fileName.hasPrefix("Place_Local_Video_") ||
+                    fileName.hasPrefix("Place_Local_Menu_PDF_")
+
+                // Match 2: Draft Temp Files (Created during saveDraftState)
+                let isDraftFile = fileName.hasSuffix("_local_img.jpg") ||
+                    fileName.hasSuffix("_local_vid.mp4") ||
+                    fileName.hasSuffix("_local_menu.pdf")
+
+                // 💥 Nuke it if it matches ANY condition!
+                if isPickerFile || isDraftFile {
+                    try fileManager.removeItem(at: fileURL)
+                    deletedCount += 1
+                    print("🗑️ Nuke Cleanup Deleted: \(fileName)")
+                }
+            }
+            print("✅ Disk Cleared: \(deletedCount) temporary files permanently removed from iPhone storage.")
+
+        } catch {
+            print("❌ Error during master cleanup: \(error.localizedDescription)")
+        }
+
+        // 2. 🧠 WIPE RAM & USER DEFAULTS (100% NIL STATE)
+        // Removes the draft data and tracking links completely.
         UserDefaults.standard.removeObject(forKey: kPendingKey)
         UserDefaults.standard.removeObject(forKey: kGlobalDraftLinksKey)
-        print("🧹 All Drafts and Global Trackers Cleared.")
+        UserDefaults.standard.synchronize()
+
+        print("🧹 ALL SYSTEMS CLEARED: UploadPersistenceManager is now 100% nil.")
     }
 
     // MARK: - Helpers 🛠️
@@ -220,18 +249,17 @@ class UploadPersistenceManager {
 // MARK: - Partial Update Helpers (Crucial for Smart Resume) 🔄
 
 extension UploadPersistenceManager {
-
     func updateDraftImageURL(_ url: String) {
         guard let currentDraft = getPendingUpload() else { return }
-        
+
         let updatedDraft = PendingUploadModel(
             isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
             name: currentDraft.name, desc: currentDraft.desc, website: currentDraft.website, phone: currentDraft.phone, addressLabel: currentDraft.addressLabel, rating: currentDraft.rating,
             city: currentDraft.city, priceRange: currentDraft.priceRange, openingTime: currentDraft.openingTime, closingTime: currentDraft.closingTime, holiday: currentDraft.holiday,
             latitude: currentDraft.latitude, longitude: currentDraft.longitude,
-            
+
             existingImageURL: url, // ✅ Updated
-            
+
             existingVideoURL: currentDraft.existingVideoURL, existingThumbURL: currentDraft.existingThumbURL, existingPDFURL: currentDraft.existingPDFURL,
             localImagePath: currentDraft.localImagePath, localVideoPath: currentDraft.localVideoPath, localPDFPath: currentDraft.localPDFPath,
             hasSelectedNewImage: currentDraft.hasSelectedNewImage,
@@ -242,18 +270,18 @@ extension UploadPersistenceManager {
 
     func updateDraftVideoURL(videoUrl: String?, thumbUrl: String?) {
         guard let currentDraft = getPendingUpload() else { return }
-        
+
         let updatedDraft = PendingUploadModel(
             isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
             name: currentDraft.name, desc: currentDraft.desc, website: currentDraft.website, phone: currentDraft.phone, addressLabel: currentDraft.addressLabel, rating: currentDraft.rating,
             city: currentDraft.city, priceRange: currentDraft.priceRange, openingTime: currentDraft.openingTime, closingTime: currentDraft.closingTime, holiday: currentDraft.holiday,
             latitude: currentDraft.latitude, longitude: currentDraft.longitude,
-            
+
             existingImageURL: currentDraft.existingImageURL,
-            
+
             existingVideoURL: videoUrl ?? currentDraft.existingVideoURL, // ✅ Updated
             existingThumbURL: thumbUrl ?? currentDraft.existingThumbURL, // ✅ Updated
-            
+
             existingPDFURL: currentDraft.existingPDFURL,
             localImagePath: currentDraft.localImagePath, localVideoPath: currentDraft.localVideoPath, localPDFPath: currentDraft.localPDFPath,
             hasSelectedNewImage: currentDraft.hasSelectedNewImage,
@@ -264,17 +292,17 @@ extension UploadPersistenceManager {
 
     func updateDraftPDFURL(_ url: String) {
         guard let currentDraft = getPendingUpload() else { return }
-        
+
         let updatedDraft = PendingUploadModel(
             isEditMode: currentDraft.isEditMode, placeID: currentDraft.placeID,
             name: currentDraft.name, desc: currentDraft.desc, website: currentDraft.website, phone: currentDraft.phone, addressLabel: currentDraft.addressLabel, rating: currentDraft.rating,
             city: currentDraft.city, priceRange: currentDraft.priceRange, openingTime: currentDraft.openingTime, closingTime: currentDraft.closingTime, holiday: currentDraft.holiday,
             latitude: currentDraft.latitude, longitude: currentDraft.longitude,
-            
+
             existingImageURL: currentDraft.existingImageURL, existingVideoURL: currentDraft.existingVideoURL, existingThumbURL: currentDraft.existingThumbURL,
-            
+
             existingPDFURL: url, // ✅ Updated
-            
+
             localImagePath: currentDraft.localImagePath, localVideoPath: currentDraft.localVideoPath, localPDFPath: currentDraft.localPDFPath,
             hasSelectedNewImage: currentDraft.hasSelectedNewImage,
             uploadedDraftURLs: currentDraft.uploadedDraftURLs
