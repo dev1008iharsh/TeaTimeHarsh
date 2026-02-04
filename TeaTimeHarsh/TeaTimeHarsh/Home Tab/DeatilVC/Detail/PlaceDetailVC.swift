@@ -94,7 +94,7 @@ class PlaceDetailVC: UIViewController {
                 LoaderManager.shared.stopLoading()
                 let fetchedReviews = try await FirebaseManager.shared.fetchPlaceReviews(for: placeId)
                 self.arrReviews = fetchedReviews
-                ToastManager.shared.show(message: "Tap on reviews & share your experience 💬😊")
+                ToastManager.shared.show(message: "Tap on reviews & share your experience 💬😊", type: .warning)
                 print("✅ Got \(fetchedReviews.count) reviews!")
             } catch {
                 HapticHelper.error()
@@ -113,8 +113,8 @@ private extension PlaceDetailVC {
     func setupTableHeader() {
         guard let place = place,
               let header = Bundle.main.loadNibNamed(
-                AppConstants.Cells.DetailHeader,
-                owner: nil
+                  AppConstants.Cells.DetailHeader,
+                  owner: nil
               )?.first as? DetailHeader
         else { return }
 

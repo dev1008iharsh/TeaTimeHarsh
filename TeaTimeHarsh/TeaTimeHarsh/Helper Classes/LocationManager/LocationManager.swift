@@ -4,41 +4,51 @@
 //
 //  Created by Harsh on 31/12/25.
 //
-
 import CoreLocation
 import UIKit
 
 @MainActor
 class LocationManager: NSObject, CLLocationManagerDelegate {
+    // ✅ Singleton Instance
     static let shared = LocationManager()
 
     private let locationManager = CLLocationManager()
 
-    // 🛠️  Expose the authorization status publicly
+    // Callback: Triggered when user denies permission or cancels the alert
+    var onPermissionDenied: (() -> Void)?
+
+    // 🛠️ Public Authorization Status
     var authorizationStatus: CLAuthorizationStatus {
         return locationManager.authorizationStatus
     }
 
-    // 🛠️  Expose the last known location
-    // This allows us to get the location INSTANTLY if the GPS is already warm.
+    // 🛠️ Last Known Location (Instant Access)
     var lastKnownLocation: CLLocation? {
         return locationManager.location
     }
 
-    private weak var viewControllerName: UIViewController?
+    // ⚠️ Improved Naming: 'hostViewController' clarifies it's a reference to the VC, not a String name.
+    // [weak] is crucial here to avoid Retain Cycles (Memory Leak Prevention).
+    private weak var hostViewController: UIViewController?
 
     var onLocationUpdate: ((CLLocation) -> Void)?
     var onLocationFailure: ((Error) -> Void)?
 
-    override init() {
+    override private init() {
         super.init()
         locationManager.delegate = self
+        // 'Best' accuracy is good for maps, but uses more battery. Ensure we stop it when not needed.
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        // We don't start updating here to save battery until requested
+    }
+
+    /// Call this when you are done with the map (e.g. viewWillDisappear) to save battery 🔋
+    func stopUpdating() {
+        print("🛑 Stopping Location Updates to save battery.")
+        locationManager.stopUpdatingLocation()
     }
 
     func checkAuthorizationStatus(from viewController: UIViewController) {
-        viewControllerName = viewController
+        hostViewController = viewController
         let status = locationManager.authorizationStatus
         handleAuthorizationStatus(status)
     }
@@ -46,66 +56,92 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private func handleAuthorizationStatus(_ status: CLAuthorizationStatus) {
         switch status {
         case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
+            print("❓ Permission Not Determined. Requesting...")
+            DispatchQueue.main.async {
+                self.locationManager.requestWhenInUseAuthorization()
+            }
+
         case .authorizedWhenInUse, .authorizedAlways:
+            print("✅ Permission Granted.")
+
+            // Optional: Check for accuracy (iOS 14+)
+            if locationManager.accuracyAuthorization == .reducedAccuracy {
+                print("⚠️ Note: User has only granted approximate location.")
+            }
+
             locationManager.startUpdatingLocation()
-        case .denied:
-            HapticHelper.warning()
+
+        case .denied, .restricted:
+            print("🚫 Permission Explicitly Denied/Restricted. Handling Alert.")
             showPermissionDeniedAlert()
-        case .restricted:
-            showPermissionRestrictedAlert()
+
         @unknown default:
-            print("Unknown status")
+            print("⚠️ Unknown Authorization Status")
         }
     }
 
     // MARK: - Alerts
 
     private func showPermissionDeniedAlert() {
-        guard let vcName = viewControllerName else { return }
-        AlertHelper.showConfirmationAlert(
-            title: "Location Permission Denied",
-            message: "Please enable location services in Settings.",
-            vc: vcName,
-            rightBtnTitle: "Settings",
-            rightBtnStyle: .default,
-            leftBtnTitle: "Cancel",
-            leftBtnStyle: .destructive,
-            rightAction: { _ in
-                self.openSettings()
-            },
-            leftAction: { _ in
-                print("User cancelled location setup")
+        // Ensure UI updates are always on Main Thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let hostVC = self.hostViewController else { return }
+
+            // 🛡️ Safety: Prevent stacking alerts.
+            // If an alert is ALREADY showing, don't show another one.
+            // This logic is crucial when returning from Settings.
+            if hostVC.presentedViewController is UIAlertController {
+                print("⚠️ Alert already presented, skipping duplicate.")
+                return
             }
-        )
-    }
 
-    private func showPermissionRestrictedAlert() {
-        guard let vcName = viewControllerName else { return }
-        HapticHelper.warning()
-        AlertHelper.showAlert(title: "Restricted", message: "Location is restricted.", vc: vcName)
-    }
-
-    func openSettings() {
-        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-        if UIApplication.shared.canOpenURL(settingsURL) {
-            UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
+            print("🚨 Presenting Permission Alert")
+            AlertHelper.showConfirmationAlert(
+                title: "Permission Required 📍",
+                message: "We need your location to show the map. Please enable 'Location' in Settings.",
+                vc: hostVC,
+                rightBtnTitle: "Settings",
+                rightBtnStyle: .default,
+                leftBtnTitle: "Cancel",
+                leftBtnStyle: .destructive,
+                rightAction: { _ in
+                    self.openSettings()
+                },
+                leftAction: { [weak self] _ in
+                    print("❌ User cancelled permission alert.")
+                    self?.onPermissionDenied?()
+                }
+            )
         }
     }
 
-    // MARK: - Delegate
+    private func openSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        if UIApplication.shared.canOpenURL(settingsURL) {
+            UIApplication.shared.open(settingsURL)
+        }
+    }
+
+    // MARK: - Delegate Methods
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        // Pass location to the closure
         onLocationUpdate?(location)
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // Ignore "Unknown" error which happens sometimes during initialization
         if let clError = error as? CLError, clError.code == .locationUnknown { return }
+
+        print("❌ Location Manager Failed: \(error.localizedDescription)")
         onLocationFailure?(error)
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        // 🔄 Real-time update: If user comes back from Settings, this triggers automatically.
+        print("🔄 Authorization Status Changed.")
         handleAuthorizationStatus(manager.authorizationStatus)
     }
 }

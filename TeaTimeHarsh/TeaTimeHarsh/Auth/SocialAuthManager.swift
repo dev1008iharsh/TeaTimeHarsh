@@ -29,6 +29,14 @@ class SocialAuthManager: NSObject {
 
     override private init() {}
 
+    func signOutSocialIfNeeded() {
+        if UserDataManager.shared.user?.providerType == .facebook {
+            LoginManager().logOut()
+        } else if UserDataManager.shared.user?.providerType == .google {
+            GIDSignIn.sharedInstance.signOut()
+        }
+    }
+
     // MARK: - 🌍 Google Login Logic (Stays Async - It is Native)
 
     @MainActor
@@ -60,6 +68,7 @@ class SocialAuthManager: NSObject {
             fullName: user.profile?.name,
             email: email,
             profileImageUrl: user.profile?.imageURL(withDimension: 320)?.absoluteString,
+            providerID: user.userID, // googleID
             providerType: .google,
             isEmailVerified: true,
             isActive: true,
@@ -116,10 +125,12 @@ class SocialAuthManager: NSObject {
                     let pictureData = fbData["picture"] as? [String: Any]
                     let pictureDataInside = pictureData?["data"] as? [String: Any]
                     let pictureUrl = pictureDataInside?["url"] as? String
+                    let fbId = pictureDataInside?["id"] as? String
 
-                    print("name",name ?? "")
-                    print("pictureUrl",pictureUrl ?? "")
-                    print("email",email)
+                    print("FB name : ", name ?? "")
+                    print("FB pictureUrl : ", pictureUrl ?? "")
+                    print("FB email : ", email)
+                    print("FB fbId : ", fbId ?? "")
                     // 3. Create Firebase Credential
                     let credential = FacebookAuthProvider.credential(withAccessToken: tokenString)
 
@@ -130,6 +141,7 @@ class SocialAuthManager: NSObject {
                         fullName: name,
                         email: email,
                         profileImageUrl: pictureUrl,
+                        providerID: fbId,
                         providerType: .facebook,
                         isEmailVerified: true,
                         isActive: true,

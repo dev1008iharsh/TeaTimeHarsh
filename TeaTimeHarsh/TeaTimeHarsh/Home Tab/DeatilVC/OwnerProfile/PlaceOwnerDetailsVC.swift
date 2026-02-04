@@ -63,8 +63,8 @@ class PlaceOwnerDetailsVC: UIViewController {
 
         return "I want to connect to \(ownerName) due to this reasons...\n"
             + "Write your message here...\n\n\n\n\n\n\n\n\n"
-            + "Owner details: \(ownerEmail) \n \(ownerUserID) \n \(ownerUserProviderID) \n\n"
-            + "User details: \(currentEmail) \n \(currentUserID) \n \(currentUserProviderID) \n\n"
+            + "Owner details: Email-\(ownerEmail) \n ID-\(ownerUserID) \n ProviderID-\(ownerUserProviderID) \n\n"
+            + "User details: Email-\(currentEmail) \n ID-\(currentUserID) \n ProviderID-\(currentUserProviderID) \n\n"
             + EmailMetaData.supportInfo
     }
 

@@ -184,7 +184,11 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     // 🛠️ Debug Helper (Restored)
     private func seedSimulatorDataIfNeeded() {
-        ToastManager.shared.show(message: "Pre-load data for better testing...")
+        ToastManager.shared
+            .show(
+                message: "Pre-load data for better testing...",
+                type: .appTheme
+            )
         txtName.text = "Cafe at midnight ok to go"
         txtDesc.text = "Cafe Despotic is a casual café known for its great coffee, tea selection, and nice, cozy atmosphere. Located in Rajkot, it offers table service, takeout, and delivery with free street parking. It is a popular spot for quick bites like samosas, with an average cost of ₹100-2000"
 
@@ -371,7 +375,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.updateProgress(0.2)
         } else if hasSelectedNewImage, let image = imgPlace.image {
             HapticHelper.light()
-            ToastManager.shared.show(message: "Uploading place cover image... 📸")
+            ToastManager.shared.show(message: "Uploading place cover image... 📸", type: .success)
             UploadProgressHUD.shared.titleLabel.text = "Uploading place cover image... 📸"
             UploadProgressHUD.shared.updateProgress(0.05)
 
@@ -442,7 +446,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
                 if let compressed = compressedURL {
                     print("☁️⬆️ Uploading Video...")
                     HapticHelper.light()
-                    ToastManager.shared.show(message: "Uploading video to the cloud...🎥➡️☁️")
+                    ToastManager.shared.show(message: "Uploading video to the cloud...🎥➡️☁️", type: .success)
                     UploadProgressHUD.shared.titleLabel.text = "Optimising video and uploading to the cloud...🎥"
 
                     // ✅ FIX: Use Deterministic Name (PLACE_ID_video.mp4)
@@ -482,7 +486,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.updateProgress(1.0)
         } else if let pdfURL = selectedPDFURL {
             print("☁️⬆️ Uploading PDF...")
-            ToastManager.shared.show(message: "Uploading attached pdf document... 📄")
+            ToastManager.shared.show(message: "Uploading attached pdf document... 📄", type: .success)
             UploadProgressHUD.shared.titleLabel.text = "Uploading attached pdf document... 📄"
 
             // ✅ FIX: Use Deterministic Name (PLACE_ID_menu.pdf)
@@ -500,7 +504,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             UploadProgressHUD.shared.updateProgress(1.0)
         }
         HapticHelper.light()
-        ToastManager.shared.show(message: "Saving place to server... 🥳🎉")
+        ToastManager.shared.show(message: "Saving place to server... 🥳🎉", type: .appTheme)
         UploadProgressHUD.shared.titleLabel.text = "Saving place to server... 🥳🎉"
         return (finalImageURL, finalVideoURL, finalThumbURL, finalPDFURL)
     }
@@ -595,7 +599,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
     func restoreFromDraft(model: PendingUploadModel) {
         // ✅ CRITICAL: Restore the ID from draft so filenames match
-        ToastManager.shared.show(message: "Restoring draft...🤗")
+        ToastManager.shared.show(message: "Restoring draft...🤗", type: .success)
         if let savedID = model.placeID {
             currentPlaceID = savedID
             print("♻️ Restored Place ID from Draft: \(savedID)")
@@ -837,8 +841,29 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
         }
 
         // 2. 📝 Text Fields Validation
-        guard let name = txtName.text?.trimmed, !name.isEmpty else { return "Please enter tea place name" }
-        guard let desc = txtDesc.text?.trimmed, !desc.isEmpty else { return "Please enter description" }
+        // Trimmed text safely
+        let name = txtName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let desc = txtDesc.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        // Name empty
+        guard !name.isEmpty else {
+            return "Please enter tea place name"
+        }
+
+        // Name length
+        guard name.count <= 35 else {
+            return "Name must be maximum 35 characters only"
+        }
+
+        // Description empty
+        guard !desc.isEmpty else {
+            return "Please enter description"
+        }
+
+        // Description length
+        guard desc.count <= 200 else {
+            return "Description must be maximum 200 characters only"
+        }
 
         guard let phone = txtPhone.text?.removeAllSpaces, phone.count == 10, phone.isNumeric else {
             return "Enter valid 10-digit contact number"

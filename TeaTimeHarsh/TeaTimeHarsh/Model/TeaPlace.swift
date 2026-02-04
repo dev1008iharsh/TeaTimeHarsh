@@ -102,3 +102,37 @@ struct TeaPlace: Identifiable, Codable {
         return nowInMinutes >= startInMinutes && nowInMinutes <= endInMinutes
     }
 }
+
+// MARK: - TeaPlace Equatable (For Smart Sync)
+
+extension TeaPlace: Equatable {
+    /// Compares server data directly to check if local update is needed.
+    /// Uses 'nonisolated' to be thread-safe in Swift 6 concurrency.
+    nonisolated static func == (lhs: TeaPlace, rhs: TeaPlace) -> Bool {
+        return lhs.id == rhs.id &&
+            lhs.name == rhs.name &&
+            lhs.desc == rhs.desc &&
+            lhs.website == rhs.website &&
+            lhs.phone == rhs.phone &&
+            lhs.city == rhs.city &&
+            lhs.address == rhs.address &&
+
+            // Direct comparison for numbers and dates
+            lhs.latitude == rhs.latitude &&
+            lhs.longitude == rhs.longitude &&
+            lhs.rating == rhs.rating &&
+            lhs.totalReviewCount == rhs.totalReviewCount && // Important Check
+            lhs.createdAt == rhs.createdAt &&
+
+            lhs.imageURL == rhs.imageURL &&
+            lhs.videoURL == rhs.videoURL &&
+            lhs.videoThumbnailURL == rhs.videoThumbnailURL &&
+            lhs.pdfURL == rhs.pdfURL &&
+
+            lhs.priceRange == rhs.priceRange &&
+            lhs.openingTime == rhs.openingTime &&
+            lhs.closingTime == rhs.closingTime &&
+            lhs.holiday == rhs.holiday &&
+            lhs.createdByUserId == rhs.createdByUserId
+    }
+}

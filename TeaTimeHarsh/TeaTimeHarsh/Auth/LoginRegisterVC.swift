@@ -63,6 +63,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         if AppNetworkManager.shared.isConnected {
             if AuthManager.shared.isUserLoggedIn {
                 _ = AuthManager.shared.signOut()
+                ToastManager.shared.show(message: "Login optimisation done", type: .success)
             }
         }
     }
@@ -85,7 +86,12 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         return true
     }
 
-    // MARK: - 2. Optimized UI Update Function ✨
+    private func clearTextFields() {
+        txtEmail.text = ""
+        txtPassword.text = ""
+    }
+
+    // MARK: - Optimised UI Update Function ✨
 
     /// Manages visibility and text changes based on the AuthMode
     func updateUI(mode: AuthMode) {
@@ -143,7 +149,8 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 2. Forgot Password / Back Button Tapped
     @IBAction func onForgotPasswordTapped(_ sender: UIButton) {
-        self.view.endEditing(true)
+        clearTextFields()
+        view.endEditing(true)
         HapticHelper.light()
         if currentMode == .login {
             // Go to Forgot Password Screen
@@ -156,9 +163,8 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 
     // 3. Main Action Button Tapped (Handles All 3 Logics)
     @IBAction func btnSubmitLoginRegister(_ sender: UIButton) {
-        self.view.endEditing(true)
-        HapticHelper.heavy()
         view.endEditing(true)
+        HapticHelper.light()
 
         guard let email = txtEmail.text?.trimmingCharacters(in: .whitespaces), !email.isEmpty,
               let password = txtPassword.text?.trimmingCharacters(in: .whitespaces), !password.isEmpty else {
@@ -173,6 +179,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
         }
 
         if !Utility.isValidEmail(email) {
+            HapticHelper.warning()
             AlertHelper.showAlert(title: "Invalid Email", message: "Please enter a valid email address.", vc: self)
             return
         }
@@ -201,6 +208,7 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
             }
 
             if !Utility.isPasswordValid(password) {
+                HapticHelper.warning()
                 AlertHelper.showAlert(
                     title: "Weak Password",
                     message: "Password must contain:\n• At least 1 Capital Letter (A-Z)\n• At least 1 Small Letter (a-z)\n• At least 1 Special Symbol (@, $, #, etc.)\n• Minimum 6 characters.",
@@ -313,14 +321,16 @@ class LoginRegisterVC: UIViewController, UITextFieldDelegate {
 extension LoginRegisterVC {
     // 🌍 Google Login
     @IBAction func btnGoogleTapped(_ sender: UIButton) {
-        self.view.endEditing(true)
+        clearTextFields()
+        view.endEditing(true)
         HapticHelper.light()
         performSocialLogin(provider: .google)
     }
 
     // 📘 Facebook Login
     @IBAction func btnFacebookTapped(_ sender: UIButton) {
-        self.view.endEditing(true)
+        clearTextFields()
+        view.endEditing(true)
         HapticHelper.light()
         performSocialLogin(provider: .facebook)
     }
@@ -393,7 +403,7 @@ extension LoginRegisterVC {
     }
 
     @IBAction func btnAppleTapped(_ sender: UIButton) {
-        self.view.endEditing(true)
+        view.endEditing(true)
         HapticHelper.light()
         print("🟢 Apple Sign-In Button Tapped")
 

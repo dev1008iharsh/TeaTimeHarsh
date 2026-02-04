@@ -307,7 +307,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 from: self,
                 recipients: [AppConstants.Strings.developerEmail],
                 subject: "Help & Support Request from \(UtilsProject.getAppName) - Profile Screen",
-                body: "Tell us more about the problem you're facing here...\n\n\n\n\n" + EmailMetaData.supportInfo
+                body: "Tell us more about the problem you're facing here...\n\n\n\n\n"
+                    + "Current account Details \nEmail : \(UserDataManager.shared.user?.email ?? "") \n"
+                    + "userid : ID-\(UserDataManager.shared.user?.id ?? "")  ProviderID-\(UserDataManager.shared.user?.providerID ?? "")\n"
+                    + EmailMetaData.supportInfo
             )
 
         case .share:
@@ -641,7 +644,7 @@ extension ProfileVC {
     }
 
     // 5. Error Handler
-    private func showErrorAlert(message: String) { 
+    private func showErrorAlert(message: String) {
         AlertHelper.showAlert(
             title: "Error",
             message: message,

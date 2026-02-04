@@ -39,7 +39,7 @@ class AuthManager {
 
             AppConstants.Strings.currentUserID = uid
 
-            // Create User Model (Explicitly setting all values)
+            // Create User Model (Explicitly setting all values) - because this model directly could not save in user-default
             let newUser = User(id: uid, username: nil, email: email, bio: nil, phoneNumber: nil, city: nil, profileImageUrl: nil, birthDate: nil, providerID: nil, providerType: .email, isEmailVerified: false, isActive: true, isOnBoardingDone: false, isSubscribed: false, createdAt: Date(), lastLoginAt: Date(), fcmToken: nil)
 
             // Save to Firestore
@@ -49,7 +49,7 @@ class AuthManager {
                     print("❌ Firestore Error: \(error.localizedDescription)")
                     completion(false, "Database save failed")
                 } else {
-                    print("registerUser registerUser registerUser Email : ",newUser.email)
+                    print("✅Registered User Email : ", newUser.email)
                     UserDataManager.shared.saveUserToUserDefaults(newUser)
                     completion(true, nil)
                 }
@@ -125,10 +125,10 @@ class AuthManager {
     // MARK: - 4. Logout Function
 
     func signOut() -> Bool {
-        if isUserLoggedIn{
+        if isUserLoggedIn {
             do {
                 try Auth.auth().signOut()
-
+                SocialAuthManager.shared.signOutSocialIfNeeded()
                 resetKeychain()
                 clearAllUserDefaults()
                 AppConstants.Strings.currentUserID = ""
@@ -160,14 +160,13 @@ class AuthManager {
             SecItemDelete(spec as CFDictionary)
         }
     }
-    
+
     func clearAllUserDefaults() {
         guard let bundleID = Bundle.main.bundleIdentifier else { return }
         UserDefaults.standard.removePersistentDomain(forName: bundleID)
         UserDefaults.standard.synchronize()
     }
-    
-    
+
     // MARK: - 5. Social Login Handler 🌐
 
     func signInWithSocialCredential(credential: AuthCredential, userDetails: User) async throws {
@@ -197,9 +196,8 @@ class AuthManager {
             var newUser = userDetails
             newUser.id = uid
             newUser.email = email
-            print(
-                "signInWithSocialCredential \(uid) \(email) \(userDetails.email) \(userDetails.providerID ?? "") \(userDetails.profileImageUrl ?? "") \(userDetails.username ?? "")"
-            )
+            newUser.providerID = userDetails.providerID
+            print("✅ Final Submitting to Firebase signInWithSocialCredential UID :\(uid)\n  Email :\(email)\n  userDetail.EmailId :\(userDetails.email) \n ProviderID :\(userDetails.providerID ?? "") \n ProfileImageUrl :\(userDetails.profileImageUrl ?? "")\n UserName : \(userDetails.username ?? "")")
 
             try userRef.setData(from: newUser)
             print("✅ Social Register: New User Created.")
@@ -223,22 +221,92 @@ class AuthManager {
         switch errorCode {
         case .userNotFound:
             return "Account does not exist! Please register first."
+
         case .wrongPassword:
             return "Incorrect Password. Please try again."
+
         case .invalidEmail:
             return "Invalid email format."
+
         case .emailAlreadyInUse:
-            return "⚠️ This email is already registered. Please login."
+            return "⚠️ This email is already registered. Please login.It may be registered with social login also so try that."
+
         case .weakPassword:
             return "Password is too weak."
+
+        // Common additional auth errors
         case .networkError:
-            return "Network connection error. Check internet."
+            return "Network connection error. Check your internet."
+
         case .accountExistsWithDifferentCredential:
             return "Account exists with a different sign-in method."
+
         case .credentialAlreadyInUse:
             return "This social account is already linked to another user."
+
+        // User state related errors
+        case .userDisabled:
+            return "Your account was disabled. Contact support if needed."
+
+        case .requiresRecentLogin:
+            return "Please login again to continue."
+
+        // Provider / credential errors
+        case .invalidCredential:
+            return "Invalid credentials provided. Try again."
+
+        case .operationNotAllowed:
+            return "This sign-in method is disabled in server settings."
+
+        case .providerAlreadyLinked:
+            return "This provider is already linked to the user."
+
+        case .noSuchProvider:
+            return "This sign-in provider is not available."
+
+        // Too many tries / throttling
+        case .tooManyRequests:
+            return "Too many attempts. Please wait and try again."
+
+        // App security / authorization
+        case .appNotAuthorized:
+            return "This app is not authorized to use Firebase Auth."
+
+        case .keychainError:
+            return "Secure storage (Keychain) error occurred."
+
+        // Fallback / others
         default:
             return "Error: \(error.localizedDescription)"
         }
     }
 }
+
+/*
+
+ // Phone / verification related (if using phone auth)
+ case .missingPhoneNumber:
+     return "Phone number is required for verification."
+
+ case .invalidPhoneNumber:
+     return "Invalid phone number format."
+
+ case .missingVerificationCode:
+     return "Verification code is missing."
+
+ case .missingVerificationID:
+     return "Verification ID is missing."
+
+ case .captchaCheckFailed:
+     return "CAPTCHA validation failed. Try again."
+
+ case .appNotVerified:
+     return "App verification failed. Try again later."
+
+ // Multi-factor auth related
+ case .secondFactorRequired:
+     return "Second factor required. Complete additional authentication."
+
+ case .missingMultiFactorSession:
+     return "Missing multi-factor session. Start sign-in again."
+ */

@@ -575,7 +575,7 @@
                                     <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
                                 </buttonConfiguration>
                                 <connections>
-                                    <action selector="btnSubmitMapTapped:" destination="mDT-Em-ayL" eventType="touchUpInside" id="3eS-gv-8tZ"/>
+                                    <action selector="submitButtonTapped:" destination="mDT-Em-ayL" eventType="touchUpInside" id="1cG-4f-6Rg"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -596,9 +596,10 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="addressLabel" destination="747-bC-T1j" id="d4I-jL-gRZ"/>
                         <outlet property="centerPinImageView" destination="RJ5-z8-wrP" id="dyJ-xd-e1c"/>
-                        <outlet property="lblAddress" destination="747-bC-T1j" id="uxq-f4-qg4"/>
                         <outlet property="mapContainerView" destination="Y00-Jn-nTO" id="STf-nx-5LW"/>
+                        <outlet property="viewAddressLabel" destination="IBv-X0-B6F" id="a3H-6I-SO8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Krf-Or-QaC" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

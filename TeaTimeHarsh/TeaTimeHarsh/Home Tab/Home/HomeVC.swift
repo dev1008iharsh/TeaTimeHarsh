@@ -108,6 +108,7 @@ class HomeVC: UIViewController {
     // MARK: - Setup UI
 
     private func setupAllUI() {
+        ToastManager.shared.show(message: "Fetching latest places...🥳", type: .appTheme)
         setupTableView()
         setupNavBar()
         setupSearchController()
@@ -119,7 +120,10 @@ class HomeVC: UIViewController {
 
     private func checkPendingUploads(draft: PendingUploadModel) {
         // Debug print to see what files are tracked for deletion
-        print("🔍 Found Tracked Media URLs for potential cleanup:", UploadPersistenceManager.shared.getUploadedDraftMediaURLs())
+        print(
+            "🔍 Found Tracked Media URLs for potential cleanup TOTAL COUNT - \(UploadPersistenceManager.shared.getUploadedDraftMediaURLs().count)",
+            UploadPersistenceManager.shared.getUploadedDraftMediaURLs()
+        )
 
         let actions = [
             // ---------------------------------------------------------
@@ -258,7 +262,7 @@ class HomeVC: UIViewController {
     private func setupRefreshControl() {
         // Update Selector to loadData
         refreshControl.addTarget(self, action: #selector(fetchLatestDataApi), for: .valueChanged)
-        refreshControl.tintColor = .systemIndigo
+        refreshControl.tintColor = .systemGray
         tblTeaPlaces.refreshControl = refreshControl
     }
 
@@ -284,7 +288,7 @@ class HomeVC: UIViewController {
 
     @objc func handleConnectionRestored() {
         print("🚀 Internet Restored! Auto-refreshing Home & User Data...")
-        ToastManager.shared.show(message: "🚀 Internet Restored! Auto-refreshing Home and User Data...🥳")
+        ToastManager.shared.show(message: "🚀 Internet Restored! Auto-refreshing Home and User Data...🥳", type: .success)
         HapticHelper.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.fetchLatestDataApi()
@@ -326,8 +330,6 @@ class HomeVC: UIViewController {
 
         // 2. Check Connection using your AppNetworkManager
         if AppNetworkManager.shared.isConnected {
-            ToastManager.shared.show(message: "Fetching latest places from server...🥳")
-
             print("🌍 Internet Available for that fetching data from firebase")
             fetchFromFirebaseAndSync()
         } else {
