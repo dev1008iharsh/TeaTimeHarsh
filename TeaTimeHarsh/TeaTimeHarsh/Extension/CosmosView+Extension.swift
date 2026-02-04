@@ -14,7 +14,7 @@ extension CosmosView {
     /// Applies the common theme style for the app
     func applyTeaThemeStyle(starSize: Double, isEditable: Bool, color: UIColor = .systemOrange) {
         settings.updateOnTouch = isEditable
-        settings.fillMode = .half
+        settings.fillMode = .full
         settings.emptyBorderWidth = 1.5
         settings.starSize = starSize
         settings.starMargin = 2

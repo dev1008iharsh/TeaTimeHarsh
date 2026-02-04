@@ -8,16 +8,12 @@
 import UIKit
 
 extension UIImageView {
-    
-    func applyCircularProfileStyle(
-        borderColor: UIColor = .systemIndigo,
-        borderWidth: CGFloat = 0.5
-    ) {
+    func applyCircularProfileStyle(borderColor: UIColor = .systemIndigo, borderWidth: CGFloat = 0.5) {
         // Ensure layout is updated before calculating cornerRadius
-        self.contentMode = .scaleAspectFill
-        self.clipsToBounds = true
-        self.layer.cornerRadius = self.frame.height / 2
-        self.layer.borderColor = borderColor.cgColor
-        self.layer.borderWidth = borderWidth
+        contentMode = .scaleAspectFill
+        clipsToBounds = true
+        layer.cornerRadius = frame.height / 2
+        layer.borderColor = borderColor.cgColor
+        layer.borderWidth = borderWidth
     }
 }

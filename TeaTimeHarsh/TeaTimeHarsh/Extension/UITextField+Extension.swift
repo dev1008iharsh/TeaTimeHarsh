@@ -28,12 +28,8 @@ extension UITextField {
         rightViewMode = .always
     }
 
-    func applySingleSelectionMenu(
-        title: String,
-        items: [String],
-        selectedItem: String?,
-        onSelect: @escaping (String) -> Void
-    ) {
+    func applySingleSelectionMenu(title: String, items: [String], selectedItem: String?,
+                                  onSelect: @escaping (String) -> Void) {
         // Disable keyboard
         inputView = UIView()
 
@@ -43,11 +39,7 @@ extension UITextField {
         overlayButton.frame = bounds
         overlayButton.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        overlayButton.menu = SingleSelectionMenuBuilder.makeMenu(
-            title: title,
-            items: items,
-            selectedItem: selectedItem
-        ) { selected in
+        overlayButton.menu = SingleSelectionMenuBuilder.makeMenu(title: title, items: items, selectedItem: selectedItem) { selected in
             self.text = selected
             onSelect(selected)
         }

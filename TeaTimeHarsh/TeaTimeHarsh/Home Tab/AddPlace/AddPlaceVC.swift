@@ -842,8 +842,8 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         // 2. 📝 Text Fields Validation
         // Trimmed text safely
-        let name = txtName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let desc = txtDesc.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let name = txtName.text?.trimmed ?? ""
+        let desc = txtDesc.text?.trimmed ?? ""
 
         // Name empty
         guard !name.isEmpty else {
@@ -852,7 +852,7 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
 
         // Name length
         guard name.count <= 35 else {
-            return "Name must be maximum 35 characters only"
+            return "Tea place name must be maximum 35 characters only"
         }
 
         // Description empty
