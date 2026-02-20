@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Allow access to save photos directly to your gallery.</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>We need your location to show nearby tea places and help you find the best tea spots around you. 🍵</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow access to save photos directly to your gallery.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to show nearby tea places and help you find the best tea spots around you. 🍵</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -13,7 +13,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fb772829175123421</string>
+				<string>fb$(FB_APP_ID)</string>
 			</array>
 		</dict>
 		<dict>
@@ -21,14 +21,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.896769880320-2759mu1mut9ed813pddddv0uupalr7vm</string>
+				<string>$(GOOGLE_CLIENT_ID)</string>
 			</array>
 		</dict>
 	</array>
 	<key>FacebookAppID</key>
-	<string>772829175123421</string>
+	<string>$(FB_APP_ID)</string>
 	<key>FacebookClientToken</key>
-	<string>ab565c3bf841f4149ebab5b9d490b451</string>
+	<string>$(FB_CLIENT_TOKEN)</string>
 	<key>FacebookDisplayName</key>
 	<string>TeaTimeHarsh</string>
 	<key>LSApplicationQueriesSchemes</key>
@@ -37,10 +37,10 @@
 		<string>comgooglemaps-x-callback</string>
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
-        <string>whatsapp</string>
-        <string>facetime</string>
-        <string>tel</string>
-        <string>sms</string>
+		<string>whatsapp</string>
+		<string>facetime</string>
+		<string>tel</string>
+		<string>sms</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -61,5 +61,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>GoogleMapsAPIKey</key>
+	<string>$(GoogleMapsAPIKey)</string>
 </dict>
 </plist>

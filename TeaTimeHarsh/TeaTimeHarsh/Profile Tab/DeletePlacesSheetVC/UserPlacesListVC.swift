@@ -204,6 +204,7 @@ extension UserPlacesListVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.row >= places.count { return UITableViewCell() }
         let cell = tableView.dequeueReusableCell(withIdentifier: UserPlacesListTableCell.identifier, for: indexPath) as! UserPlacesListTableCell
         cell.configure(place: places[indexPath.row])
         return cell

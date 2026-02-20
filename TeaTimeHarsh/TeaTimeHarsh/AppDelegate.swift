@@ -16,7 +16,7 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        GMSServices.provideAPIKey("AIzaSyASy1OZ0tgXMWAYYPN2chKgO_T_gWSJj8Y")
+        getGoogleMapServiceApiKeyPlist()
         IQKeyboardManager.shared.isEnabled = true
         IQKeyboardManager.shared.resignOnTouchOutside = true
         FirebaseApp.configure()
@@ -31,6 +31,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         return ApplicationDelegate.shared.application(app, open: url, options: options)
+    }
+
+    private func getGoogleMapServiceApiKeyPlist() {
+        if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GoogleMapsAPIKey") as? String {
+            GMSServices.provideAPIKey(apiKey)
+            print("✅ Google Maps initialized with RUNTIME dynamic key.")
+        } else {
+            print("❌ Error: Could not find RUNTIME GoogleMapsAPIKey in Info.plist")
+        }
     }
 
     // MARK: UISceneSession Lifecycle

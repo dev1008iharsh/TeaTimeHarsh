@@ -472,6 +472,7 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row >= displayedPlaces.count { return }
         let detailVC = storyboard?.instantiateViewController(
             withIdentifier: AppConstants.ViewControllers.PlaceDetailVC) as! PlaceDetailVC
         detailVC.place = displayedPlaces[indexPath.row]

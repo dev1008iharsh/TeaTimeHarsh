@@ -336,6 +336,7 @@ extension PlaceReviewVC: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.row >= arrReviews?.count ?? 0 { return UITableViewCell() }
         let cell = tableView.dequeueReusableCell(withIdentifier: "PlaceReviewTableCell", for: indexPath) as! PlaceReviewTableCell
 
         if let review = arrReviews?[indexPath.row] {
