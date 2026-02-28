@@ -50,7 +50,8 @@ Youtube iOS app video TeaTimeHarsh : https://www.youtube.com/watch?v=CqoFJ-II3hg
 
 ## ➕ Add Place — Media Upload Flow
  <img width="939" height="494" alt="dev.iharsh1008" src="https://github.com/user-attachments/assets/6ec659bb-675e-4aeb-b2d7-196927a65aa8" />
-### ✨ Features
+
+ ### ✨ Features
 
 - Form-based place creation via floating action button  
 - Map location selection with coordinate capture  
