@@ -27,7 +27,7 @@ enum ProfileSection: Int, CaseIterable {
     var items: [ProfileRow] {
         switch self {
         case .personal: return [.editProfile, .favourites, .visited, .myPlaces]
-        case .preferences: return [.language, .notification, .appearance, .appIcon]
+        case .preferences: return [.language, .notification, .appearance, .appIcon, .biometricMPin]
         case .support: return [.help, .share, .rate, .bug, .privacy, .terms]
         case .account: return [.deleteAllPlaces, .deleteAccount, .logout]
         }
@@ -38,7 +38,7 @@ enum ProfileRow {
     // Personal
     case editProfile, favourites, visited, myPlaces
     // Preferences
-    case language, notification, appearance, appIcon
+    case language, notification, appearance, appIcon, biometricMPin
     // Support
     case help, share, rate, bug, privacy, terms
     // Account
@@ -54,6 +54,7 @@ enum ProfileRow {
         case .notification: return "Notification"
         case .appearance: return "Appearance"
         case .appIcon: return "Change app icon"
+        case .biometricMPin: return "Biometric & M-PIN"
         case .help: return "Help & Support"
         case .share: return "Share app"
         case .rate: return "Rate Us on App store"
@@ -76,6 +77,7 @@ enum ProfileRow {
         case .notification: return "bell.badge"
         case .appearance: return "moon.stars"
         case .appIcon: return "app.gift"
+        case .biometricMPin: return "lock.shield"
         case .help: return "questionmark.circle"
         case .share: return "square.and.arrow.up"
         case .rate: return "star"
@@ -294,6 +296,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         case .appIcon:
             print("📱 Change app icon")
             navigateToChangeAppIcon()
+
+        case .biometricMPin:
+            print("📱 Biometric & M-PIN")
+            handleMPINSetup()
 
         // Support
         case .help:
@@ -650,5 +656,130 @@ extension ProfileVC {
             message: message,
             vc: self
         )
+    }
+}
+
+// MARK: - MPIN Logic
+
+extension ProfileVC {
+    private func handleMPINSetup() {
+        // Check if MPIN already exists in Keychain
+        let hasExistingMPIN = KeychainManager.shared.getMPIN() != nil
+
+        let title = hasExistingMPIN ? "Change MPIN" : "Set MPIN"
+        let message = "When you set MPIN, biometric will be enabled by default. At app launch, you can choose your preferred login method."
+
+        // We use native UIAlertController here because AlertHelper doesn't support TextFields natively yet
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
+        alertController.addTextField { textField in
+            textField.placeholder = hasExistingMPIN ? "Enter Old MPIN" : "Enter New MPIN"
+            textField.isSecureTextEntry = true
+            textField.keyboardType = .numberPad
+        }
+
+        alertController.addTextField { textField in
+            textField.placeholder = hasExistingMPIN ? "Enter New MPIN" : "Confirm New MPIN"
+            textField.isSecureTextEntry = true
+            textField.keyboardType = .numberPad
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
+        let saveAction = UIAlertAction(title: "Save", style: .default) { [weak self] _ in
+            guard let self = self,
+                  let textFields = alertController.textFields,
+                  let firstText = textFields[0].text,
+                  let secondText = textFields[1].text else { return }
+
+            if hasExistingMPIN {
+                self.validateAndChangeMPIN(oldPIN: firstText, newPIN: secondText)
+            } else {
+                self.validateAndCreateMPIN(newPIN: firstText, confirmPIN: secondText)
+            }
+        }
+
+        alertController.addAction(cancelAction)
+        alertController.addAction(saveAction)
+
+        present(alertController, animated: true)
+    }
+
+    private func validateAndCreateMPIN(newPIN: String, confirmPIN: String) {
+        guard newPIN.count == 4, confirmPIN.count == 4 else {
+            AlertHelper.showAlert(title: "Error", message: "MPIN must be exactly 4 digits.", vc: self)
+            return
+        }
+
+        if newPIN == confirmPIN {
+            if KeychainManager.shared.saveMPIN(newPIN) {
+                promptForBiometricEnrollment()
+            } else {
+                AlertHelper.showAlert(title: "Error", message: "Failed to save MPIN securely.", vc: self)
+            }
+        } else {
+            AlertHelper.showAlert(title: "Error", message: "MPINs do not match. Please try again.", vc: self)
+        }
+    }
+
+    private func validateAndChangeMPIN(oldPIN: String, newPIN: String) {
+        guard let savedPIN = KeychainManager.shared.getMPIN() else { return }
+
+        guard oldPIN == savedPIN else {
+            AlertHelper.showAlert(title: "Error", message: "Old MPIN is incorrect.", vc: self)
+            return
+        }
+
+        guard newPIN.count == 4 else {
+            AlertHelper.showAlert(title: "Error", message: "New MPIN must be exactly 4 digits.", vc: self)
+            return
+        }
+
+        if KeychainManager.shared.saveMPIN(newPIN) {
+            promptForBiometricEnrollment()
+        } else {
+            AlertHelper.showAlert(title: "Error", message: "Failed to save new MPIN.", vc: self)
+        }
+    }
+
+    // MARK: - Biometric Logic
+
+    private func promptForBiometricEnrollment() {
+        guard BiometricManager.shared.isBiometricAvailable() else {
+            AppPreferences.setBiometricEnabled(false)
+            AlertHelper.showAlert(title: "Success", message: "MPIN saved successfully! (Biometrics not available on device)", vc: self)
+            return
+        }
+
+        // 🚀 Utilizing your AlertHelper for the confirmation dialog!
+        AlertHelper.showConfirmationAlert(
+            title: "Enable Face ID",
+            message: "Do you want to enable Face ID for faster unlock?",
+            vc: self,
+            rightBtnTitle: "Yes, Enable",
+            rightBtnStyle: .default,
+            leftBtnTitle: "No Thanks",
+            leftBtnStyle: .cancel,
+            rightAction: { [weak self] _ in
+                self?.authenticateAndEnableBiometric()
+            },
+            leftAction: { [weak self] _ in
+                AppPreferences.setBiometricEnabled(false)
+                AlertHelper.showAlert(title: "Success", message: "MPIN saved successfully. Biometric disabled.", vc: self)
+            }
+        )
+    }
+
+    private func authenticateAndEnableBiometric() {
+        BiometricManager.shared.authenticateUser { [weak self] success, _ in
+            guard let self = self else { return }
+
+            if success {
+                AppPreferences.setBiometricEnabled(true)
+                AlertHelper.showAlert(title: "Success", message: "MPIN and Biometric setup successful!", vc: self)
+            } else {
+                AppPreferences.setBiometricEnabled(false)
+                AlertHelper.showAlert(title: "Warning", message: "Biometric setup failed. You can still use MPIN to login.", vc: self)
+            }
+        }
     }
 }

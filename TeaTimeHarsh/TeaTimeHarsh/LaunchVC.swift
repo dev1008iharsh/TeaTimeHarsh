@@ -1,13 +1,3 @@
-//
-//  LaunchVC.swift
-//  TeaTimeHarsh
-//
-//  Created by Harsh on 27/12/25.
-//
-
-import Network
-import UIKit
-
 import Network
 import UIKit
 
@@ -55,23 +45,11 @@ class LaunchVC: UIViewController {
     private func handleOnline() {
         print("🌍 Online Launch: Syncing user profile")
         // UserDataManager.shared.isUserUpdatedAtCurrentAppLaunch = false
-        // already doen in api response
+        // already done in api response
         UserDataManager.shared.fetchUserProfileIfNeeded()
 
-        goToHome()
-    }
-
-    private func goToHome() {
-        guard !(navigationController?.topViewController is HomeVC) else { return }
-
-        let homeVC = UIStoryboard(
-            name: AppConstants.Storyboards.Main,
-            bundle: nil
-        ).instantiateViewController(
-            withIdentifier: AppConstants.ViewControllers
-                .HomeVC)
-
-        navigationController?.setViewControllers([homeVC], animated: true)
+        // After online tasks are done, decide where to go
+        proceedToNextScreen()
     }
 
     private func handleOffline() {
@@ -92,8 +70,68 @@ class LaunchVC: UIViewController {
             """,
             vc: self
         ) { [weak self] _ in
-            self?.goToHome()
+            // User tapped OK on offline alert, now decide where to go
+            self?.proceedToNextScreen()
         }
+    }
+
+    // MARK: - Routing Logic
+
+    /// Centralized function to determine the next screen based on user state
+    private func proceedToNextScreen() {
+        // Check if user data exists to confirm login status
+        let isLoggedIn = UserDataManager.shared.loadUserFromUserDefaults() != nil
+
+        if !isLoggedIn {
+            // User is NOT logged in -> Go to Login
+            goToLogin()
+        } else {
+            // User IS logged in -> Check if MPIN is setup in Keychain
+            let isMPINSet = KeychainManager.shared.getMPIN() != nil
+
+            if isMPINSet {
+                goToBiometricAuth()
+            } else {
+                goToHome()
+            }
+        }
+    }
+
+    // MARK: - Navigation Helpers
+
+    private func goToHome() {
+        guard !(navigationController?.topViewController is HomeVC) else { return }
+
+        let homeVC = UIStoryboard(
+            name: AppConstants.Storyboards.Main,
+            bundle: nil
+        ).instantiateViewController(
+            withIdentifier: AppConstants.ViewControllers.HomeVC
+        )
+
+        navigationController?.setViewControllers([homeVC], animated: true)
+    }
+
+    private func goToLogin() {
+        let loginVC = UIStoryboard(
+            name: AppConstants.Storyboards.Main,
+            bundle: nil
+        ).instantiateViewController(
+            withIdentifier: "LoginVC"
+        )
+
+        navigationController?.setViewControllers([loginVC], animated: true)
+    }
+
+    private func goToBiometricAuth() {
+        let biometricVC = UIStoryboard(
+            name: AppConstants.Storyboards.Auth,
+            bundle: nil
+        ).instantiateViewController(
+            withIdentifier: "BiometricMPinVC"
+        )
+
+        navigationController?.setViewControllers([biometricVC], animated: true)
     }
 }
 

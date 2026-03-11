@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Allow Face ID to securely and quickly authenticate your access without needing an MPIN.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Allow access to save photos directly to your gallery.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
