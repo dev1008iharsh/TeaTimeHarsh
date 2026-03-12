@@ -15,6 +15,10 @@ struct AppConstants {
         static let registerTitle = "Register"
         static let ok = "OK"
         static let cancel = "Cancel"
+        static let keychainAccountName = "TeatimeHarshMPIN"
+        static let unlockMessage = "Unlock Teatime Harsh securely."
+        static let networkMonitorQueue = "NetworkMonitorQueue"
+        
     }
 
     struct Storyboards {
@@ -25,6 +29,7 @@ struct AppConstants {
 
     struct ViewControllers {
         static let LoginRegisterVC = "LoginRegisterVC"
+        static let BiometricMPinVC = "BiometricMPinVC"
         
         static let HomeVC = "HomeVC"
         static let HomeListingTipVC = "HomeListingTipVC"

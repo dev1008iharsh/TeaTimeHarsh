@@ -5,13 +5,12 @@ class LaunchVC: UIViewController {
     // MARK: - Properties
 
     private let networkMonitor = NWPathMonitor()
-    private let monitorQueue = DispatchQueue(label: "NetworkMonitorQueue")
+    private let monitorQueue = DispatchQueue(label: AppConstants.Strings.networkMonitorQueue)
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         checkInternet()
     }
 
@@ -114,23 +113,17 @@ class LaunchVC: UIViewController {
 
     private func goToLogin() {
         let loginVC = UIStoryboard(
-            name: AppConstants.Storyboards.Main,
+            name: AppConstants.Storyboards.Auth,
             bundle: nil
         ).instantiateViewController(
-            withIdentifier: "LoginVC"
-        )
-
+            withIdentifier:AppConstants
+                .ViewControllers.LoginRegisterVC)
+        
         navigationController?.setViewControllers([loginVC], animated: true)
     }
 
     private func goToBiometricAuth() {
-        let biometricVC = UIStoryboard(
-            name: AppConstants.Storyboards.Auth,
-            bundle: nil
-        ).instantiateViewController(
-            withIdentifier: "BiometricMPinVC"
-        )
-
+        let biometricVC = UIStoryboard(name: AppConstants.Storyboards.Auth,bundle: nil).instantiateViewController(withIdentifier: AppConstants.ViewControllers.BiometricMPinVC)
         navigationController?.setViewControllers([biometricVC], animated: true)
     }
 }

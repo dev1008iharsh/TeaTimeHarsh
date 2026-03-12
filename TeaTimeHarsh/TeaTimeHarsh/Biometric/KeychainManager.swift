@@ -15,7 +15,7 @@ import Security
 
 class KeychainManager {
     static let shared = KeychainManager()
-    private let accountName = "TeatimeHarshMPIN"
+    private let accountName = AppConstants.Strings.keychainAccountName
     
     private init() {}
     

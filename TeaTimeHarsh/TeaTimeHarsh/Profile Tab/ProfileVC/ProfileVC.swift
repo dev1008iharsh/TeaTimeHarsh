@@ -662,14 +662,15 @@ extension ProfileVC {
 // MARK: - MPIN Logic
 
 extension ProfileVC {
+    // MARK: - MPIN Setup
+
+    /// Initiates the MPIN setup or change process via an alert
     private func handleMPINSetup() {
-        // Check if MPIN already exists in Keychain
         let hasExistingMPIN = KeychainManager.shared.getMPIN() != nil
 
         let title = hasExistingMPIN ? "Change MPIN" : "Set MPIN"
-        let message = "When you set MPIN, biometric will be enabled by default. At app launch, you can choose your preferred login method."
+        let message = "When you set an MPIN, you can optionally enable biometric login for faster access. MPIN must be exactly 4 digits."
 
-        // We use native UIAlertController here because AlertHelper doesn't support TextFields natively yet
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
         alertController.addTextField { textField in
@@ -704,23 +705,26 @@ extension ProfileVC {
         present(alertController, animated: true)
     }
 
+    /// Validates and securely saves a newly created MPIN
     private func validateAndCreateMPIN(newPIN: String, confirmPIN: String) {
         guard newPIN.count == 4, confirmPIN.count == 4 else {
             AlertHelper.showAlert(title: "Error", message: "MPIN must be exactly 4 digits.", vc: self)
             return
         }
 
-        if newPIN == confirmPIN {
-            if KeychainManager.shared.saveMPIN(newPIN) {
-                promptForBiometricEnrollment()
-            } else {
-                AlertHelper.showAlert(title: "Error", message: "Failed to save MPIN securely.", vc: self)
-            }
+        guard newPIN == confirmPIN else {
+            AlertHelper.showAlert(title: "Error", message: "Confirm MPINs do not match. Please try again.", vc: self)
+            return
+        }
+
+        if KeychainManager.shared.saveMPIN(newPIN) {
+            promptForBiometricEnrollment()
         } else {
-            AlertHelper.showAlert(title: "Error", message: "MPINs do not match. Please try again.", vc: self)
+            AlertHelper.showAlert(title: "Error", message: "Failed to save MPIN securely.", vc: self)
         }
     }
 
+    /// Validates old MPIN and updates to the new one
     private func validateAndChangeMPIN(oldPIN: String, newPIN: String) {
         guard let savedPIN = KeychainManager.shared.getMPIN() else { return }
 
@@ -735,7 +739,12 @@ extension ProfileVC {
         }
 
         if KeychainManager.shared.saveMPIN(newPIN) {
-            promptForBiometricEnrollment()
+            // Check if biometric is already enabled to skip asking again
+            if AppPreferences.isBiometricEnabled() {
+                AlertHelper.showAlert(title: "Success", message: "MPIN changed successfully.", vc: self)
+            } else {
+                promptForBiometricEnrollment()
+            }
         } else {
             AlertHelper.showAlert(title: "Error", message: "Failed to save new MPIN.", vc: self)
         }
@@ -743,6 +752,7 @@ extension ProfileVC {
 
     // MARK: - Biometric Logic
 
+    /// Asks the user if they want to enable Face ID / Touch ID
     private func promptForBiometricEnrollment() {
         guard BiometricManager.shared.isBiometricAvailable() else {
             AppPreferences.setBiometricEnabled(false)
@@ -750,7 +760,6 @@ extension ProfileVC {
             return
         }
 
-        // 🚀 Utilizing your AlertHelper for the confirmation dialog!
         AlertHelper.showConfirmationAlert(
             title: "Enable Face ID",
             message: "Do you want to enable Face ID for faster unlock?",
@@ -769,6 +778,7 @@ extension ProfileVC {
         )
     }
 
+    /// Authenticates the user and toggles biometric preference on success
     private func authenticateAndEnableBiometric() {
         BiometricManager.shared.authenticateUser { [weak self] success, _ in
             guard let self = self else { return }

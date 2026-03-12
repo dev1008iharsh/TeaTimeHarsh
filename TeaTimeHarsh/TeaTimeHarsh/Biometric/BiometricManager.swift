@@ -25,7 +25,7 @@ class BiometricManager {
     func authenticateUser(completion: @escaping (Bool, Error?) -> Void) {
         let context = LAContext()
         var error: NSError?
-        let reason = "Unlock Teatime Harsh securely."
+        let reason = AppConstants.Strings.unlockMessage
         
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, evalError in
