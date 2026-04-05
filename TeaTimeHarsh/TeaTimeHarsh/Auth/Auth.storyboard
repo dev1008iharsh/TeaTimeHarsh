@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="yg5-iH-uqW">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="yg5-iH-uqW">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -138,6 +138,15 @@
                                     </button>
                                 </subviews>
                             </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Firebase Plist needed for app login" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Pn3-HQ-Jxi">
+                                <rect key="frame" x="315" y="748" width="70" height="36"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="70" id="0Af-Im-qy3"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor"/>
@@ -153,9 +162,11 @@
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="30" id="Qdu-9q-lPT"/>
                             <constraint firstItem="wEb-8U-tnB" firstAttribute="top" secondItem="479-yt-StS" secondAttribute="bottom" constant="20" id="Sn4-y9-xJQ"/>
                             <constraint firstItem="Uob-rR-Vbh" firstAttribute="top" secondItem="S4I-xn-P98" secondAttribute="bottom" constant="15" id="Uek-PU-l2H"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="Pn3-HQ-Jxi" secondAttribute="trailing" constant="8" id="VG9-Q5-aQD"/>
                             <constraint firstItem="zkC-Bx-7LH" firstAttribute="top" secondItem="wEb-8U-tnB" secondAttribute="bottom" constant="20" id="Wyh-ap-Xvo"/>
                             <constraint firstItem="zkC-Bx-7LH" firstAttribute="centerX" secondItem="wEb-8U-tnB" secondAttribute="centerX" id="hlq-Tq-XOa"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="centerX" secondItem="vDu-zF-Fre" secondAttribute="centerX" id="ivU-yt-eEE"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="Pn3-HQ-Jxi" secondAttribute="bottom" id="ltf-Uc-21K"/>
                             <constraint firstItem="zrv-uR-rkG" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" id="tE1-0L-cyg"/>
                         </constraints>
                     </view>
