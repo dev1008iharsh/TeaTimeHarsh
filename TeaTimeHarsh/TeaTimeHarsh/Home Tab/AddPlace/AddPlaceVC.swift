@@ -542,9 +542,15 @@ class AddPlaceVC: UIViewController, UITextFieldDelegate {
             prepareUIForUpload(isUploading: false)
             HapticHelper.success()
 
-            AlertHelper.showAlertHandler(title: "Success ✅", message: getSuccessMessage(), vc: self) { _ in
+            AlertHelper.showAlertHandler(title: "Success ✅", message: getSuccessMessage(), vc: self) { [weak self] _ in
+                guard let self = self else { return }
+
+                let scene = self.view.window?.windowScene
+
                 self.onPlaceAdded?(true)
                 self.navigationController?.popViewController(animated: true)
+
+                ReviewManager.shared.logReviewEligibleEvent(in: scene)
             }
         }
     }
