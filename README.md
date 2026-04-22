@@ -331,4 +331,22 @@ Youtube iOS app video TeaTimeHarsh : https://www.youtube.com/watch?v=CqoFJ-II3hg
 - Consistent state management during interruptions  
 - Optimized resource usage for smooth user experience  
 
+<h2>👨‍💻 Author</h2>
+
+<p>
+<b>Harsh Darji — iOS Developer 🚀</b>
+</p>
+
+<ul>
+<li><b>Developer:</b> Harsh</li>
+<li><b>Role:</b> Senior iOS Engineer</li>
+<li><b>Phone:</b> <a href="tel:+919662108047">+91 9662108047</a></li>
+<li><b>Email:</b> <a href="mailto:dev.iharsh1008@gmail.com">dev.iharsh1008@gmail.com</a></li>
+<li><b>GitHub:</b> <a href="https://github.com/dev1008iharsh">dev1008iharsh</a></li>
+<li><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/dev1008iharsh/">dev1008iharsh</a></li>
+</ul>
+
+---
+
+
 
